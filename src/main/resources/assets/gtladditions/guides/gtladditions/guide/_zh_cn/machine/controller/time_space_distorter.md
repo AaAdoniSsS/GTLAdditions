@@ -23,7 +23,7 @@ item_ids:
 > 可以在gui中选择是否开启均分模式 \
 > 非均分模式下超频模式为每提高6倍功率获得2倍提速 \
 > 均分模式**不受**增幅次数调整**影响** \
-> 开启后, 每个处理的配方都需要消耗配方并行数/27的<ItemLink id="kubejs:quantum_anomaly" />和配方并行数/436的<ItemLink id="kubejs:hypercube" /> \
+> 开启后, 每个处理的配方都需要消耗配方并行数/27的<ItemLink id="kubejs:quantum_anomaly" />和配方并行数/623的<ItemLink id="kubejs:hypercube" /> \
 > 将配方输出概率变成百分百，将超频模式变为无损超频 \
 > 由于奇迹内禀的不可预测性, 下面的配方概率无法被修改
 

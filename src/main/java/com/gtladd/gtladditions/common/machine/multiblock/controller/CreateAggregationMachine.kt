@@ -97,7 +97,7 @@ class CreateAggregationMachine(holder: IMachineBlockEntity) : ConversationMachin
         when (machineStorage.getStackInSlot(0).item) {
             CARD_3 -> {
                 cardId = 3
-                parallel = 2048
+                parallel = 8192
             }
             else -> {
                 cardId = 0

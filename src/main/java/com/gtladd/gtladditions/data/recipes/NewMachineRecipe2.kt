@@ -44,11 +44,13 @@ import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.FRACT
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.FUXI_BAGUA_HEAVEN_FORGING_FURNACE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.HYPERDIMENSIONAL_ENERGY_CONCETRATOR
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.MAGNETORHEOLOGICAL_CONVERGENCE_CORE
+import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.NEBULA_REAPER
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.PLANETARY_IONISATION_CONVERGENCE_TOWER
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.PRIMORDIAL_EVOLUTION_NEXUS
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.RECURSIVE_REVERSE_FORGE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.REVERSE_TIME_BOOSTING_ENGINE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SKELETON_SHIFT_RIFT_ENGINE
+import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SPACE_ELEVATOR_MKII
 import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.utils.Registries.getFluid
 import com.gtladd.gtladditions.utils.Registries.getItemStack
@@ -293,7 +295,7 @@ object NewMachineRecipe2 {
             }
             .save(provider)
 
-        ASSEMBLY_LINE_RECIPES.recipeBuilder(id("floating_light_deep_space_industrial_vessel"))
+        SUPRACHRONAL_ASSEMBLY_LINE_RECIPES.recipeBuilder(id("floating_light_deep_space_industrial_vessel"))
             .inputItems(DYSON_SPHERE, 16)
             .inputItems(SPACE_ELEVATOR, 16)
             .inputItems(SPACE_PROBE_SURFACE_RECEPTION, 16)
@@ -403,6 +405,40 @@ object NewMachineRecipe2 {
                 it.researchStack(LARGE_GREENHOUSE.asStack())
                     .dataStack(TOOL_DATA_MODULE.asStack())
                     .EUt(VA[UV]).CWUt(512)
+            }
+            .save(provider)
+
+        ASSEMBLY_LINE_RECIPES.recipeBuilder(id("mega_space_elevator"))
+            .inputItems(SPACE_ELEVATOR, 64)
+            .inputItems(SPACE_ELEVATOR, 64)
+            .inputItems(POWER_MODULE_5, 64)
+            .inputItems("kubejs:module_connector".getItemStack(48))
+            .inputItems(CustomTags.OpV_CIRCUITS, 64)
+            .inputItems(INSANELY_ULTIMATE_BATTERY, 8)
+            .inputItems(FIELD_GENERATOR_UXV, 56)
+            .inputItems(wireGtHex, DraconiumAwakened, 32)
+            .inputItems(
+                "kubejs:nuclear_clock".getItemStack(32),
+                "kubejs:charged_lepton_trap_crystal".getItemStack(32),
+                "kubejs:eigenfolded_kerr_manifold".getItemStack(64),
+                "kubejs:eigenfolded_kerr_manifold".getItemStack(64)
+            )
+            .inputItems(nanoswarm, BlackDwarfMatter, 64)
+            .inputItems(nanoswarm, WhiteDwarfMatter, 64)
+            .inputItems(
+                "kubejs:wyvern_core".getItemStack(64),
+                "kubejs:wyvern_core".getItemStack(64)
+            )
+            .inputFluids(Hikarium.getFluid(1440000))
+            .inputFluids(SuperMutatedLivingSolder.getFluid(2880000))
+            .inputFluids(Radox.getFluid(560000))
+            .inputFluids(GammaRaysPhotoresist.getFluid(1000000))
+            .outputItems(SPACE_ELEVATOR_MKII)
+            .EUt(VA[OpV].toLong()).duration(7200)
+            .stationResearch {
+                it.researchStack(NEBULA_REAPER.asStack())
+                    .dataStack(TOOL_DATA_MODULE.asStack())
+                    .EUt(VA[UXV]).CWUt(1024)
             }
             .save(provider)
     }

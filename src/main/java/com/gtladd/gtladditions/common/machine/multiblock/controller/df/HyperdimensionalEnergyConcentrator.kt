@@ -23,9 +23,11 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.network.chat.Component
+import net.minecraft.network.chat.HoverEvent
 import net.minecraft.world.InteractionHand
 import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
@@ -71,6 +73,7 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
             }
             if (tick % 5 == 0) findAndConnectToHost()
         }
+        updateHostTierBasedOnDrones()
     }
 
     fun getEUt(): BigInteger {
@@ -95,7 +98,7 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
                 GuiTextures.BUTTON_POWER.getSubTexture(0.0, 0.0, 1.0, 0.5),
                 GuiTextures.BUTTON_POWER.getSubTexture(0.0, 0.5, 1.0, 0.5),
                 { this.isWorkingEnabled },
-                { clickData, pressed -> this.isWorkingEnabled = pressed }
+                { _, pressed -> this.isWorkingEnabled = pressed }
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
@@ -105,7 +108,6 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
     override fun addDisplayText(textList: MutableList<Component>) {
         val builder = MultiblockDisplayText.builder(textList, isFormed())
             .setWorkingStatus(recipeLogic.isWorkingEnabled, recipeLogic.isActive)
-            .addEnergyUsageLine(energyContainer)
             .addWorkingStatusLine()
             .addProgressLine(recipeLogic.progressPercent)
             .addRecipeStatus(recipeLogic as IRecipeStatus)
@@ -114,7 +116,9 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
             builder.addComponent(
                 Component.translatable("gtmthings.machine.wireless_energy_monitor.tooltip.0", TeamUtil.GetName(level, uuid)),
                 Component.translatable("gtmthings.machine.wireless_energy_monitor.tooltip.1", FormattingUtil.formatNumbers(WirelessEnergyManager.getUserEU(uuid))),
-                Component.translatable("gtceu.machine.hyperdimensional_energy_concentrator.gui.tooltip.0", FormattingUtil.formatNumbers(getEUt()))
+                Component.translatable("gtceu.machine.hyperdimensional_energy_concentrator.gui.tooltip.1", FormattingUtil.formatNumbers(getEUt())).withStyle { style ->
+                    style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, "gtceu.multiblock.max_energy_per_tick_hover".toComponent.withStyle(ChatFormatting.GRAY)))
+                }
             )
         }
     }
@@ -212,6 +216,23 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
                 this.setWaiting(null)
             }
             if (this.status == Status.WAITING) this.doDamping()
+        }
+    }
+
+    fun hasDrone(): Boolean {
+        return machineStorage.getStackInSlot(0).count > 0
+    }
+
+    @Persisted
+    private var lastHasDrone = false
+
+    private fun updateHostTierBasedOnDrones() {
+        val hasDrone = hasDrone()
+        if (hasDrone != lastHasDrone) {
+            lastHasDrone = hasDrone
+            if (host != null) {
+                host!!.getRecipeLogic().updateTickSubscription()
+            }
         }
     }
 }

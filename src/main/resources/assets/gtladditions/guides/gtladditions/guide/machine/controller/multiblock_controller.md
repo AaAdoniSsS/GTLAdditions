@@ -40,6 +40,7 @@ categories:
 * [Draconic Collapse Core](draconic_collapse_core.md)
 * [Titan's Crip Earthbore](titan_crip_earthbore.md)
 * [Skeleton Shift Rift Engine](skeleton_shift_rift_engine.md)
+* [Space Elevator MKII](space_elevator_mkii.md)
 
 ## <Color color="#0000FF">**OpV**</Color>
 

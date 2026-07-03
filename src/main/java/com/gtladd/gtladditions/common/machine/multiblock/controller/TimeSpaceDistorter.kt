@@ -282,13 +282,28 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             if (machine.isMultiple) {
                 return machine.inputItemStack(
                     ItemStack(QuantumAnomaly, (parallels / 27).safeToInt),
-                    ItemStack(Hypercube, (parallels / 436).safeToInt)
+                    ItemStack(Hypercube, (parallels / 623).safeToInt)
                 )
             }
-            if (machine.config >= 1 && !machine.inputFluidStack(Infinity.getFluid(parallels / 7))) return false
-            if (machine.config >= 2 && !machine.inputFluidStack(Hypogen.getFluid(parallels / 18))) return false
-            if (machine.config >= 3 && !machine.inputFluidStack(SpaceTime.getFluid(parallels / 34))) return false
-            return true
+            when (machine.config) {
+                1 -> {
+                    return machine.inputFluidStack(Infinity.getFluid(parallels / 70))
+                }
+                2 -> {
+                    return machine.inputFluidStack(
+                        Infinity.getFluid(parallels / 70),
+                        Hypogen.getFluid(parallels / 180)
+                    )
+                }
+                3 -> {
+                    return machine.inputFluidStack(
+                        Infinity.getFluid(parallels / 70),
+                        Hypogen.getFluid(parallels / 180),
+                        SpaceTime.getFluid(parallels / 340)
+                    )
+                }
+                else -> return true
+            }
         }
     }
 

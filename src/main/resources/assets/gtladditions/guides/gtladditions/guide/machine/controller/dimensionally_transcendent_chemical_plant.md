@@ -13,7 +13,7 @@ item_ids:
 <BlockImage id = "dimensionally_transcendent_chemical_plant" scale = "8"/>
 
 > A chemical plant that supports multi-recipe processing, with additional time and energy multipliers \
-> Time multiplier: 0.8 * (1 - Coil tier * 0.05) \
-> Energy multiplier: 0.6 * (1 - Coil tier * 0.05)
+> Time multiplier: 0.6 * (1 - Coil tier * 0.05) \
+> Energy multiplier: 0.4 * (1 - Coil tier * 0.05)
 
 

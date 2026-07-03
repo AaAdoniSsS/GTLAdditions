@@ -19,7 +19,7 @@ item_ids:
 * Can be converted by installing <ItemLink id="gtladditions:me_block_conservation" />
 * Select Circuit 24 in the input bus to run the conversion
 * Only **Ultimate Conversation Card** can be placed in the Machine, which provides parallel bonus. The Machine won't work without it
-* Door of Creation: 65536 parallel; Creative Aggregator: 2048 parallel
+* Door of Creation: 65536 parallel; Creative Aggregator: 8192 parallel
 * Hold <ItemLink id="gtceu:creative_data_access_hatch" /> and Right-click the **Transmutation Bus** to install for normal operation
 * Other usage methods of the **Transmutation Bus** are similar to <ItemLink id="gtladditions:atomic_transmutation_core" />
 * Select circuit 1 in the input bus for vanilla mode

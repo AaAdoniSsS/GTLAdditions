@@ -87,7 +87,7 @@ item_ids:
 > After the module is installed, the Recursive Reverse Forge can work directly by obtaining energy from the wireless energy network \
 > The <ItemLink id="kubejs:hyperdimensional_drone" /> should be placed in the main module. Each time it is placed, the maximum energy obtainable will increase by 16A 
 > <Color color="#FF0000">**M**</Color><Color color="#00FF00">**A**</Color><Color color="#0000FF">**X**</Color><Color color="#FFFF00">**+**</Color><Color color="#FF0000">**16**</Color> \
-> The maximum power that can be obtained by the base is 1A MAX, and it needs to be put into the Hyperdimensional Drone to increase the upper limit of power, and the maximum can be put into 64 \
+> The maximum power that can be obtained by the base is 1A MAX, and it needs to be put into the Hyperdimensional Drone to increase the upper limit of power(This will also lock the recipe level at MAX), and the maximum can be put into 64 \
 > A hyperdimensional drone is launched (consumed) every hour to maintain connection with the wireless energy network \
 > It is necessary to provide 524,288 CWU/t, 64A <Color color="#FF0000">**MAX**</Color> and 240B/s of Gelid Cryotheum to maintain the operation of the module
 

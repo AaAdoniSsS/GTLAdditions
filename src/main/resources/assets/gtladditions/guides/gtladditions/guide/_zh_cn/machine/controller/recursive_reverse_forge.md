@@ -85,7 +85,7 @@ item_ids:
 
 > 安装该模块后, 可以使递归反演锻炉直接从无线电网中获取能量来工作 \
 > 需要在该模块主机中放入 <ItemLink id="kubejs:hyperdimensional_drone" />, 每放入一个可以使获取的功率上限加16A<Color color="#FF0000">**M**</Color><Color color="#00FF00">**A**</Color><Color color="#0000FF">**X**</Color><Color color="#FFFF00">**+**</Color><Color color="#FF0000">**16**</Color>. \
-> 基础可获得最大功率为1A MAX, 需要放入超维度无人机才能增加获得功率上限, 最多可以放入64个 \
+> 基础可获得最大功率为1A MAX, 需要放入超维度无人机才能增加获得功率上限（同时会将配方等级锁定为MAX）, 最多可以放入64个 \
 > 每小时都会发射(消耗)一台超维度无人机以维持与无线电网的连接 \
 > 需要提供524288 CWU/t, 64A<Color color="#FF0000">**MAX**</Color>以及240B/s的极寒之凛冰来维持模块运行
 

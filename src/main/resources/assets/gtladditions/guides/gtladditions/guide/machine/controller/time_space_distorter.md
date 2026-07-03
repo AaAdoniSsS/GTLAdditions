@@ -23,7 +23,7 @@ item_ids:
 > The GUI can choose whether to enable the Equally Divided Mode \
 > In the non-Equally Divided Mode, overclocking mode becomes 6x power for 2x speed  \
 > The Equally Divided Mode is **not affected** by the amplification times adjustment \
-> After enabling, each processed recipe requires consumption of recipe parallel number / 27 of <ItemLink id="kubejs:quantum_anomaly" /> and recipe parallel number / 436 of <ItemLink id="kubejs:hypercube" /> \
+> After enabling, each processed recipe requires consumption of recipe parallel number / 27 of <ItemLink id="kubejs:quantum_anomaly" /> and recipe parallel number / 623 of <ItemLink id="kubejs:hypercube" /> \
 > The recipe output chance becomes 100%, and the overclocking mode becomes perfect overclockings \
 > Due to the intrinsic unpredictability of miracles, the following recipe probabilities cannot be modified
 

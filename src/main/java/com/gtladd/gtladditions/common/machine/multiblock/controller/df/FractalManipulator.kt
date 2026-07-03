@@ -24,15 +24,18 @@ import com.gregtechceu.gtceu.utils.FormattingUtil
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
+import net.minecraft.network.chat.HoverEvent
 
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.ContentList
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.IWirelessGTRecipe
+import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.create
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
@@ -69,24 +72,48 @@ class FractalManipulator(holder: IMachineBlockEntity) :
     }
 
     override fun addDisplayText(textList: MutableList<Component>) {
+        val m1 = if (this.host?.ccaModule != null) {
+            if (this.host?.ccaModule!!.isWorking) 2 else 1
+        } else {
+            0
+        }
+        val m2 = if (this.host?.hecModule != null) {
+            if (this.host?.hecModule!!.isWorkingEnabled) 2 else 1
+        } else {
+            0
+        }
+        val effectiveTier = if (this.host?.hecModule?.isWorkingEnabled == true &&
+            this.host?.hecModule?.hasDrone() == true
+        ) {
+            14
+        } else {
+            tier
+        }
         val builder = MultiblockDisplayText.builder(textList, isFormed())
             .setWorkingStatus(recipeLogic.isWorkingEnabled, recipeLogic.isActive)
-            .addEnergyUsageLine(energyContainer)
-            .addEnergyTierLine(tier)
+        if (this.host?.hecModule?.uuid == null) {
+            builder.addEnergyUsageLine(energyContainer)
+        } else {
+            builder.addComponent(
+                translatable(
+                    "gtceu.machine.hyperdimensional_energy_concentrator.gui.tooltip.0",
+                    FormattingUtil.formatNumbers(this.host!!.hecModule!!.getEUt()).literal.withStyle(ChatFormatting.GRAY).withStyle { style ->
+                        style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, "gtceu.multiblock.max_energy_per_tick_hover".toComponent.withStyle(ChatFormatting.GRAY)))
+                    }
+                )
+            )
+        }
+        builder.addEnergyTierLine(effectiveTier)
             .addMachineModeLine(recipeType)
             .addParallelsLine(Int.MAX_VALUE)
             .addWorkingStatusLine()
             .addProgressLine(recipeLogic.progressPercent)
             .addRecipeStatus(recipeLogic as IRecipeStatus)
-            .addComponent(translatable("gtceu.machine.recursive_reverse_forge.gui.module.4", if (host == null) "×" else "✓"))
-        if (this.host?.hecModule?.uuid != null) {
-            builder.addComponent(
-                translatable(
-                    "gtceu.machine.hyperdimensional_energy_concentrator.gui.tooltip.0",
-                    FormattingUtil.formatNumbers(this.host!!.hecModule!!.getEUt())
-                )
-            )
-        }
+            .addComponent(translatable("gtceu.machine.recursive_reverse_forge.gui.module.4", if (host == null) "×" else "✓"),)
+        builder.addComponent(
+            translatable("gtceu.machine.fractal_manipulator.gui.module.$m1", translatable("block.gtladditions.catalytic_cascade_array")),
+            translatable("gtceu.machine.fractal_manipulator.gui.module.$m2", translatable("block.gtladditions.hyperdimensional_energy_concentrator"))
+        )
     }
 
     override fun onStructureFormed() {
@@ -141,9 +168,17 @@ class FractalManipulator(holder: IMachineBlockEntity) :
 
         fun handleGTRecipe(): Boolean {
             if (fmMachine.host?.rtbeModule?.isWorking == true) {
+                val hec = fmMachine.host?.hecModule
+                val effectiveTier =
+                    if (hec != null && hec.isWorkingEnabled && hec.hasDrone()
+                    ) {
+                        14
+                    } else {
+                        fmMachine.tier
+                    }
                 (
                     lastOriginRecipe ?: fmMachine.recipeType.lookup.find(fmMachine) {
-                        matchRecipe(fmMachine, it) && it.euTier <= fmMachine.tier
+                        matchRecipe(fmMachine, it) && it.euTier <= effectiveTier
                     }
                     )?.let { recipe ->
                     val isWireless = fmMachine.host?.hecModule?.isWorkingEnabled == true

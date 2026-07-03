@@ -26,11 +26,13 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.lookup.GTRecipeLookup
 import com.gregtechceu.gtceu.utils.FormattingUtil
 
+import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
+import net.minecraft.network.chat.HoverEvent
 
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.IMultipleRecipeTypeMachine
@@ -43,6 +45,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.HYPER
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.MAGNETORHEOLOGICAL_CONVERGENCE_CORE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.REVERSE_TIME_BOOSTING_ENGINE
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
+import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
@@ -105,18 +108,28 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
         } else {
             0
         }
+        val effectiveTier = if (hecModule?.isWorkingEnabled == true &&
+            hecModule?.hasDrone() == true
+        ) {
+            14
+        } else {
+            tier
+        }
         val builder = MultiblockDisplayText.builder(textList, isFormed())
             .setWorkingStatus(recipeLogic.isWorkingEnabled, recipeLogic.isActive)
-            .addEnergyUsageLine(energyContainer)
-            .addEnergyTierLine(tier)
-        if (hecModule?.uuid != null) {
+        if (hecModule?.uuid == null) {
+            builder.addEnergyUsageLine(energyContainer)
+        } else {
             builder.addComponent(
                 translatable(
                     "gtceu.machine.hyperdimensional_energy_concentrator.gui.tooltip.0",
-                    FormattingUtil.formatNumbers(hecModule!!.getEUt())
+                    FormattingUtil.formatNumbers(hecModule!!.getEUt()).literal.withStyle(ChatFormatting.GRAY).withStyle { style ->
+                        style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, "gtceu.multiblock.max_energy_per_tick_hover".toComponent.withStyle(ChatFormatting.GRAY)))
+                    }
                 )
             )
         }
+        builder.addEnergyTierLine(effectiveTier)
         builder.addMachineModeLine(multiRecipeType)
             .addParallelsLine(Int.MAX_VALUE)
             .addWorkingStatusLine()
@@ -348,7 +361,17 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
             return false
         }
 
-        private fun checkRecipe(recipe: GTRecipe): Boolean = matchRecipe(this.machine, recipe) && IGTRecipe.of(recipe).euTier <= rrfMachine.tier
+        private fun checkRecipe(recipe: GTRecipe): Boolean {
+            val effectiveTier = if (rrfMachine.hecModule?.isWorkingEnabled == true &&
+                rrfMachine.hecModule?.hasDrone() == true
+            ) {
+                14
+            } else {
+                rrfMachine.tier
+            }
+            return matchRecipe(this.machine, recipe) &&
+                IGTRecipe.of(recipe).euTier <= effectiveTier
+        }
     }
 
     companion object {

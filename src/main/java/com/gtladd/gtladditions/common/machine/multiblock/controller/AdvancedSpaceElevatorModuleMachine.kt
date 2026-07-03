@@ -47,6 +47,9 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
         )
     }
 
+    @Persisted
+    private var isMegaHost = false
+
     override fun createRecipeLogic(vararg args: Any) = AdvancedSpaceElevatorModuleMachineRecipeLogic(this)
 
     override fun getHost(): SpaceElevatorMachine? = host
@@ -81,7 +84,63 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
                 pos.offset(3, -2, 8),
                 pos.offset(3, -2, -8),
                 pos.offset(-3, -2, 8),
-                pos.offset(-3, -2, -8)
+                pos.offset(-3, -2, -8),
+                pos.offset(4, -2, 11),
+                pos.offset(4, -2, -11),
+                pos.offset(-4, -2, 11),
+                pos.offset(-4, -2, -11),
+                pos.offset(11, -2, 4),
+                pos.offset(-11, -2, 4),
+                pos.offset(11, -2, -4),
+                pos.offset(-11, -2, -4),
+                pos.offset(18, -2, 8),
+                pos.offset(18, -2, -8),
+                pos.offset(-18, -2, 8),
+                pos.offset(-18, -2, -8),
+                pos.offset(9, -2, 18),
+                pos.offset(9, -2, -18),
+                pos.offset(-9, -2, 18),
+                pos.offset(-9, -2, -18),
+                pos.offset(1, -2, 21),
+                pos.offset(1, -2, -21),
+                pos.offset(-1, -2, 21),
+                pos.offset(-1, -2, -21),
+                pos.offset(21, -2, 1),
+                pos.offset(21, -2, -1),
+                pos.offset(-21, -2, 1),
+                pos.offset(-21, -2, -1),
+                pos.offset(7, -2, 22),
+                pos.offset(7, -2, -22),
+                pos.offset(-7, -2, 22),
+                pos.offset(-7, -2, -22),
+                pos.offset(22, -2, 7),
+                pos.offset(22, -2, -7),
+                pos.offset(-22, -2, 7),
+                pos.offset(-22, -2, -7),
+                pos.offset(26, -2, 6),
+                pos.offset(26, -2, -6),
+                pos.offset(-26, -2, 6),
+                pos.offset(-26, -2, -6),
+                pos.offset(6, -2, 26),
+                pos.offset(6, -2, -26),
+                pos.offset(-6, -2, 26),
+                pos.offset(-6, -2, -26),
+                pos.offset(16, -2, 19),
+                pos.offset(16, -2, -19),
+                pos.offset(-16, -2, 19),
+                pos.offset(-16, -2, -19),
+                pos.offset(19, -2, 16),
+                pos.offset(19, -2, -16),
+                pos.offset(-19, -2, 16),
+                pos.offset(-19, -2, -16),
+                pos.offset(16, -2, 23),
+                pos.offset(16, -2, -23),
+                pos.offset(-16, -2, 23),
+                pos.offset(-16, -2, -23),
+                pos.offset(23, -2, 16),
+                pos.offset(23, -2, -16),
+                pos.offset(-23, -2, 16),
+                pos.offset(-23, -2, -16),
             )
 
             for (i in coordinates) {
@@ -104,6 +163,7 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
             if (logic.isWorking && logic.progress > 80) {
                 spaceElevatorTier = it.tier - 7
                 moduleTier = it.casingTier
+                isMegaHost = it is SpaceElevatorMKII
             } else {
                 spaceElevatorTier = 0
                 moduleTier = 0
@@ -159,7 +219,11 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
 
     override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult = FastRecipeModify.ReduceResult(1.0, .8.pow(spaceElevatorTier - 1))
 
-    override fun getMaxParallel(): Int = 8.pow(this.moduleTier - 1)
+    override fun getMaxParallel(): Int = if (isMegaHost) {
+        12.pow(this.moduleTier - 1)
+    } else {
+        8.pow(this.moduleTier - 1)
+    }
 
     class AdvancedSpaceElevatorModuleMachineRecipeLogic(val asemMachine: AdvancedSpaceElevatorModuleMachine) :
         GTLAddMultipleRecipesLogic(asemMachine) {

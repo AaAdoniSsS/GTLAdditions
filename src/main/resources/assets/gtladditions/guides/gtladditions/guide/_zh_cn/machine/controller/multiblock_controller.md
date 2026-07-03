@@ -40,6 +40,7 @@ categories:
 * [龙怒坍缩核心](draconic_collapse_core.md)
 * [泰坦之握凿地机](titan_crip_earthbore.md)
 * [骸变速隙机](skeleton_shift_rift_engine.md)
+* [太空电梯MK2](space_elevator_mkii.md)
 
 ## <Color color="#0000FF">**OpV**</Color>
 

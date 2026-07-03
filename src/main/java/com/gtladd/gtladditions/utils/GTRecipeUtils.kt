@@ -55,16 +55,18 @@ object GTRecipeUtils {
         var totalEu = 0.0
         for (index in 1..maxThread) {
             val recipe = getRecipe.invoke(p) ?: break
+            if (recipe.getEU > this.maxVoltage) break
             if (testBefore.invoke(recipe as Object)) {
                 if (handleRecipeInput(this, recipe)) {
                     totalEu += recipe.duration * recipe.getEU.toDouble()
                     il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
                     fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
+                } else {
+                    break
                 }
             } else {
                 break
             }
-            if (totalEu > maxEUt) break
         }
         if (il.isEmpty && fl.isEmpty) return null
         val d = totalEu / maxEUt
@@ -85,11 +87,14 @@ object GTRecipeUtils {
         var totalEu = 0.0
         while (rp > 0) {
             val recipe = getRecipe.invoke(rp) ?: break
+            if (recipe.getEU > this.maxVoltage) break
             if (handleRecipeInput(this, recipe)) {
                 rp -= recipe.longParallel
                 totalEu += recipe.duration * recipe.getEU.toDouble()
                 il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
                 fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
+            } else {
+                break
             }
             if (totalEu > maxEUt.toDouble() * 20 * 500) break
         }
@@ -106,8 +111,7 @@ object GTRecipeUtils {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
-        val recipes = getRecipeSet
-        val length = recipes.size
+        val length = getRecipeSet.size
         if (length == 0) return null
         val mp = (this as ParallelMachine).maxParallel.toLong()
         val pa = LongArray(length)
@@ -115,7 +119,8 @@ object GTRecipeUtils {
         var rp = mp * maxThread
         val q = ObjectArrayFIFOQueue<RecipeData>(length)
         val recipeList = ObjectArrayList<GTRecipe>(length)
-        for (r in recipes) {
+        for (r in getRecipeSet) {
+            if (r.getEU > this.maxVoltage) continue
             val p = IParallelLogic.getMaxParallel(this, r, mp * maxThread)
             if (p <= 0) continue
             recipeList.add(r)
@@ -123,7 +128,7 @@ object GTRecipeUtils {
             if (p > pa[i]) q.enqueue(RecipeData(i, p - pa[i]))
             rp -= pa[i++]
         }
-        if (recipeList.isEmpty()) return null
+        if (recipeList.isEmpty) return null
         while (rp > 0 && !q.isEmpty) {
             val d = q.dequeue()
             val g = rp / (q.size() + 1)

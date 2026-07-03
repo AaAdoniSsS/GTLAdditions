@@ -28,6 +28,7 @@
     "gtceu.recipe.RecyclingRecipesMixin",
     "gtlcore.api.NotifiableCircuitItemStackHandlerMixin",
     "gtlcore.machine.HarmonyMachineMixin",
+    "gtlcore.machine.SpaceElevatorModuleMachineMixin",
     "gtlcore.machine.LargeSteamParallelMultiblockMachineMixin",
     "gtlcore.machine.MultipleRecipesLogicMixin",
     "gtlcore.machine.part.AutoConfigurationMaintenanceHatchPartMachineMixin",
