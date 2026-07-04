@@ -60,7 +60,7 @@
   "gtceu.multiblock.antientropy_condensation_center.0": "Dust cryotheum needs to be provided before each work session",
   "gtceu.multiblock.antientropy_condensation_center.1": "You can right-click to insert the Create Ultimate Battery to obtain additional bonuses",
   "gtceu.multiblock.biosphereiii.0": "Allow the use of laser hatch with a power of UIV or higher",
-  "gtceu.multiblock.biosphereiii.1": "For every 1000K increase in coil temperature, the number of parallel lines is X2",
+  "gtceu.multiblock.biosphereiii.1": "For every 1100K increase in the host coil temperature, the number of parallel lines is X2",
   "gtceu.multiblock.skeleton_shift_rift_engine.0": "For every 1200K increase in coil temperature, the number of parallel lines is X2",
   "gtceu.multiblock.skeleton_shift_rift_engine.1": "Duration consumption multiplier: 1 / Stellar thermal container grade",
   "gtceu.multiblock.biological_simulation_laboratory.tooltip.0": "Obtain biological drops more efficiently",

@@ -45,6 +45,8 @@ import com.gtladd.gtladditions.client.render.machine.ArcanicAstrographRender
 import com.gtladd.gtladditions.common.machine.GTLAddMachines
 import com.gtladd.gtladditions.common.machine.GTLAddPredicates
 import com.gtladd.gtladditions.common.machine.multiblock.controller.*
+import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.BiosphereIIIController
+import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.BiosphereIIIModule
 import com.gtladd.gtladditions.common.machine.multiblock.controller.df.*
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightController
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightModule
@@ -1558,36 +1560,20 @@ object MultiBlockMachine {
 
     val BIOSPHERE_III: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "biosphere_iii",
-        Function {
-            return@Function object : BiosphereIII(it) {
-                override val multiRecipeTypes: Array<GTRecipeType> = arrayOf(BiosphereIIIType)
-            }
-        }
+        ::BiosphereIIIController
     )
         .nonYAxisRotation()
-        .tooltipTextKey(
-            "gtceu.multiblock.biosphereiii.1".toComponent,
-            "gtceu.multiblock.biosphereiii.0".toComponent
-        )
-        .tooltipTextMultiRecipes()
-        .tooltipTextMultiRecipeTypes()
-        .tooltipTextMultiRecipeType(GREENHOUSE_RECIPES, FISHING_GROUND_RECIPES)
+        .tooltipTextKey("gtceu.machine.hold_g.tooltip.1".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
-        .recipeType(GREENHOUSE_RECIPES)
-        .recipeType(FISHING_GROUND_RECIPES)
         .appearanceBlock(SPS_CASING)
         .pattern {
             MultiBlockStructureB.BIOSPHERE_III_STRUCTURE
                 .where("|", controller(blocks(it.get())))
                 .where(
                     "{",
-                    blocks(SPS_CASING.get()).or(abilities(EXPORT_ITEMS).setPreviewCount(1))
-                        .or(abilities(IMPORT_ITEMS).setPreviewCount(1))
-                        .or(abilities(EXPORT_FLUIDS).setPreviewCount(1))
-                        .or(abilities(IMPORT_FLUIDS).setPreviewCount(1))
-                        .or(abilities(INPUT_ENERGY).setMaxGlobalLimited(2))
-                        .or(ability(INPUT_LASER, 11, 14).setMaxGlobalLimited(1))
-                        .or(abilities(MAINTENANCE).setExactLimit(1))
+                    blocks(SPS_CASING.get())
+                        .or(abilities(IMPORT_ITEMS).setExactLimit(1))
+                        .or(abilities(INPUT_ENERGY).setExactLimit(1))
                 )
                 .where("b", blocks("gtceu:computer_casing".getBlock))
                 .where("g", blocks("kubejs:neutronium_pipe_casing".getBlock))
@@ -1603,7 +1589,7 @@ object MultiBlockMachine {
                 .where("T", blocks("minecraft:oak_leaves".getBlock))
                 .where("i", blocks("gtlcore:super_computation_component".getBlock))
                 .where("l", blocks("gtlcore:antifreeze_heatproof_machine_casing".getBlock))
-                .where("~", blocks("minecraft:bubble_column".getBlock))
+                .where("~", blocks("minecraft:water".getBlock).or(blocks("minecraft:bubble_column".getBlock)))
                 .where("L", blocks("minecraft:water".getBlock))
                 .where("R", blocks("minecraft:packed_mud".getBlock))
                 .where("S", blocks("kubejs:magic_core".getBlock))
@@ -1666,6 +1652,48 @@ object MultiBlockMachine {
         }
         .workableCasingRenderer(
             GTLCore.id("block/casings/sps_casing"),
+            GTCEu.id("block/multiblock/implosion_compressor")
+        )
+        .register()
+
+    val BIOSPHERE_III_MODULE: MultiblockMachineDefinition = REGISTRATE.multiblock(
+        "garden_of_hermes",
+        Function {
+            return@Function object : BiosphereIIIModule(it) {
+                override val multiRecipeTypes: Array<GTRecipeType> = arrayOf(BiosphereIIIType)
+            }
+        }
+    )
+        .nonYAxisRotation()
+        .tooltipTextKey(
+            "gtceu.multiblock.biosphereiii.1".toComponent,
+            "gtceu.multiblock.biosphereiii.0".toComponent
+        )
+        .tooltipTextMultiRecipes()
+        .tooltipTextMultiRecipeTypes()
+        .tooltipTextMultiRecipeType(GREENHOUSE_RECIPES, FISHING_GROUND_RECIPES)
+        .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
+        .recipeType(GREENHOUSE_RECIPES)
+        .recipeType(FISHING_GROUND_RECIPES)
+        .appearanceBlock(HIGH_POWER_CASING)
+        .pattern {
+            MultiBlockStructureB.BIOSPHERE_III_MODULE_STRUCTURE
+                .where(
+                    "A",
+                    blocks(HIGH_POWER_CASING.get()).or(abilities(EXPORT_ITEMS).setPreviewCount(1))
+                        .or(abilities(IMPORT_ITEMS).setPreviewCount(1))
+                        .or(abilities(EXPORT_FLUIDS).setPreviewCount(1))
+                        .or(abilities(IMPORT_FLUIDS).setPreviewCount(1))
+                        .or(abilities(INPUT_ENERGY).setMaxGlobalLimited(2))
+                        .or(ability(INPUT_LASER, 11, 14).setMaxGlobalLimited(1))
+                        .or(abilities(MAINTENANCE).setExactLimit(1))
+                )
+                .where("B", controller(blocks(it.get())))
+                .where("C", blocks("kubejs:high_strength_concrete".getBlock))
+                .build()
+        }
+        .workableCasingRenderer(
+            GTCEu.id("block/casings/hpca/high_power_casing"),
             GTCEu.id("block/multiblock/implosion_compressor")
         )
         .register()

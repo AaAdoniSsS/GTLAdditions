@@ -47,9 +47,6 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
         )
     }
 
-    @Persisted
-    private var isMegaHost = false
-
     override fun createRecipeLogic(vararg args: Any) = AdvancedSpaceElevatorModuleMachineRecipeLogic(this)
 
     override fun getHost(): SpaceElevatorMachine? = host
@@ -97,10 +94,10 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
                 pos.offset(18, -2, -8),
                 pos.offset(-18, -2, 8),
                 pos.offset(-18, -2, -8),
-                pos.offset(9, -2, 18),
-                pos.offset(9, -2, -18),
-                pos.offset(-9, -2, 18),
-                pos.offset(-9, -2, -18),
+                pos.offset(8, -2, 18),
+                pos.offset(8, -2, -18),
+                pos.offset(-8, -2, 18),
+                pos.offset(-8, -2, -18),
                 pos.offset(1, -2, 21),
                 pos.offset(1, -2, -21),
                 pos.offset(-1, -2, 21),
@@ -163,7 +160,6 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
             if (logic.isWorking && logic.progress > 80) {
                 spaceElevatorTier = it.tier - 7
                 moduleTier = it.casingTier
-                isMegaHost = it is SpaceElevatorMKII
             } else {
                 spaceElevatorTier = 0
                 moduleTier = 0
@@ -219,7 +215,7 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
 
     override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult = FastRecipeModify.ReduceResult(1.0, .8.pow(spaceElevatorTier - 1))
 
-    override fun getMaxParallel(): Int = if (isMegaHost) {
+    override fun getMaxParallel(): Int = if (host is SpaceElevatorMKII) {
         12.pow(this.moduleTier - 1)
     } else {
         8.pow(this.moduleTier - 1)

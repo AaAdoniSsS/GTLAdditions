@@ -55,7 +55,6 @@ object GTRecipeUtils {
         var totalEu = 0.0
         for (index in 1..maxThread) {
             val recipe = getRecipe.invoke(p) ?: break
-            if (recipe.getEU > this.maxVoltage) break
             if (testBefore.invoke(recipe as Object)) {
                 if (handleRecipeInput(this, recipe)) {
                     totalEu += recipe.duration * recipe.getEU.toDouble()
@@ -67,6 +66,7 @@ object GTRecipeUtils {
             } else {
                 break
             }
+            if (totalEu > maxEUt) break
         }
         if (il.isEmpty && fl.isEmpty) return null
         val d = totalEu / maxEUt
@@ -87,7 +87,6 @@ object GTRecipeUtils {
         var totalEu = 0.0
         while (rp > 0) {
             val recipe = getRecipe.invoke(rp) ?: break
-            if (recipe.getEU > this.maxVoltage) break
             if (handleRecipeInput(this, recipe)) {
                 rp -= recipe.longParallel
                 totalEu += recipe.duration * recipe.getEU.toDouble()
@@ -120,7 +119,6 @@ object GTRecipeUtils {
         val q = ObjectArrayFIFOQueue<RecipeData>(length)
         val recipeList = ObjectArrayList<GTRecipe>(length)
         for (r in getRecipeSet) {
-            if (r.getEU > this.maxVoltage) continue
             val p = IParallelLogic.getMaxParallel(this, r, mp * maxThread)
             if (p <= 0) continue
             recipeList.add(r)

@@ -33,6 +33,7 @@ import com.gtladd.gtladditions.GTLAdditions.id
 import com.gtladd.gtladditions.common.machine.GTLAddMachines
 import com.gtladd.gtladditions.common.machine.GTLAddMachines.VIENTIANE_TRANSCEIPTION_NODE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.BIOSPHERE_III
+import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.BIOSPHERE_III_MODULE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.CATALYTIC_CASCADE_ARRAY
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.FLOATING_LIGHT_DEEP_SPACE_INDUSTRIAL_VESSEL
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.FLOATING_LIGHT_DEEP_SPACE_INDUSTRIAL_VESSEL_MODULE_1
@@ -52,6 +53,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.REVER
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SKELETON_SHIFT_RIFT_ENGINE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SPACE_ELEVATOR_MKII
 import com.gtladd.gtladditions.common.register.GTLAddItems
+import com.gtladd.gtladditions.common.register.GTLAddItems.OUTSTANDING_SOC_WAFER
 import com.gtladd.gtladditions.utils.Registries.getFluid
 import com.gtladd.gtladditions.utils.Registries.getItemStack
 import com.hepdd.gtmthings.data.WirelessMachines
@@ -381,7 +383,7 @@ object NewMachineRecipe2 {
             .save(provider)
 
         ASSEMBLY_LINE_RECIPES.recipeBuilder(id("biosphere_iii"))
-            .inputItems(PETROCHEMICAL_PLANT, 16)
+            .inputItems(LARGE_GREENHOUSE, 16)
             .inputItems(COVER_SOLAR_PANEL_HV, 4)
             .inputItems(FIELD_GENERATOR_UEV, 8)
             .inputItems(CustomTags.UIV_CIRCUITS, 16)
@@ -405,6 +407,34 @@ object NewMachineRecipe2 {
                 it.researchStack(LARGE_GREENHOUSE.asStack())
                     .dataStack(TOOL_DATA_MODULE.asStack())
                     .EUt(VA[UV]).CWUt(512)
+            }
+            .save(provider)
+
+        ASSEMBLY_LINE_RECIPES.recipeBuilder(id("garden_of_hermes"))
+            .inputItems(LARGE_GREENHOUSE, 8)
+            .inputItems(COVER_SOLAR_PANEL_HV, 2)
+            .inputItems(FIELD_GENERATOR_UEV, 4)
+            .inputItems(CustomTags.UIV_CIRCUITS, 8)
+            .inputItems(OUTSTANDING_SOC_WAFER, 64)
+            .inputItems(OUTSTANDING_SOC_WAFER, 64)
+            .inputItems(
+                "kubejs:draconium_dust".getItemStack(64),
+                "kubejs:draconium_dust".getItemStack(64)
+            )
+            .inputItems(plateDouble, Quantanium, 16)
+            .inputItems(plateDouble, Highurabilityompoundteel, 16)
+            .inputItems(wireFine, TitanSteel, 48)
+            .inputItems(wireFine, TitanSteel, 48)
+            .inputFluids(SuperMutatedLivingSolder.getFluid(20000))
+            .inputFluids(CaliforniumCyclopentadienide.getFluid(100000))
+            .inputFluids(Zylon.getFluid(14400))
+            .inputFluids(MoltenCalciumSalts.getFluid(12000))
+            .outputItems(BIOSPHERE_III_MODULE)
+            .EUt(VA[UEV].toLong()).duration(3600)
+            .stationResearch {
+                it.researchStack(BIOSPHERE_III.asStack())
+                    .dataStack(TOOL_DATA_MODULE.asStack())
+                    .EUt(VA[UEV]).CWUt(512)
             }
             .save(provider)
 

@@ -60,7 +60,7 @@
   "gtceu.multiblock.antientropy_condensation_center.0": "每次工作前需要提供凛冰粉",
   "gtceu.multiblock.antientropy_condensation_center.1": "可以右键塞入创造电池获得额外加成",
   "gtceu.multiblock.biosphereiii.0": "允许使用UIV以上的激光仓",
-  "gtceu.multiblock.biosphereiii.1": "线圈温度每高出1000K, 并行数X2",
+  "gtceu.multiblock.biosphereiii.1": "本体线圈温度每高出1100K, 并行数X2",
   "gtceu.multiblock.skeleton_shift_rift_engine.0": "线圈温度每高出1200K, 并行数X2",
   "gtceu.multiblock.skeleton_shift_rift_engine.1": "耗时倍数: 1/恒星热力容器等级",
   "gtceu.multiblock.biological_simulation_laboratory.tooltip.0": "更高效的获取生物掉落物",

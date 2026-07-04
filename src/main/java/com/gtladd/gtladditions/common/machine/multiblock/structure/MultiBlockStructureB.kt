@@ -580,4 +580,7 @@ object MultiBlockStructureB {
         .aisle(*SpaceElevatorMKIIStructureB.A_42)
         .aisle(*SpaceElevatorMKIIStructureB.A_43)
         .aisle(*SpaceElevatorMKIIStructureB.A_44)
+
+    val BIOSPHERE_III_MODULE_STRUCTURE: FactoryBlockPattern = FactoryBlockPattern.start()
+        .aisle("CCC", "AAA", "ABA", "AAA")
 }
