@@ -1685,7 +1685,7 @@ object MultiBlockMachine {
                         .or(abilities(EXPORT_FLUIDS).setPreviewCount(1))
                         .or(abilities(IMPORT_FLUIDS).setPreviewCount(1))
                         .or(abilities(INPUT_ENERGY).setMaxGlobalLimited(2))
-                        .or(ability(INPUT_LASER, 11, 14).setMaxGlobalLimited(1))
+                        .or(ability(INPUT_LASER, 11, 12, 13, 14).setMaxGlobalLimited(1))
                         .or(abilities(MAINTENANCE).setExactLimit(1))
                 )
                 .where("B", controller(blocks(it.get())))
