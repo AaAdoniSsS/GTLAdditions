@@ -3,7 +3,6 @@ package com.gtladd.gtladditions.common.machine.multiblock
 import org.gtlcore.gtlcore.GTLCore
 import org.gtlcore.gtlcore.api.pattern.GTLPredicates
 import org.gtlcore.gtlcore.api.pattern.GTLPredicates.diffAbilities
-import org.gtlcore.gtlcore.client.renderer.machine.SpaceElevatorRenderer
 import org.gtlcore.gtlcore.common.block.BlockMap
 import org.gtlcore.gtlcore.common.block.GTLFusionCasingBlock
 import org.gtlcore.gtlcore.common.data.GTLBlocks.*
@@ -42,6 +41,7 @@ import com.gtladd.gtladditions.api.machine.*
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.registry.GTLAddRegistration.Companion.REGISTRATE
 import com.gtladd.gtladditions.client.render.machine.ArcanicAstrographRender
+import com.gtladd.gtladditions.client.render.machine.SpaceElevatorMKIIRenderer
 import com.gtladd.gtladditions.common.machine.GTLAddMachines
 import com.gtladd.gtladditions.common.machine.GTLAddPredicates
 import com.gtladd.gtladditions.common.machine.multiblock.controller.*
@@ -1757,7 +1757,7 @@ object MultiBlockMachine {
                 .where("O", air())
                 .build()
         }
-        .renderer(::SpaceElevatorRenderer)
+        .renderer(::SpaceElevatorMKIIRenderer)
         .hasTESR(true)
         .register()
 
