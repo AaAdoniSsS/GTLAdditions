@@ -1,8 +1,10 @@
 package com.gtladd.gtladditions.mixin.gtlcore.machine;
 
+import com.gtladd.gtladditions.common.machine.hatch.HugeSteamHatchPartMachine;
 import org.gtlcore.gtlcore.api.machine.ISteamMachine;
 import org.gtlcore.gtlcore.common.data.GTLMachines;
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA;
+import org.gtlcore.gtlcore.common.machine.multiblock.part.LargeSteamHatchPartMachine;
 import org.gtlcore.gtlcore.common.machine.multiblock.steam.LargeSteamParallelMultiblockMachine;
 
 import com.gregtechceu.gtceu.api.capability.recipe.*;
@@ -13,8 +15,8 @@ import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine;
 import com.gregtechceu.gtceu.api.machine.steam.SteamEnergyRecipeHandler;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableFluidTank;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.common.data.GTMaterials;
 import com.gregtechceu.gtceu.common.data.GTRecipeModifiers;
+import com.gregtechceu.gtceu.common.machine.multiblock.part.SteamHatchPartMachine;
 
 import com.lowdragmc.lowdraglib.gui.widget.ComponentPanelWidget;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
@@ -94,9 +96,10 @@ public class LargeSteamParallelMultiblockMachineMixin extends WorkableMultiblock
             while (itr.hasNext()) {
                 var handler = itr.next();
                 if (handler instanceof NotifiableFluidTank tank) {
-                    if (tank.getFluidInTank(0).isFluidEqual(GTMaterials.Steam.getFluid(1L))) {
-                        gtladditions$isLarge = tank.getMachine().getDefinition() == GTLMachines.LARGE_STEAM_HATCH;
-                        gtladditions$isHuge = tank.getMachine().getDefinition() == GTLAddMachines.HUGE_STEAM_HATCH;
+                    var machine = tank.getMachine();
+                    if (machine instanceof SteamHatchPartMachine || machine instanceof LargeSteamHatchPartMachine || machine instanceof HugeSteamHatchPartMachine) {
+                        gtladditions$isLarge = machine.getDefinition() == GTLMachines.LARGE_STEAM_HATCH;
+                        gtladditions$isHuge = machine.getDefinition() == GTLAddMachines.HUGE_STEAM_HATCH;
                         this.isOC = gtladditions$isLarge || gtladditions$isHuge;
                         this.gtladditions$isMacerator = this.self().getDefinition() == MultiBlockMachineA.LARGE_STEAM_MACERATOR;
                         itr.remove();

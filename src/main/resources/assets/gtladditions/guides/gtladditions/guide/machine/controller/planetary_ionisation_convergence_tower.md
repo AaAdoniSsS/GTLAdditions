@@ -1,7 +1,7 @@
 ---
 navigation:
   title: Planetary Ionisation Convergence Tower
-  icon: stone
+  icon: planetary_ionisation_convergence_tower
   parent: controller/multiblock_controller.md
   position: 10
 item_ids:

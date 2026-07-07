@@ -1,7 +1,7 @@
 ---
 navigation:
   title: 行星电离汇流塔
-  icon: stone
+  icon: planetary_ionisation_convergence_tower
   parent: controller/multiblock_controller.md
   position: 10
 item_ids:
