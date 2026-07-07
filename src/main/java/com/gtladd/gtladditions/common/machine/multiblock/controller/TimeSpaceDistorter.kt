@@ -183,6 +183,10 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
         }
 
         override fun handleRecipeWorking() {
+            if (!tsdMachine.isWorkingEnabled) {
+                this.status = Status.IDLE
+                return
+            }
             checkNotNull(lastRecipe)
             val energyMachine = tsdMachine as IEnergyMachine
             if (eut > 0 && eut <= energyMachine.energyContainerList.energyStored) {
