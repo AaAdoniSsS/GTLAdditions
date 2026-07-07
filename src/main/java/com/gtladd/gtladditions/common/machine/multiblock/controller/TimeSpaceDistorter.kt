@@ -134,11 +134,13 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
     class TimeSpaceDistorterRecipeLogic(val tsdMachine: TimeSpaceDistorter) : RecipeLogic(tsdMachine), IRecipeStatus {
         private var eut = 0L
         val recipeList = IntArrayList()
+        private val failedRecipeIds = mutableSetOf<Int>()
 
         override fun findAndHandleRecipe() {
             this.lastRecipe = null
             this.lastOriginRecipe = null
             this.recipeStatus = null
+            this.failedRecipeIds.clear()
             this.recipeList.clear()
             if (tsdMachine.isMultiple) {
                 tsdMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = 16, minDuration = 1)?.let {
@@ -155,11 +157,14 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
         }
 
         private fun findAndModifyRecipe(parallel: Long): GTRecipe? {
-            lookup.find(machine, ::checkRecipe)?.let { recipe ->
-                this.modifyRecipe(recipe, parallel)?.let {
+            var recipe = lookup.find(machine, ::checkRecipe)
+            while (recipe != null) {
+                this.modifyRecipe(recipe, parallel)?.let { modifiedRecipe ->
                     this.recipeList.add(recipe.id.hashCode())
-                    return it
+                    return modifiedRecipe
                 }
+                this.failedRecipeIds.add(recipe.id.hashCode())
+                recipe = lookup.find(machine, ::checkRecipe)
             }
             return null
         }
@@ -193,6 +198,7 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
         override fun onRecipeFinish() {
             lastRecipe?.let { RecipeRunnerHelper.handleRecipeOutput(tsdMachine, it) }
             this.recipeList.clear()
+            this.failedRecipeIds.clear()
             if (tsdMachine is ISuspendableMachine) {
                 val ism = tsdMachine as ISuspendableMachine
                 if (ism.`gtlcore$isSuspendAfterFinish`()) {
@@ -233,7 +239,7 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
         }
 
         private fun checkRecipe(recipe: GTRecipe): Boolean = !this.recipeList.contains(recipe.id.hashCode()) &&
-            RecipeRunnerHelper.matchRecipe(machine, recipe) &&
+            RecipeRunnerHelper.matchRecipe(machine, recipe) && !this.failedRecipeIds.contains(recipe.id.hashCode()) &&
             IGTRecipe.of(recipe).euTier <= tsdMachine.tier && recipe.checkConditions(this).isSuccess
 
         private fun modifyRecipe(recipe: GTRecipe, parallel: Long): GTRecipe? {
