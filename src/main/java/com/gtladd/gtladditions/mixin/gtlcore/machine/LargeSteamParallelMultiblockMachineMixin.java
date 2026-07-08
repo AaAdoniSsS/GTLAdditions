@@ -1,6 +1,5 @@
 package com.gtladd.gtladditions.mixin.gtlcore.machine;
 
-import com.gtladd.gtladditions.common.machine.hatch.HugeSteamHatchPartMachine;
 import org.gtlcore.gtlcore.api.machine.ISteamMachine;
 import org.gtlcore.gtlcore.common.data.GTLMachines;
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA;
@@ -28,6 +27,7 @@ import net.minecraft.network.chat.Style;
 
 import com.gtladd.gtladditions.api.recipe.ContentList;
 import com.gtladd.gtladditions.common.machine.GTLAddMachines;
+import com.gtladd.gtladditions.common.machine.hatch.HugeSteamHatchPartMachine;
 import com.gtladd.gtladditions.utils.GTRecipeUtils;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.*;
