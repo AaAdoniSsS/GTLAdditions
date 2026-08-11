@@ -1,5 +1,6 @@
 package com.gtladd.gtladditions.api.recipe
 
+import org.gtlcore.gtlcore.api.recipe.IGTRecipe
 import org.gtlcore.gtlcore.utils.NumberUtils
 
 import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability
@@ -22,6 +23,11 @@ object FastRecipeModify {
 
     private val defaultReduceResult = ReduceResult(1.0, 1.0)
 
+    private fun markSubTickParallelized(recipe: GTRecipe, result: SubTickResult, parallelResult: ParallelResult): GTRecipe {
+        IGTRecipe.of(recipe).isSubTickParallelized = result.parallel > parallelResult.actualParallel
+        return recipe
+    }
+
     fun rrfModify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, maxEU: Double, isWireless: Boolean = false, machineParallel: Long, ocResult: OverClockFactor, mdRecipe: (GTRecipe) -> GTRecipe?): GTRecipe? {
         if (maxEU <= 0) return null
         val mr = mdRecipe.invoke(recipe.copy) ?: return null
@@ -42,7 +48,7 @@ object FastRecipeModify {
                 wireless.iO = IO.OUT
             }
         }
-        return modify
+        return markSubTickParallelized(modify, stResult, pr)
     }
 
     fun modify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, machineParallel: Long, isSub: Boolean = true, ocResult: OverClockFactor, reResult: (GTRecipe) -> ReduceResult): GTRecipe? {
@@ -64,7 +70,11 @@ object FastRecipeModify {
             subTickParallelOC(d, peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
 
-        return useSubTickResult(machine, stResult, recipe, pr, false)
+        return markSubTickParallelized(
+            useSubTickResult(machine, stResult, recipe, pr, false),
+            stResult,
+            pr
+        )
     }
 
     fun copyModify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, machineParallel: Long, isSub: Boolean = true, isOC: Boolean = true, ocResult: OverClockFactor, mdRecipe: (GTRecipe) -> GTRecipe): GTRecipe? {
@@ -86,7 +96,11 @@ object FastRecipeModify {
             subTickParallelOC(mr.duration.toDouble(), peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
 
-        return useSubTickResult(machine, stResult, mr, pr, true)
+        return markSubTickParallelized(
+            useSubTickResult(machine, stResult, mr, pr, true),
+            stResult,
+            pr
+        )
     }
 
     fun getParallelResult(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, recipeEUt: Long, machineEnergy: Double, machineParallel: Long): ParallelResult {

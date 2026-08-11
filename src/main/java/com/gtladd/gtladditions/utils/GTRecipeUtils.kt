@@ -53,10 +53,13 @@ object GTRecipeUtils {
         val fl = ContentList()
         val p = (this as ParallelMachine).maxParallel.toLong()
         var totalEu = 0.0
+        var hasSubTickParallelized = false
         for (index in 1..maxThread) {
             val recipe = getRecipe.invoke(p) ?: break
             if (testBefore.invoke(recipe as Object)) {
                 if (handleRecipeInput(this, recipe)) {
+                    hasSubTickParallelized = hasSubTickParallelized ||
+                        IGTRecipe.of(recipe).isSubTickParallelized
                     totalEu += recipe.duration * recipe.getEU.toDouble()
                     il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
                     fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
@@ -74,7 +77,9 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        return o.buildRawRecipe()
+        val result = o.buildRawRecipe()
+        IGTRecipe.of(result).isSubTickParallelized = hasSubTickParallelized
+        return result
     }
 
     fun WorkableElectricMultiblockMachine.getFastMultipleRecipe(getRecipe: (Long) -> GTRecipe?, maxThread: Int, minDuration: Int): GTRecipe? {
