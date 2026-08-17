@@ -87,6 +87,12 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
         )
     }
 
+    override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
+        val multiplier = FastRecipeModify.ReduceResult(reduceEUt, reduceDuration)
+        getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
+        return multiplier
+    }
+
     override fun addDisplayText(textList: MutableList<Component>) {
         super.addDisplayText(textList)
         this.takeIf { it.isFormed }?.let {
@@ -126,6 +132,7 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
         this.maxParallels = maxParallels
         this.reduceEUt = reduceEUt
         this.reduceDuration = reduceDuration
+        getRecipeLogic().setReduction(reduceEUt, reduceDuration)
     }
 
     override fun getMaxParallel(): Int = maxParallels
@@ -151,7 +158,7 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
                         it,
                         parallel.maxParallel.toLong(),
                         ocResult = FastRecipeModify.getPerfectOverclock()
-                    ) { FastRecipeModify.ReduceResult(bslMachine.reduceEUt, bslMachine.reduceDuration) }
+                    ) { recipe -> bslMachine.modifyRecipe(recipe) }
                 }
                 return null
             }

@@ -213,8 +213,15 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
         FastRecipeModify.OverClockFactor(0.5, 4.0)
     }
 
-    override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult = FastRecipeModify.ReduceResult(1.0, .8.pow(spaceElevatorTier - 1))
-
+    override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
+        val multiplier = if (spaceElevatorTier < 1) {
+            FastRecipeModify.getDefaultReduce()
+        } else {
+            FastRecipeModify.ReduceResult(1.0, .8.pow(spaceElevatorTier - 1))
+        }
+        getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
+        return multiplier
+    }
     override fun getMaxParallel(): Int = if (host is SpaceElevatorMKII) {
         12.pow(this.moduleTier - 1)
     } else {

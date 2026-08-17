@@ -32,7 +32,15 @@ class AntientropyCondensationCenter(holder: IMachineBlockEntity) : GTLAddWorkabl
     @Persisted
     private var isModify = false
 
-    override fun modifyRecipe(recipe: GTRecipe) = if (isModify) FastRecipeModify.ReduceResult(.5, .7) else super.modifyRecipe(recipe)
+    override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
+        val multiplier = if (isModify) {
+            FastRecipeModify.ReduceResult(0.5, 0.7)
+        } else {
+            super.modifyRecipe(recipe)
+        }
+        getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
+        return multiplier
+    }
 
     override fun onUse(state: BlockState, world: Level, pos: BlockPos, player: Player, hand: InteractionHand, hit: BlockHitResult): InteractionResult {
         if (!world.isClientSide && !this.isModify) {
@@ -41,6 +49,7 @@ class AntientropyCondensationCenter(holder: IMachineBlockEntity) : GTLAddWorkabl
                 val a = stack.count - 1
                 player.`kjs$setMainHandItem`(if (a == 0) ItemStack.EMPTY else ItemStack(CreateUltimateBattery, a))
                 this.isModify = true
+                getRecipeLogic().setReduction(0.5, 0.7)
             }
         }
         return super.onUse(state, world, pos, player, hand, hit)

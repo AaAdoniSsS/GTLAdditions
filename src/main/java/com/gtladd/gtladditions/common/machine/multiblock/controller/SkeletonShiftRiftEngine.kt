@@ -1,5 +1,6 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
+import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.DECAY_HASTENER_RECIPES
 
 import com.gregtechceu.gtceu.api.block.ICoilType
@@ -50,10 +51,19 @@ class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) : GTLAddWorkableElect
 
     override fun parallel() = Int.MAX_VALUE minToInt 2.pow(this.coilType.coilTemperature / 1200)
 
-    override fun modifyRecipe(recipe: GTRecipe): GTRecipe? = FastRecipeModify.modify(
-        this,
-        recipe,
-        parallel().toLong(),
-        ocResult = FastRecipeModify.getPerfectOverclock()
-    ) { FastRecipeModify.ReduceResult(1.0, 1.0 / this.casingTier) }
+    override fun modifyRecipe(recipe: GTRecipe): GTRecipe? {
+        val durationMultiplier = if (casingTier > 0) 1.0 / casingTier else 1.0
+        RecipeMultiplierTracker.captureReduction(
+            this,
+            recipe,
+            1.0,
+            durationMultiplier
+        )
+        return FastRecipeModify.modify(
+            this,
+            recipe,
+            parallel().toLong(),
+            ocResult = FastRecipeModify.getPerfectOverclock()
+        ) { FastRecipeModify.ReduceResult(1.0, durationMultiplier) }
+    }
 }

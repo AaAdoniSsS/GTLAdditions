@@ -52,11 +52,13 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
 
     override fun modifyRecipe(recipe: GTRecipe): ReduceResult {
         val modify = (host?.tier ?: 0) - GTValues.UIV
-        return if (modify > 0) {
+        val multiplier = if (modify > 0) {
             ReduceResult(0.9.pow(modify), 0.9.pow(modify))
         } else {
             super.modifyRecipe(recipe)
         }
+        getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
+        return multiplier
     }
 
     override fun getThread() = 128 * if (host?.isDouble == true) 2 else 1

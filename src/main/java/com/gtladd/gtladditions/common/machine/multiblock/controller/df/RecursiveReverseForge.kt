@@ -7,6 +7,7 @@ import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
+import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
@@ -347,7 +348,26 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
                     if (gtRecipe != null && rrfMachine.mccModule != null) gtRecipe = rrfMachine.mccModule!!.modifyRecipe(gtRecipe)
                     if (gtRecipe != null && rrfMachine.ccaModule != null) gtRecipe = rrfMachine.ccaModule!!.modifyRecipe(gtRecipe)
                     gtRecipe?.setEU((gtRecipe.getEU * 0.8) maxToLong 1)
-                    return@rrfModify gtRecipe
+                    gtRecipe?.let { modified ->
+                        val originalEUt = it.getEU.toDouble()
+                        val energyMultiplier = if (originalEUt == 0.0) {
+                            1.0
+                        } else {
+                            kotlin.math.abs(modified.getEU.toDouble() / originalEUt)
+                        }
+                        val durationMultiplier = if (it.duration <= 0) {
+                            1.0
+                        } else {
+                            modified.duration.toDouble() / it.duration
+                        }
+                        RecipeMultiplierTracker.captureReduction(
+                            rrfMachine,
+                            it,
+                            energyMultiplier,
+                            durationMultiplier
+                        )
+                        return@rrfModify gtRecipe
+                    }
                 }?.let { modify ->
                     rrfMachine.rtbeModule?.setReturnContent(modify)
                     if (checkRecipe(modify)) {

@@ -484,8 +484,16 @@ object MultiBlockMachine {
         Function {
             return@Function object : GTLAddCoilWorkableElectricMultipleRecipesMultiblockMachine(it) {
                 override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
-                    val reduce = 1 - this.getCoilTier() * 0.05
-                    return FastRecipeModify.ReduceResult(reduce * 0.6, reduce * 0.4)
+                    val coilMultiplier = 1 - getCoilTier() * 0.05
+                    val multiplier = FastRecipeModify.ReduceResult(
+                        coilMultiplier * 0.6,
+                        coilMultiplier * 0.4
+                    )
+                    getRecipeLogic().setReduction(
+                        multiplier.reduceEUt,
+                        multiplier.reduceDuration
+                    )
+                    return multiplier
                 }
             }
         }
@@ -577,7 +585,9 @@ object MultiBlockMachine {
         Function {
             return@Function object : GTLAddCoilWorkableElectricParallelHatchMultipleRecipesMachine(it) {
                 override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
-                    return FastRecipeModify.ReduceResult(0.6, 0.8)
+                    val multiplier = FastRecipeModify.ReduceResult(0.6, 0.8)
+                    getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
+                    return multiplier
                 }
             }
         }

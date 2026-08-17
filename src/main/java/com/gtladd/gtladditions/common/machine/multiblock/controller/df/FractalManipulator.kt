@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
+import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
@@ -40,7 +41,9 @@ import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.create
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
 import com.gtladd.gtladditions.utils.MachineUtil.inputItemStack
+import com.gtladd.gtladditions.utils.MathUtil.maxToLong
 import com.gtladd.gtladditions.utils.Registries.getItemStack
 
 import java.math.BigDecimal
@@ -189,7 +192,31 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                         isWireless,
                         Int.MAX_VALUE.toLong(),
                         FastRecipeModify.getPerfectOverclock()
-                    ) { fmMachine.host?.ccaModule?.modifyRecipe(it) ?: it }?.let { modify ->
+                    ) { copiedRecipe ->
+                        val modifiedRecipe = fmMachine.host?.ccaModule?.modifyRecipe(copiedRecipe)
+                            ?: copiedRecipe
+
+                        modifiedRecipe.setEU((modifiedRecipe.getEU * 0.8) maxToLong 1)
+
+                        val originalEUt = recipe.getEU.toDouble()
+                        val energyMultiplier = if (originalEUt == 0.0) {
+                            1.0
+                        } else {
+                            kotlin.math.abs(modifiedRecipe.getEU.toDouble() / originalEUt)
+                        }
+                        val durationMultiplier = if (recipe.duration <= 0) {
+                            1.0
+                        } else {
+                            modifiedRecipe.duration.toDouble() / recipe.duration
+                        }
+                        RecipeMultiplierTracker.captureReduction(
+                            fmMachine,
+                            recipe,
+                            energyMultiplier,
+                            durationMultiplier
+                        )
+                        modifiedRecipe
+                    }?.let { modify ->
                         val item = recipe.data.getString("accelerant").getItemStack(64)
                         if (fmMachine.inputItemStack(item)) {
                             modify.outputs.computeIfAbsent(ItemRecipeCapability.CAP) { ContentList(1) }

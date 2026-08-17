@@ -77,7 +77,7 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        val result = o.buildRawRecipe()
+        val result = o.buildRawRecipe().markInternallyAggregated()
         IGTRecipe.of(result).isSubTickParallelized = hasSubTickParallelized
         return result
     }
@@ -108,7 +108,7 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        return o.buildRawRecipe()
+        return o.buildRawRecipe().markInternallyAggregated()
     }
 
     fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Object) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int): GTRecipe? {
@@ -167,7 +167,7 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        return o.buildRawRecipe()
+        return o.buildRawRecipe().markInternallyAggregated()
     }
 
     val GTRecipe.copy: GTRecipe get() = GTRecipe(
@@ -231,6 +231,10 @@ object GTRecipeUtils {
             }
         }
         return map
+    }
+
+    private fun GTRecipe.markInternallyAggregated(): GTRecipe = apply {
+        (this as IGTRecipe).isBatchProcessed = true
     }
 
     private fun copyContentChances(holder: IRecipeLogicMachine, recipe: GTRecipe, parallel: Long): MutableMap<RecipeCapability<*>, MutableList<Content>> {
