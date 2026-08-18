@@ -2,7 +2,6 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller
 
 import org.gtlcore.gtlcore.api.machine.ISuspendableMachine
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.ILockRecipe
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
@@ -77,7 +76,6 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
             )
                 .setTooltipsSupplier { listOf((if (it) "behaviour.soft_hammer.enabled" else "behaviour.soft_hammer.disabled").toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
         IRecipeCapabilityMachine.attachConfigurators(configuratorPanel, self() as WorkableElectricMultiblockMachine)
     }
 

@@ -3,7 +3,6 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller.df
 import org.gtlcore.gtlcore.api.machine.ISuspendableMachine
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineHost
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
@@ -84,7 +83,6 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
         IRecipeCapabilityMachine.attachConfigurators(configuratorPanel, self() as WorkableElectricMultiblockMachine)
     }
 

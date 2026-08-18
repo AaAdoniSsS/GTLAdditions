@@ -1,6 +1,5 @@
 package com.gtladd.gtladditions.api.machine
 
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.common.data.GTLItems.CONVERSION_SIMULATE_CARD
 import org.gtlcore.gtlcore.common.data.GTLItems.FAST_CONVERSION_SIMULATE_CARD
@@ -145,7 +144,6 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
     }
 
     override fun createUIWidget(): Widget = (super.createUIWidget() as WidgetGroup).let {

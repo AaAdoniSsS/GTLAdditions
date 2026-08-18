@@ -2,7 +2,6 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller
 
 import org.gtlcore.gtlcore.api.machine.ISuspendableMachine
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
@@ -81,7 +80,6 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
         IRecipeCapabilityMachine.attachConfigurators(configuratorPanel, self() as WorkableElectricMultiblockMachine)
     }
 

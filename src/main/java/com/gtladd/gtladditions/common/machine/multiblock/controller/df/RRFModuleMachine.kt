@@ -1,7 +1,6 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller.df
 
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 
 import com.gregtechceu.gtceu.api.gui.GuiTextures
 import com.gregtechceu.gtceu.api.gui.fancy.ConfiguratorPanel
@@ -112,7 +111,6 @@ abstract class RRFModuleMachine(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf((if (it) "behaviour.soft_hammer.enabled" else "behaviour.soft_hammer.disabled").toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
     }
 
     override fun createUIWidget(): Widget {

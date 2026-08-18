@@ -2,7 +2,6 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller.bs
 
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineHost
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.utils.datastructure.ModuleRenderInfo
 
 import com.gregtechceu.gtceu.api.gui.GuiTextures
@@ -69,7 +68,6 @@ class BiosphereIIIController(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
     }
 
     override fun attachSideTabs(sideTabs: TabsWidget) {

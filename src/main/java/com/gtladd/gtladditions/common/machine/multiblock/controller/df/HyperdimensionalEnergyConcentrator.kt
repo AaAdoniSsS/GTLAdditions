@@ -1,7 +1,6 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller.df
 
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
 
@@ -102,7 +101,6 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
             )
                 .setTooltipsSupplier { listOf(if (it) "behaviour.soft_hammer.enabled".toComponent else "behaviour.soft_hammer.disabled".toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
     }
 
     override fun addDisplayText(textList: MutableList<Component>) {

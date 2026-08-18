@@ -1,6 +1,5 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
-import org.gtlcore.gtlcore.api.machine.trait.ICheckPatternMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
@@ -190,7 +189,6 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
             ) { _, pressed -> this.isWorkingEnabled = pressed }
                 .setTooltipsSupplier { listOf((if (it) "behaviour.soft_hammer.enabled" else "behaviour.soft_hammer.disabled").toComponent) }
         )
-        ICheckPatternMachine.attachConfigurators(configuratorPanel, self())
     }
 
     override fun onMachinePlaced(player: LivingEntity?, stack: ItemStack) {
