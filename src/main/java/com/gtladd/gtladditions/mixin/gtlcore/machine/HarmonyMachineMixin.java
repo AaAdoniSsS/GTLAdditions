@@ -6,7 +6,6 @@ import org.gtlcore.gtlcore.common.machine.multiblock.electric.HarmonyMachine;
 
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
-import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
@@ -14,8 +13,6 @@ import com.gregtechceu.gtceu.api.machine.MetaMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
-import com.gregtechceu.gtceu.api.recipe.content.Content;
-import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient;
 import com.gregtechceu.gtceu.common.data.GTMaterials;
 
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
@@ -25,11 +22,12 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+import com.gtladd.gtladditions.api.recipe.ContentList;
+import com.gtladd.gtladditions.common.register.GTLAddItems;
 import com.gtladd.gtladditions.common.saved.HarmonySaved;
 import com.gtladd.gtladditions.utils.MachineUtil;
 import com.llamalad7.mixinextras.sugar.Local;
@@ -43,7 +41,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-import java.util.List;
 import java.util.UUID;
 
 import static org.gtlcore.gtlcore.utils.MachineIO.inputFluid;
@@ -96,13 +93,7 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
               remap = false)
     private static @NotNull GTRecipe modify(GTRecipe instance, @Local(name = "machine") MetaMachine machine) {
         val hm = (HarmonyMachineMixin) machine;
-        ItemStack machineStorageItem = hm.gTLAdditions$machineStorage.storage.getStackInSlot(0);
-        boolean hasUltimateTea = false;
-        if (!machineStorageItem.isEmpty()) {
-            String itemId = BuiltInRegistries.ITEM.getKey(machineStorageItem.getItem()).toString();
-            hasUltimateTea = "gtladditions:create_data".equals(itemId);
-        }
-        if (hasUltimateTea) {
+        if (hm.gTLAdditions$machineStorage.storage.getStackInSlot(0).is(GTLAddItems.CREATE_DATA.get())) {
             GTRecipe modified = new GTRecipe(
                     instance.recipeType,
                     instance.id,
@@ -120,9 +111,7 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
                     instance.duration,
                     instance.isFuel);
             modified.outputs.clear();
-            RecipeCapability<FluidIngredient> fluidCap = FluidRecipeCapability.CAP;
-            Content fluidContent = new Content(FluidIngredient.of(GTLMaterials.RawStarMatter.getFluid(FluidStorageKeys.PLASMA, 1310720 * 12)), 10000, 10000, 0, null, null);
-            modified.outputs.put(fluidCap, List.of(fluidContent));
+            modified.outputs.put(FluidRecipeCapability.CAP, ContentList.Companion.getFluidStackList(GTLMaterials.RawStarMatter.getFluid(FluidStorageKeys.PLASMA, 1310720 * 12)));
             return modified;
         } else {
             return instance.copy();
@@ -146,18 +135,18 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
 
     @Override
     public void onMachineRemoved() {
-        HarmonySaved.Companion.getINSTANCE().remove(this.getPos().asLong());
+        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().remove(this.getPos().asLong());
     }
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
         if (player != null) this.userid = player.getUUID();
-        HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
+        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
+        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
     }
 }

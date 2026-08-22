@@ -41,6 +41,11 @@ object GTLAddMachines {
     val ORE_PROCESSOR_HATCH: MachineDefinition
     val ME_BLOCK_CONVERSATION: MachineDefinition
     val VIENTIANE_TRANSCEIPTION_NODE: MachineDefinition
+    val CLOUD_COMPUTATION_HATCH_TRANSMITTER: MachineDefinition
+    val CLOUD_COMPUTATION_HATCH_RECEIVER: MachineDefinition
+    val CLOUD_COMPUTATION_MONITOR: MachineDefinition
+    val CLOUD_DATA_MACHINE: MachineDefinition
+    val CLOUD_DATA_HATCH: MachineDefinition
 
     @JvmField
     val HUGE_OUTPUT_DUAL_HATCH: Array<MachineDefinition> = CustomMachines.registerTieredMachines(
@@ -174,6 +179,53 @@ object GTLAddMachines {
             .langValue("Vientiane Transcription Node")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(14)
+            .register()
+
+        CLOUD_COMPUTATION_MONITOR = REGISTRATE.machine("cloud_computation_monitor", ::CloudOpticalComputationMonitorMachine)
+            .rotationState(RotationState.ALL)
+            .overlayTieredHullRenderer("cloud_computation_monitor")
+            .langValue("Cloud Computation Monitor")
+            .tooltipBuilder(GTLAdd_ADD)
+            .tier(11)
+            .register()
+
+        CLOUD_COMPUTATION_HATCH_TRANSMITTER = REGISTRATE.machine("cloud_computation_transmitter_hatch") { holder ->
+            CloudOpticalComputationHatchMachine(holder, true)
+        }
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.COMPUTATION_DATA_TRANSMISSION)
+            .overlayTieredHullRenderer("cloud_computation_transmitter_hatch")
+            .langValue("Cloud Computation Transmitter Hatch")
+            .tooltipBuilder(GTLAdd_ADD)
+            .tier(11)
+            .register()
+
+        CLOUD_COMPUTATION_HATCH_RECEIVER = REGISTRATE.machine("cloud_computation_receiver_hatch") { holder ->
+            CloudOpticalComputationHatchMachine(holder, false)
+        }
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.COMPUTATION_DATA_RECEPTION)
+            .overlayTieredHullRenderer("cloud_computation_receiver_hatch")
+            .langValue("Cloud Computation Receiver Hatch")
+            .tooltipBuilder(GTLAdd_ADD)
+            .tier(11)
+            .register()
+
+        CLOUD_DATA_MACHINE = REGISTRATE.machine("cloud_data_machine", ::CloudOpticalDataMachine)
+            .rotationState(RotationState.ALL)
+            .overlayTieredHullRenderer("cloud_data_machine")
+            .langValue("Cloud Data Machine")
+            .tooltipBuilder(GTLAdd_ADD)
+            .tier(11)
+            .register()
+
+        CLOUD_DATA_HATCH = REGISTRATE.machine("cloud_data_hatch", ::CloudOpticalDataHatchMachine)
+            .rotationState(RotationState.ALL)
+            .abilities(PartAbility.OPTICAL_DATA_RECEPTION)
+            .overlayTieredHullRenderer("cloud_data_hatch")
+            .langValue("Cloud Data Hatch")
+            .tooltipBuilder(GTLAdd_ADD)
+            .tier(11)
             .register()
     }
 }

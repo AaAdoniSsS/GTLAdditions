@@ -17,6 +17,7 @@ import com.gregtechceu.gtceu.api.pattern.Predicates.blocks
 import com.gregtechceu.gtceu.common.data.GTBlocks
 import com.gregtechceu.gtceu.common.data.GTMachines
 import com.gregtechceu.gtceu.common.data.GTMaterials
+import com.gregtechceu.gtceu.common.data.machines.GTResearchMachines
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.ActiveTransformerMachine
 import com.gregtechceu.gtceu.utils.SupplierMemoizer
 
@@ -244,6 +245,31 @@ object MultiBlockModify {
                         .build()
                 }
                 ).apply(GTMachines.ACTIVE_TRANSFORMER)
+        }
+
+        (GTResearchMachines.NETWORK_SWITCH as MultiblockMachineDefinition).patternFactory = SupplierMemoizer.memoize {
+            (
+                Function { _: MultiblockMachineDefinition ->
+                    val b1 = PartAbility.COMPUTATION_DATA_RECEPTION.allBlocks
+                    b1.remove(GTLAddMachines.CLOUD_COMPUTATION_HATCH_RECEIVER.block)
+                    val b2 = PartAbility.COMPUTATION_DATA_TRANSMISSION.allBlocks
+                    b2.remove(GTLAddMachines.CLOUD_COMPUTATION_HATCH_TRANSMITTER.block)
+                    FactoryBlockPattern.start()
+                        .aisle("XXX", "XXX", "XXX")
+                        .aisle("XXX", "XAX", "XXX")
+                        .aisle("XXX", "XSX", "XXX")
+                        .where('S', Predicates.controller(blocks(GTResearchMachines.NETWORK_SWITCH.block)))
+                        .where('A', blocks(GTBlocks.ADVANCED_COMPUTER_CASING.get()))
+                        .where(
+                            'X',
+                            blocks(GTBlocks.COMPUTER_CASING.get()).setMinGlobalLimited(7)
+                                .or(abilities(PartAbility.INPUT_ENERGY).setMinGlobalLimited(1, 1))
+                                .or(abilities(PartAbility.MAINTENANCE).setExactLimit(1))
+                                .or(blocks(*b1.toTypedArray()).setMinGlobalLimited(1, 2))
+                                .or(blocks(*b2.toTypedArray()).setMinGlobalLimited(1, 1))
+                        ).build()
+                }
+                ).apply(GTResearchMachines.NETWORK_SWITCH as MultiblockMachineDefinition)
         }
     }
 }
