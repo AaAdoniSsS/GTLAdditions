@@ -1,6 +1,6 @@
 ---
 navigation:
-  title: Cloud Computation/Data Systems
+  title: Cloud Computation/Research Data Systems
   icon: gtmthings:iv_huge_output_dual_hatch
   parent: part/machine_part_index.md
   position: 10
@@ -12,7 +12,7 @@ item_ids:
   - gtladditions:cloud_computation_receiver_hatch
 ---
 
-# Cloud Computation/Data Systems
+# Cloud Computation/Research Data Systems
 
 <Row>
     <BlockImage id="gtladditions:cloud_data_hatch" scale="3" />
@@ -28,5 +28,6 @@ item_ids:
 
 * The Cloud Computation Transmitter Hatch is equivalent to the Computation Transmitter Hatch, whilst the Computation Receiver Hatch is equivalent to the Computation Receiver Hatch; the Cloud Computation Monitor is responsible for monitoring the computation I/O status of the cloud computation system
 * Only multiblock structs with bridging capabilities can provide computation to the cloud computation system.
-* The Cloud Data Hatch is equivalent to the Data Receiver Hatch
-* The Cloud Data Machine is responsible for storing data modules, data spheres and flash memory in the cloud data system; each data module, data sphere or flash memory unit increases energy consumption by 393,216 EU/t. When placed within the Creative Data Access Hatch, it provides all research data to all the Data Hatch.
+* The Cloud Research Data Hatch is equivalent to the Research Data Receiver Hatch
+* The Cloud Research Data Machine is responsible for storing data modules, data spheres and flash memory in the cloud research data system; each data module, data sphere or flash memory unit increases energy consumption by 393,216 EU/t. When placed within the Creative Data Access Hatch, it provides all research data to all the Data Hatch.
+* All Cloud Computation/Research Data Systems are capable of working *across dimensions*
