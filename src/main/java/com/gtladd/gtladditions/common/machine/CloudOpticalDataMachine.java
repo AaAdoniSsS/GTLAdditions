@@ -113,7 +113,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
         if (isRemote()) return;
-        if (player instanceof Player p) this.teamId = TeamUtil.getTeamUUID(p.getUUID());
+        if (player instanceof Player p) this.teamId = p.getUUID();
         CLOUD_DATA_MACHINE_SET.add(this);
         markRecipesDirty();
     }
@@ -121,7 +121,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
         if (isRemote() || player == null) return InteractionResult.PASS;
-        this.teamId = TeamUtil.getTeamUUID(player.getUUID());
+        this.teamId = player.getUUID();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         }
@@ -142,6 +142,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     public void onMachineRemoved() {
         CLOUD_DATA_MACHINE_SET.remove(this);
         clearInventory(importItems);
+        clearInventory(createItem);
     }
 
     public long getDataCount() {
@@ -235,7 +236,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     private void addDisplayText(List<Component> textList) {
         if (isRemote()) return;
         textList.add(self().getBlockState().getBlock().getName());
-        if (getLevel() != null) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
+        if (TeamUtil.hasOwner(getLevel(), teamId)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count", getRecipes().size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.energy_demand", FormattingUtil.formatNumbers(getEnergyDemand())));
         textList.add(Component.translatable(hasPower ? "gui.gtladditions.cloud_data_machine.power_normal" : "gui.gtladditions.cloud_data_machine.power_insufficient")

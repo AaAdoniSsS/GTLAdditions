@@ -38,6 +38,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -102,7 +103,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
     }
 
     private void bindTeam(Player player) {
-        this.teamId = TeamUtil.getTeamUUID(player.getUUID());
+        this.teamId = player.getUUID();
     }
 
     @Override
@@ -195,7 +196,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     .withStyle(ChatFormatting.RED));
             return;
         }
-        if (getLevel() != null) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
+        if (TeamUtil.hasOwner(getLevel(), teamId)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.provider_count", getTeamState(teamId).providers.size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.max_cwu", FormattingUtil.formatNumbers(getMaxCWU(this.teamId))));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.requestable_cwu", FormattingUtil.formatNumbers(getRemainingCWU(this.teamId))));
@@ -204,19 +205,21 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
     @Override
     public void attachSideTabs(TabsWidget tabs) {
         IFancyUIMachine.super.attachSideTabs(tabs);
-        tabs.attachSubTab(new CloudOverviewPage());
+        if (teamId != null) tabs.attachSubTab(new CloudOverviewPage(this));
     }
 
-    private class CloudOverviewPage implements IFancyUIProvider {
+    private record CloudOverviewPage(CloudOpticalComputationMonitorMachine machine) implements IFancyUIProvider {
+
+        public static final IGuiTexture ICON = new ResourceTexture(new ResourceLocation("gtceu", "textures/item/computer_monitor_cover.png"));
 
         @Override
         public Widget createMainPage(FancyMachineUIWidget widget) {
-            return new CloudOverviewWidget(CloudOpticalComputationMonitorMachine.this);
+            return new CloudOverviewWidget(this.machine.teamId);
         }
 
         @Override
         public IGuiTexture getTabIcon() {
-            return new ResourceTexture(new ResourceLocation("gtceu", "textures/item/computer_monitor_cover.png"));
+            return ICON;
         }
 
         @Override
@@ -232,11 +235,10 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
     private static class CloudOverviewWidget extends WidgetGroup {
 
-        CloudOverviewWidget(CloudOpticalComputationMonitorMachine monitor) {
+        CloudOverviewWidget(UUID uuid) {
             super(0, 0, 280, 222);
 
-            UUID teamId = monitor.getTeamId();
-            if (teamId == null) {
+            if (uuid == null) {
                 this.addWidget(new LabelWidget(6, 4,
                         Component.translatable("gui.gtladditions.cloud.not_bound")
                                 .withStyle(ChatFormatting.RED)));
@@ -247,13 +249,13 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             var providerScroll = new DraggableScrollableWidgetGroup(4, 18, 272, 95).setBackground(GuiTextures.DISPLAY);
             providerScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
             int i = 0;
-            var state = getTeamState(monitor.getTeamId());
+            var state = getTeamState(uuid);
             int otherProviders = 0;
-            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!Objects.equals(h.getTeamId(), monitor.getTeamId())) otherProviders++;
+            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!Objects.equals(h.getTeamId(), uuid)) otherProviders++;
             for (var p : state.providers) {
                 if (p instanceof MetaMachine m) providerScroll.addWidget(new RowWidgets((i++) * 20, true, RowWidgets.Kind.MACHINE, m, 0));
             }
-            if (i == 0) providerScroll.addWidget(new RowWidgets(0, true, RowWidgets.Kind.NO_ENTRIES, null, 0));
+            if (i == 0) providerScroll.addWidget(new RowWidgets(i++ * 20, true, RowWidgets.Kind.NO_ENTRIES, null, 0));
             if (otherProviders > 0) providerScroll.addWidget(new RowWidgets(i * 20, true, RowWidgets.Kind.OTHER_TEAM, null, otherProviders));
 
             addWidget(providerScroll);
@@ -263,11 +265,11 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             receiverScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
             i = 0;
             int otherReceivers = 0;
-            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!Objects.equals(h.getTeamId(), monitor.getTeamId())) otherReceivers++;
+            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!Objects.equals(h.getTeamId(), uuid)) otherReceivers++;
             for (var c : state.receiverControllers) {
                 receiverScroll.addWidget(new RowWidgets((i++) * 20, false, RowWidgets.Kind.MACHINE, c, 0));
             }
-            if (i == 0) receiverScroll.addWidget(new RowWidgets(0, false, RowWidgets.Kind.NO_ENTRIES, null, 0));
+            if (i == 0) receiverScroll.addWidget(new RowWidgets(i++ * 20, false, RowWidgets.Kind.NO_ENTRIES, null, 0));
             if (otherReceivers > 0) receiverScroll.addWidget(new RowWidgets(i * 20, false, RowWidgets.Kind.OTHER_TEAM, null, otherReceivers));
 
             addWidget(receiverScroll);
@@ -290,6 +292,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         Kind kind;
         String dim = "";
         BlockPos pos;
+        BlockPos frontPos;
         ItemStack item = ItemStack.EMPTY;
         long current;
         long max;
@@ -315,6 +318,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             if (kind == Kind.MACHINE && machine != null) {
                 this.dim = machine.getLevel() != null ? machine.getLevel().dimension().location().toString() : "";
                 this.pos = machine.getPos();
+                this.frontPos = machine.getLevel() != null ? machine.getPos().relative(machine.getFrontFacing()) : null;
                 this.item = machine.getDefinition().asStack();
                 refreshValues();
             }
@@ -340,9 +344,14 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                             var level = mc.level;
                             if (level != null) {
                                 if (mc.screen != null) mc.setScreen(null);
-                                if (gui.entityPlayer != null && dim.equals(level.dimension().location().toString())) {
-                                    gui.entityPlayer.lookAt(EntityAnchorArgument.Anchor.EYES,
-                                            new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+                                var player = gui.entityPlayer;
+                                if (player != null) {
+                                    if (dim.equals(level.dimension().location().toString())) {
+                                        player.lookAt(EntityAnchorArgument.Anchor.EYES,
+                                                new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+                                    } else if (pos != null && !dim.isEmpty()) {
+                                        sendCrossDimensionMessage(player);
+                                    }
                                 }
                             }
                         }
@@ -352,6 +361,10 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     return false;
                 }
             };
+            if (this.kind != Kind.MACHINE) {
+                button.setActive(false);
+                button.setVisible(false);
+            }
             this.addWidget(icon);
             this.addWidget(label);
             this.addWidget(button);
@@ -371,6 +384,27 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                 case NO_ENTRIES -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.no_providers" : "gui.gtladditions.cloud_monitor.no_requesters").withStyle(ChatFormatting.GRAY));
                 case OTHER_TEAM -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.other_team_providers" : "gui.gtladditions.cloud_monitor.other_team_receivers", otherCount).withStyle(ChatFormatting.YELLOW));
                 default -> {}
+            }
+        }
+
+        @OnlyIn(Dist.CLIENT)
+        private void sendCrossDimensionMessage(Player player) {
+            BlockPos tpPos = frontPos != null ? frontPos : pos;
+            String command = "/execute in " + dim + " run tp @s " + (tpPos.getX() + 0.5) + " " + tpPos.getY() + " " + (tpPos.getZ() + 0.5);
+            Component coords = Component.literal("[" + pos.getX() + ", " + pos.getY() + ", " + pos.getZ() + "]")
+                    .withStyle(style -> style.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, command))
+                            .withUnderlined(true).withColor(ChatFormatting.GREEN));
+            player.displayClientMessage(Component.translatable("gui.gtladditions.cloud_monitor.cross_dim",
+                    Component.literal("[" + dim + "]"), coords)
+                    .withStyle(style -> style.withColor(ChatFormatting.GREEN)), false);
+        }
+
+        private void refreshButtonTooltip() {
+            if (kind == Kind.MACHINE && pos != null) {
+                button.setHoverTooltips(
+                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_dim", dim),
+                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_pos",
+                                pos.getX(), pos.getY(), pos.getZ()));
             }
         }
 
@@ -405,6 +439,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             buffer.writeByte(kind.ordinal());
             buffer.writeUtf(dim);
             buffer.writeBlockPos(pos == null ? BlockPos.ZERO : pos);
+            buffer.writeBlockPos(frontPos == null ? BlockPos.ZERO : frontPos);
             buffer.writeItem(item);
             buffer.writeLong(current);
             buffer.writeLong(max);
@@ -421,11 +456,14 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             kind = Kind.values()[buffer.readByte()];
             dim = buffer.readUtf();
             pos = buffer.readBlockPos();
+            frontPos = buffer.readBlockPos();
+            if (frontPos.equals(BlockPos.ZERO)) frontPos = null;
             item = buffer.readItem();
             current = buffer.readLong();
             max = buffer.readLong();
             cwu = buffer.readInt();
             otherCount = buffer.readInt();
+            refreshButtonTooltip();
         }
 
         @Override
