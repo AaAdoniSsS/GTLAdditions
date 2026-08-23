@@ -28,6 +28,8 @@ public abstract class ComputationProviderMachineMixin extends WorkableElectricMu
     public int maxCWUt;
     @Shadow(remap = false)
     private boolean inf;
+    @Shadow(remap = false)
+    public int allocatedCWUt;
 
     public ComputationProviderMachineMixin(IMachineBlockEntity holder, Object... args) {
         super(holder, args);
@@ -42,10 +44,15 @@ public abstract class ComputationProviderMachineMixin extends WorkableElectricMu
     }
 
     @Override
+    public long remainCWU() {
+        return getMaxCWU() - this.allocatedCWUt;
+    }
+
+    @Override
     public long getMaxCWU() {
         if (this.inf) {
             return Integer.MAX_VALUE;
-        } else if (this.maxCWUt == 0) {
+        } else {
             switch (this.getTier()) {
                 case 11:
                     if (checkItem(OPTICAL_MAINFRAME)) return 1024;
@@ -61,8 +68,6 @@ public abstract class ComputationProviderMachineMixin extends WorkableElectricMu
             }
 
             return 0;
-        } else {
-            return this.maxCWUt;
         }
     }
 

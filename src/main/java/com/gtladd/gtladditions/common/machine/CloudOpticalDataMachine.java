@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.TickableSubscription;
 import com.gregtechceu.gtceu.api.machine.TieredEnergyMachine;
+import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableEnergyContainer;
@@ -21,25 +22,37 @@ import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
+import com.hepdd.gtmthings.utils.TeamUtil;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import lombok.Getter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 
-public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine {
+public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine, IDataStickInteractable {
 
     public static final Set<CloudOpticalDataMachine> CLOUD_DATA_MACHINE_SET = new ObjectOpenHashSet<>();
     public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CloudOpticalDataMachine.class, TieredEnergyMachine.MANAGED_FIELD_HOLDER);
 
     private static final long ENERGY_PER_DATA = GTValues.V[GTValues.UV] * 3 / 4;
+
+    @Getter
+    @Persisted
+    @DescSynced
+    private UUID teamId;
 
     @Persisted
     protected final NotifiableItemStackHandler importItems;
@@ -52,7 +65,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     public CloudOpticalDataMachine(IMachineBlockEntity holder) {
         super(holder, GTValues.UIV);
-        this.importItems = new NotifiableItemStackHandler(this, 54, IO.BOTH);
+        this.importItems = new NotifiableItemStackHandler(this, 90, IO.BOTH);
         this.importItems.setFilter(stack -> ResearchManager.isStackDataItem(stack, true))
                 .addChangedListener(this::markRecipesDirty);
         this.createItem = new NotifiableItemStackHandler(this, 1, IO.BOTH);
@@ -93,10 +106,25 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (!isRemote()) {
-            CLOUD_DATA_MACHINE_SET.add(this);
-            markRecipesDirty();
+        if (isRemote()) return;
+        if (player instanceof Player p) this.teamId = TeamUtil.getTeamUUID(p.getUUID());
+        CLOUD_DATA_MACHINE_SET.add(this);
+        markRecipesDirty();
+    }
+
+    @Override
+    public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
+        if (isRemote() || player == null) return InteractionResult.PASS;
+        this.teamId = TeamUtil.getTeamUUID(player.getUUID());
+        if (player instanceof ServerPlayer sp) {
+            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         }
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean onDataStickLeftClick(Player player, ItemStack stack) {
+        return false;
     }
 
     @Override
@@ -157,8 +185,9 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         return recipes;
     }
 
-    public static boolean isRecipeAvailableInCloud(GTRecipe recipe) {
+    public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID teamId) {
         for (var machine : CLOUD_DATA_MACHINE_SET) {
+            if (machine.teamId != null && teamId != null && !machine.teamId.equals(teamId)) continue;
             if (machine.hasPower) {
                 if (machine.isCreate) return true;
                 else if (machine.getRecipes().contains(recipe)) return true;
@@ -173,7 +202,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         group.addWidget(new LabelWidget(5, 5, self().getBlockState().getBlock().getDescriptionId()));
         group.addWidget(new ComponentPanelWidget(5, 17, this::addDisplayText).setMaxWidthLimit(160));
         var slotScroll = new DraggableScrollableWidgetGroup(5, 72, 168, 54);
-        for (int row = 0; row < 6; row++) {
+        for (int row = 0; row < 10; row++) {
             for (int col = 0; col < 9; col++) {
                 slotScroll.addWidget(new SlotWidget(importItems, row * 9 + col, 2 + col * 18, row * 18) {
 

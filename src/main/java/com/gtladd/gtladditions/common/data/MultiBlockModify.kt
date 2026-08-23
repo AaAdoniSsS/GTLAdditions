@@ -250,10 +250,6 @@ object MultiBlockModify {
         (GTResearchMachines.NETWORK_SWITCH as MultiblockMachineDefinition).patternFactory = SupplierMemoizer.memoize {
             (
                 Function { _: MultiblockMachineDefinition ->
-                    val b1 = PartAbility.COMPUTATION_DATA_RECEPTION.allBlocks
-                    b1.remove(GTLAddMachines.CLOUD_COMPUTATION_HATCH_RECEIVER.block)
-                    val b2 = PartAbility.COMPUTATION_DATA_TRANSMISSION.allBlocks
-                    b2.remove(GTLAddMachines.CLOUD_COMPUTATION_HATCH_TRANSMITTER.block)
                     FactoryBlockPattern.start()
                         .aisle("XXX", "XXX", "XXX")
                         .aisle("XXX", "XAX", "XXX")
@@ -265,8 +261,8 @@ object MultiBlockModify {
                             blocks(GTBlocks.COMPUTER_CASING.get()).setMinGlobalLimited(7)
                                 .or(abilities(PartAbility.INPUT_ENERGY).setMinGlobalLimited(1, 1))
                                 .or(abilities(PartAbility.MAINTENANCE).setExactLimit(1))
-                                .or(blocks(*b1.toTypedArray()).setMinGlobalLimited(1, 2))
-                                .or(blocks(*b2.toTypedArray()).setMinGlobalLimited(1, 1))
+                                .or(blocks(*PartAbility.COMPUTATION_DATA_RECEPTION.allBlocks.stream().filter { it != GTLAddMachines.CLOUD_COMPUTATION_HATCH_RECEIVER.block }.toList().toTypedArray()).setMinGlobalLimited(1, 2))
+                                .or(blocks(*PartAbility.COMPUTATION_DATA_TRANSMISSION.allBlocks.stream().filter { it != GTLAddMachines.CLOUD_COMPUTATION_HATCH_TRANSMITTER.block }.toList().toTypedArray()).setMinGlobalLimited(1, 1))
                         ).build()
                 }
                 ).apply(GTResearchMachines.NETWORK_SWITCH as MultiblockMachineDefinition)

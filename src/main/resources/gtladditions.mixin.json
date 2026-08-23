@@ -37,6 +37,7 @@
     "gtlcore.machine.part.GravityCleaningConfigurationMaintenancePartMachineMixin",
     "gtlcore.machine.part.LargeSteamHatchPartMachineMixin",
     "gtlcore.machine.part.WirelessOpticalDataHatchMachineMixin",
+    "gtmtings.WirelessEnergyHatchProviderMixin",
     "gtmtings.WirelessOpticalComputationHatchMachineMixin",
     "guide.DefaultExtensionsMixin",
     "kjs.ItemBuilderMixin",

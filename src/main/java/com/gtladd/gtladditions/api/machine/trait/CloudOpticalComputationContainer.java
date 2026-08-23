@@ -8,12 +8,14 @@ import com.gregtechceu.gtceu.api.machine.trait.NotifiableComputationContainer;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 
 import com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMachine;
+import com.gtladd.gtladditions.common.machine.hatch.CloudOpticalComputationHatchMachine;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 public class CloudOpticalComputationContainer extends NotifiableComputationContainer {
 
@@ -21,14 +23,19 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
         super(machine, handlerIO, transmitter);
     }
 
+    private UUID getTeamId() {
+        return this.machine instanceof CloudOpticalComputationHatchMachine h ? h.getTeamId() : null;
+    }
+
     @Override
     public List<Integer> handleRecipeInner(IO io, GTRecipe recipe, List<Integer> left, @Nullable String slotName, boolean simulate) {
         int sum = left.stream().reduce(0, Integer::sum);
         if (io == IO.IN) {
-            int availableCWU = (int) CloudOpticalComputationMonitorMachine.requestCWU(Integer.MAX_VALUE, true);
+            UUID teamId = getTeamId();
+            int availableCWU = (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, Integer.MAX_VALUE, true);
             if (availableCWU >= sum) {
                 if (recipe.data.getBoolean("duration_is_total_cwu")) {
-                    int drawn = simulate ? availableCWU : (int) CloudOpticalComputationMonitorMachine.requestCWU(availableCWU, false);
+                    int drawn = simulate ? availableCWU : (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, availableCWU, false);
                     if (!simulate) {
                         if (this.machine instanceof IRecipeLogicMachine rlm) {
                             rlm.getRecipeLogic().setProgress(rlm.getRecipeLogic().getProgress() - 1 + drawn);
@@ -42,7 +49,7 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
                     }
                     sum -= drawn;
                 } else {
-                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(sum, simulate);
+                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, sum, simulate);;
                 }
             }
         }
@@ -53,7 +60,7 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
     @Override
     public int requestCWUt(int cwut, boolean simulate, @NotNull Collection<com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider> seen) {
         if (this.handlerIO == IO.IN && !this.isTransmitter()) {
-            return (int) CloudOpticalComputationMonitorMachine.requestCWU(cwut, simulate);
+            return (int) CloudOpticalComputationMonitorMachine.requestCWU(getTeamId(), cwut, simulate);
         }
         return 0;
     }

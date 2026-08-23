@@ -29,6 +29,11 @@ public abstract class HPCAMachineMixin extends WorkableElectricMultiblockMachine
     }
 
     @Override
+    public long remainCWU() {
+        return this.isActive() && this.isWorkingEnabled() ? this.hpcaHandler.getMaxCWUt() - this.hpcaHandler.getAllocatedCWUt() : 0;
+    }
+
+    @Override
     public long getMaxCWU() {
         return this.isActive() && this.isWorkingEnabled() ? this.hpcaHandler.getMaxCWUt() : 0;
     }
