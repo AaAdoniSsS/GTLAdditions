@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.common.machine
 import org.gtlcore.gtlcore.utils.TextUtil
 
 import com.gregtechceu.gtceu.api.GTValues
+import com.gregtechceu.gtceu.api.GTValues.UIV
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.data.RotationState
 import com.gregtechceu.gtceu.api.machine.MachineDefinition
@@ -184,6 +185,10 @@ object GTLAddMachines {
         CLOUD_COMPUTATION_MONITOR = REGISTRATE.machine("cloud_computation_monitor", ::CloudOpticalComputationMonitorMachine)
             .rotationState(RotationState.ALL)
             .overlayTieredHullRenderer("cloud_computation_monitor")
+            .tooltips(
+                "tooltip.gtladditions.cloud_computation_monitor".toComponent,
+                "tooltip.gtladditions.cloud_systems".toComponent
+            )
             .langValue("Cloud Computation Monitor")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(11)
@@ -195,6 +200,11 @@ object GTLAddMachines {
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.COMPUTATION_DATA_TRANSMISSION)
             .overlayTieredHullRenderer("cloud_computation_transmitter_hatch")
+            .tooltips(
+                "gtceu.universal.enabled".toComponent,
+                "tooltip.gtladditions.cloud_computation_transmitter_hatch".toComponent,
+                "tooltip.gtladditions.cloud_systems".toComponent
+            )
             .langValue("Cloud Computation Transmitter Hatch")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(11)
@@ -206,6 +216,11 @@ object GTLAddMachines {
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.COMPUTATION_DATA_RECEPTION)
             .overlayTieredHullRenderer("cloud_computation_receiver_hatch")
+            .tooltips(
+                "gtceu.universal.enabled".toComponent,
+                "tooltip.gtladditions.cloud_computation_receiver_hatch".toComponent,
+                "tooltip.gtladditions.cloud_systems".toComponent
+            )
             .langValue("Cloud Computation Receiver Hatch")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(11)
@@ -214,6 +229,18 @@ object GTLAddMachines {
         CLOUD_DATA_MACHINE = REGISTRATE.machine("cloud_data_machine", ::CloudOpticalDataMachine)
             .rotationState(RotationState.ALL)
             .overlayTieredHullRenderer("cloud_data_machine")
+            .tooltips(
+                "tooltip.gtladditions.cloud_data_machine.0".toComponent,
+                "tooltip.gtladditions.cloud_data_machine.1".toComponent,
+                Component.translatable(
+                    "gtceu.universal.tooltip.max_voltage_in",
+                    FormattingUtil.formatNumbers(33554432),
+                    GTValues.VNF[UIV]
+                ),
+                Component.translatable("tooltip.gtladditions.cloud_data_machine.2", FormattingUtil.formatNumbers(536870912)),
+                Component.translatable("tooltip.gtladditions.cloud_data_machine.3", FormattingUtil.formatNumbers(2147483478)),
+                "tooltip.gtladditions.cloud_systems".toComponent
+            )
             .langValue("Cloud Data Machine")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(11)
@@ -223,6 +250,11 @@ object GTLAddMachines {
             .rotationState(RotationState.ALL)
             .abilities(PartAbility.OPTICAL_DATA_RECEPTION)
             .overlayTieredHullRenderer("cloud_data_hatch")
+            .tooltips(
+                "gtceu.universal.enabled".toComponent,
+                "tooltip.gtladditions.cloud_data_hatch".toComponent,
+                "tooltip.gtladditions.cloud_systems".toComponent
+            )
             .langValue("Cloud Data Hatch")
             .tooltipBuilder(GTLAdd_ADD)
             .tier(11)

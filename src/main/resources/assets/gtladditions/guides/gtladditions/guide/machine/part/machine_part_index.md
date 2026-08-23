@@ -20,4 +20,5 @@ Introduction GTLAdditions Machine Part
 * [Huge Output Dual Hatch](huge_output_dual_hatch.md)
 * [Laser Hatch](laser_hatch.md)
 * [Vientiane Transcription Node](vientiane_transcription_node.md)
+* [Cloud Computation/Data System](cloud_system.md)
 

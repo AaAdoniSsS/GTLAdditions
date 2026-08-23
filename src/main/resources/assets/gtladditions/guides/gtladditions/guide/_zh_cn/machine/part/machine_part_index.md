@@ -16,4 +16,5 @@ categories:
 * [巨型输出总成](huge_output_dual_hatch.md)
 * [激光仓](laser_hatch.md)
 * [万象转录节点](vientiane_transcription_node.md)
+* [云端算力/数据系统](cloud_system.md)
 
