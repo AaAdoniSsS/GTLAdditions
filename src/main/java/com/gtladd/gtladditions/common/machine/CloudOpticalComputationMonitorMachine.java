@@ -111,7 +111,13 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        return false;
+        if (isRemote() || player == null) return false;
+        this.teamId = null;
+        markCacheDirty();
+        if (player instanceof ServerPlayer sp) {
+            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
+        }
+        return true;
     }
 
     @Override
@@ -178,6 +184,11 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
     private void addDisplayText(List<Component> textList) {
         if (isRemote()) return;
+        if (teamId == null) {
+            textList.add(Component.translatable("gui.gtladditions.cloud.not_bound")
+                    .withStyle(ChatFormatting.RED));
+            return;
+        }
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.provider_count", getTeamState(teamId).providers.size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.max_cwu", FormattingUtil.formatNumbers(getMaxCWU(this.teamId))));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.requestable_cwu", FormattingUtil.formatNumbers(getRemainingCWU(this.teamId))));
@@ -216,6 +227,14 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
         CloudOverviewWidget(CloudOpticalComputationMonitorMachine monitor) {
             super(0, 0, 280, 222);
+
+            UUID teamId = monitor.getTeamId();
+            if (teamId == null) {
+                this.addWidget(new LabelWidget(6, 4,
+                        Component.translatable("gui.gtladditions.cloud.not_bound")
+                                .withStyle(ChatFormatting.RED)));
+                return;
+            }
 
             addWidget(new ExtendLabelWidget(6, 4, Component.translatable("gui.gtladditions.cloud_monitor.providers")));
             var providerScroll = new DraggableScrollableWidgetGroup(4, 18, 272, 95).setBackground(GuiTextures.DISPLAY);

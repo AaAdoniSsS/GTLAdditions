@@ -42,6 +42,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMachine.markCacheDirty;
+
 public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine, IDataStickInteractable {
 
     public static final Set<CloudOpticalDataMachine> CLOUD_DATA_MACHINE_SET = new ObjectOpenHashSet<>();
@@ -124,7 +126,13 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        return false;
+        if (isRemote() || player == null) return false;
+        this.teamId = null;
+        markCacheDirty();
+        if (player instanceof ServerPlayer sp) {
+            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
+        }
+        return true;
     }
 
     @Override
@@ -187,7 +195,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID teamId) {
         for (var machine : CLOUD_DATA_MACHINE_SET) {
-            if (machine.teamId != null && teamId != null && !machine.teamId.equals(teamId)) continue;
+            if (machine.teamId == null || !machine.teamId.equals(teamId)) continue;
             if (machine.hasPower) {
                 if (machine.isCreate) return true;
                 else if (machine.getRecipes().contains(recipe)) return true;
