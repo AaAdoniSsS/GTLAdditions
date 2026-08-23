@@ -35,8 +35,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Collection;
 import java.util.UUID;
 
-import static com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMachine.markCacheDirty;
-
 public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implements IOpticalDataAccessHatch, IMachineLife, IDataStickInteractable, IBindable {
 
     public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CloudOpticalDataHatchMachine.class, MultiblockPartMachine.MANAGED_FIELD_HOLDER);
@@ -58,14 +56,14 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
         if (!isRemote() && player instanceof Player p) {
-            this.teamId = TeamUtil.getTeamUUID(p.getUUID());
+            this.teamId = p.getUUID();
         }
     }
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
         if (isRemote() || player == null) return InteractionResult.PASS;
-        this.teamId = TeamUtil.getTeamUUID(player.getUUID());
+        this.teamId = player.getUUID();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         }
@@ -76,7 +74,6 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
         if (isRemote() || player == null) return false;
         this.teamId = null;
-        markCacheDirty();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         }

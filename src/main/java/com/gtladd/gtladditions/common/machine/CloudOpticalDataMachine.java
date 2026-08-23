@@ -18,10 +18,10 @@ import com.gregtechceu.gtceu.utils.ResearchManager;
 
 import com.lowdragmc.lowdraglib.gui.widget.ComponentPanelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
-import com.lowdragmc.lowdraglib.gui.widget.LabelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.SlotWidget;
 import com.lowdragmc.lowdraglib.gui.widget.Widget;
 import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup;
+import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
@@ -41,8 +41,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import static com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMachine.markCacheDirty;
 
 public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine, IDataStickInteractable {
 
@@ -68,9 +66,15 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     public CloudOpticalDataMachine(IMachineBlockEntity holder) {
         super(holder, GTValues.UIV);
         this.importItems = new NotifiableItemStackHandler(this, 90, IO.BOTH);
-        this.importItems.setFilter(stack -> ResearchManager.isStackDataItem(stack, true))
+        this.importItems.setFilter(stack -> ResearchManager.isStackDataItem(stack, true) && ResearchManager.hasResearchTag(stack))
                 .addChangedListener(this::markRecipesDirty);
-        this.createItem = new NotifiableItemStackHandler(this, 1, IO.BOTH);
+        this.createItem = new NotifiableItemStackHandler(this, 1, IO.NONE, IO.BOTH,
+                slots -> new ItemStackTransfer(1) {
+
+                    public int getSlotLimit(int slot) {
+                        return 1;
+                    }
+                });
         this.createItem.setFilter(stack -> stack.is(GTResearchMachines.CREATIVE_DATA_ACCESS_HATCH.getItem()))
                 .addChangedListener(() -> this.isCreate = this.createItem.getStackInSlot(0).is(GTResearchMachines.CREATIVE_DATA_ACCESS_HATCH.getItem()));
     }
@@ -128,7 +132,6 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
         if (isRemote() || player == null) return false;
         this.teamId = null;
-        markCacheDirty();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         }
@@ -206,10 +209,9 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public Widget createUIWidget() {
-        var group = new WidgetGroup(0, 0, 176, 130);
-        group.addWidget(new LabelWidget(5, 5, self().getBlockState().getBlock().getDescriptionId()));
-        group.addWidget(new ComponentPanelWidget(5, 17, this::addDisplayText).setMaxWidthLimit(160));
-        var slotScroll = new DraggableScrollableWidgetGroup(5, 72, 168, 54);
+        var group = new WidgetGroup(0, 0, 176, 145);
+        group.addWidget(new ComponentPanelWidget(5, 5, this::addDisplayText).setMaxWidthLimit(160));
+        var slotScroll = new DraggableScrollableWidgetGroup(5, 84, 168, 54);
         for (int row = 0; row < 10; row++) {
             for (int col = 0; col < 9; col++) {
                 slotScroll.addWidget(new SlotWidget(importItems, row * 9 + col, 2 + col * 18, row * 18) {
@@ -232,6 +234,8 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     private void addDisplayText(List<Component> textList) {
         if (isRemote()) return;
+        textList.add(self().getBlockState().getBlock().getName());
+        if (getLevel() != null) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count", getRecipes().size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.energy_demand", FormattingUtil.formatNumbers(getEnergyDemand())));
         textList.add(Component.translatable(hasPower ? "gui.gtladditions.cloud_data_machine.power_normal" : "gui.gtladditions.cloud_data_machine.power_insufficient")

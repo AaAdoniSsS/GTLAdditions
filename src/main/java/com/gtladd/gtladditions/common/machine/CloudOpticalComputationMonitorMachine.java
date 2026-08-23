@@ -21,6 +21,7 @@ import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ResourceTexture;
 import com.lowdragmc.lowdraglib.gui.texture.TextTexture;
+import com.lowdragmc.lowdraglib.gui.util.ClickData;
 import com.lowdragmc.lowdraglib.gui.widget.ButtonWidget;
 import com.lowdragmc.lowdraglib.gui.widget.ComponentPanelWidget;
 import com.lowdragmc.lowdraglib.gui.widget.DraggableScrollableWidgetGroup;
@@ -33,6 +34,8 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
+import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -42,6 +45,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 import com.gtladd.gtladditions.api.machine.trait.IOpticalComputationProvider;
 import com.gtladd.gtladditions.client.renderer.ClientCloudHighlighter;
@@ -189,6 +195,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     .withStyle(ChatFormatting.RED));
             return;
         }
+        if (getLevel() != null) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.provider_count", getTeamState(teamId).providers.size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.max_cwu", FormattingUtil.formatNumbers(getMaxCWU(this.teamId))));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.requestable_cwu", FormattingUtil.formatNumbers(getRemainingCWU(this.teamId))));
@@ -319,7 +326,32 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     new TextTexture(Component.translatable("gui.gtladditions.cloud_monitor.highlight").getString(), 16777045),
                     cd -> {
                         if (pos != null && !dim.isEmpty()) ClientCloudHighlighter.highlight(pos, dim);
-                    });
+                    }) {
+
+                @Override
+                @OnlyIn(Dist.CLIENT)
+                public boolean mouseClicked(double mouseX, double mouseY, int button) {
+                    if (isMouseOverElement(mouseX, mouseY)) {
+                        ClickData clickData = new ClickData();
+                        writeClientAction(1, clickData::writeToBuf);
+                        if (onPressCallback != null) {
+                            onPressCallback.accept(clickData);
+                            var mc = Minecraft.getInstance();
+                            var level = mc.level;
+                            if (level != null) {
+                                if (mc.screen != null) mc.setScreen(null);
+                                if (gui.entityPlayer != null && dim.equals(level.dimension().location().toString())) {
+                                    gui.entityPlayer.lookAt(EntityAnchorArgument.Anchor.EYES,
+                                            new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
+                                }
+                            }
+                        }
+                        playButtonClickSound();
+                        return true;
+                    }
+                    return false;
+                }
+            };
             this.addWidget(icon);
             this.addWidget(label);
             this.addWidget(button);

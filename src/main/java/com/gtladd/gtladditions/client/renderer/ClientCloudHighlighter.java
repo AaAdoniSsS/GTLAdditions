@@ -5,10 +5,8 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -65,18 +63,11 @@ public class ClientCloudHighlighter {
         long expire = level.getGameTime() + HIGHLIGHT_TICKS;
         ENTRIES.removeIf(e -> e.pos.equals(pos) && e.dim.equals(dim));
         ENTRIES.add(new Entry(pos, dim, expire));
-        if (mc.screen != null) {
-            mc.setScreen(null);
-        }
-        if (mc.player != null && dim.equals(level.dimension().location().toString())) {
-            mc.player.lookAt(EntityAnchorArgument.Anchor.EYES,
-                    new Vec3(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5));
-        }
     }
 
     @SubscribeEvent
     public static void onRenderLevel(RenderLevelStageEvent event) {
-        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_TRANSLUCENT_BLOCKS) return;
+        if (event.getStage() != RenderLevelStageEvent.Stage.AFTER_PARTICLES) return;
         var mc = Minecraft.getInstance();
         var level = mc.level;
         if (level == null) return;

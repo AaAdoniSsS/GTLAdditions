@@ -31,8 +31,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Objects;
 import java.util.UUID;
 
-import static com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMachine.markCacheDirty;
-
 public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine implements IMachineLife, IDataStickInteractable, IBindable {
 
     public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CloudOpticalComputationHatchMachine.class, MultiblockPartMachine.MANAGED_FIELD_HOLDER);
@@ -63,7 +61,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     }
 
     private void bindTeam(Player player) {
-        this.teamId = TeamUtil.getTeamUUID(player.getUUID());
+        this.teamId = player.getUUID();
     }
 
     @Override
@@ -81,7 +79,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
         if (isRemote() || player == null) return false;
         this.teamId = null;
-        markCacheDirty();
+        CloudOpticalComputationMonitorMachine.markCacheDirty();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         }
