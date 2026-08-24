@@ -27,7 +27,7 @@ item_ids:
 </Row>
 
 * The Cloud Computation Transmitter Hatch is equivalent to the Computation Transmitter Hatch, whilst the Computation Receiver Hatch is equivalent to the Computation Receiver Hatch; the Cloud Computation Monitor is responsible for monitoring the computation I/O status of the cloud computation system
-* Only multiblock structs with bridging capabilities can provide computation to the cloud computation system.
+* Only multiblock structs with bridging capabilities can provide computation to the cloud computation system; Once the cloud computing power monitor has highlighted the coordinates, if the machine is in the same dimension as the player, the GUI will close and the player’s view will be directed towards the machine; if it is in a different dimension, the chat bar will display the coordinates to which the player can teleport
 * The Cloud Research Data Hatch is equivalent to the Research Data Receiver Hatch
-* The Cloud Research Data Machine is responsible for storing data modules, data spheres and flash memory in the cloud research data system; each data module, data sphere or flash memory unit increases energy consumption by 393,216 EU/t. When placed within the Creative Data Access Hatch, it provides all research data to all the Data Hatch.
+* The Cloud Research Data Machine is responsible for storing data modules, data spheres and flash memory in the cloud research data system; each data module, data sphere or flash memory unit increases energy consumption by 393,216 EU/t. When placed within the Creative Data Access Hatch, it provides all research data to all the Data Hatch and locked energy consumption is 393,216 EU/t(The Creative Data Access Hatch *will not* drop when the machine is broke)
 * All Cloud Computation/Research Data Systems are capable of working *across dimensions*

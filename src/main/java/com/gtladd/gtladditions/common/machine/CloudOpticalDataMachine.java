@@ -1,5 +1,7 @@
 package com.gtladd.gtladditions.common.machine;
 
+import org.gtlcore.gtlcore.utils.TextUtil;
+
 import com.gregtechceu.gtceu.api.GTValues;
 import com.gregtechceu.gtceu.api.capability.recipe.IO;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
@@ -12,6 +14,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableEnergyContainer;
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
+import com.gregtechceu.gtceu.client.util.TooltipHelper;
 import com.gregtechceu.gtceu.common.data.machines.GTResearchMachines;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
 import com.gregtechceu.gtceu.utils.ResearchManager;
@@ -36,6 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import com.hepdd.gtmthings.utils.TeamUtil;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -60,7 +64,9 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     protected final NotifiableItemStackHandler createItem;
     private final Set<GTRecipe> recipes = new ObjectOpenHashSet<>();
     private boolean recipesDirty = true;
-    private boolean hasPower = true, isCreate = false;
+    @Persisted
+    private boolean isCreate = false;
+    private boolean hasPower = true;
     private TickableSubscription energySubs;
 
     public CloudOpticalDataMachine(IMachineBlockEntity holder) {
@@ -80,13 +86,13 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     @Override
-    protected NotifiableEnergyContainer createEnergyContainer(Object... args) {
+    protected @NotNull NotifiableEnergyContainer createEnergyContainer(Object @NotNull... args) {
         return NotifiableEnergyContainer.receiverContainer(this,
                 64L * GTValues.V[GTValues.UIV], GTValues.V[GTValues.UIV], 16);
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
+    public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
 
@@ -155,7 +161,8 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     public long getEnergyDemand() {
-        return getDataCount() * ENERGY_PER_DATA;
+        if (!isCreate) return getDataCount() * ENERGY_PER_DATA;
+        else return ENERGY_PER_DATA;
     }
 
     private void updateEnergy() {
@@ -199,7 +206,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID teamId) {
         for (var machine : CLOUD_DATA_MACHINE_SET) {
-            if (machine.teamId == null || !machine.teamId.equals(teamId)) continue;
+            if (machine.teamId == null || !TeamUtil.getTeamUUID(machine.teamId).equals(TeamUtil.getTeamUUID(teamId))) continue;
             if (machine.hasPower) {
                 if (machine.isCreate) return true;
                 else if (machine.getRecipes().contains(recipe)) return true;
@@ -237,7 +244,12 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         if (isRemote()) return;
         textList.add(self().getBlockState().getBlock().getName());
         if (TeamUtil.hasOwner(getLevel(), teamId)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
-        textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count", getRecipes().size()));
+        if (!isCreate) {
+            textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count.0", getRecipes().size()));
+        } else {
+            textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count.1", Component.literal(TextUtil.full_color(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count.2").getString()))
+                    .withStyle(style -> style.withColor(TooltipHelper.RAINBOW.getCurrent()))));
+        }
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.energy_demand", FormattingUtil.formatNumbers(getEnergyDemand())));
         textList.add(Component.translatable(hasPower ? "gui.gtladditions.cloud_data_machine.power_normal" : "gui.gtladditions.cloud_data_machine.power_insufficient")
                 .withStyle(style -> style.withColor(hasPower ? 0x55FF55 : 0xFF5555)));

@@ -209,6 +209,7 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
                 recipe.handleTickRecipeIO(IO.IN, machine, Collections.emptyMap())
                 ecList.changeEnergy(-EU)
                 this.status = Status.WORKING
+                this.lastRecipe = recipe
                 ++this.progress
             } else {
                 this.setWaiting(null)

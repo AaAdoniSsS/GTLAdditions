@@ -49,7 +49,7 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
+    public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
 

@@ -26,6 +26,7 @@ import com.gtladd.gtladditions.common.machine.CloudOpticalComputationMonitorMach
 import com.hepdd.gtmthings.api.capability.IBindable;
 import com.hepdd.gtmthings.utils.TeamUtil;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Objects;
@@ -52,7 +53,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
+    public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
 
@@ -120,7 +121,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     }
 
     @Override
-    public void addedToController(IMultiController controller) {
+    public void addedToController(@NotNull IMultiController controller) {
         super.addedToController(controller);
         if (isRemote()) return;
         if (transmitter) CloudOpticalComputationMonitorMachine.CLOUD_TRANSMITTER_HATCH_SET.add(this);
@@ -129,7 +130,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     }
 
     @Override
-    public void removedFromController(IMultiController controller) {
+    public void removedFromController(@NotNull IMultiController controller) {
         super.removedFromController(controller);
         if (isRemote()) return;
         if (transmitter) CloudOpticalComputationMonitorMachine.CLOUD_TRANSMITTER_HATCH_SET.remove(this);

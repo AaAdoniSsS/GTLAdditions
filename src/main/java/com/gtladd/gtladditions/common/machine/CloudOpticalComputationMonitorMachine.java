@@ -58,6 +58,7 @@ import com.hepdd.gtmthings.utils.TeamUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -66,6 +67,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+
+import static com.hepdd.gtmthings.utils.TeamUtil.getTeamUUID;
 
 public class CloudOpticalComputationMonitorMachine extends MetaMachine implements IFancyUIMachine, IMachineLife, IDataStickInteractable {
 
@@ -98,7 +101,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
     }
 
     @Override
-    public ManagedFieldHolder getFieldHolder() {
+    public @NotNull ManagedFieldHolder getFieldHolder() {
         return MANAGED_FIELD_HOLDER;
     }
 
@@ -142,12 +145,12 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         TEAM_STATES.values().forEach(TeamState::clear);
         for (var h : CLOUD_TRANSMITTER_HATCH_SET) {
             var team = h.getTeamId();
-            var state = TEAM_STATES.computeIfAbsent(team, k -> new TeamState());
+            var state = TEAM_STATES.computeIfAbsent(getTeamUUID(team), k -> new TeamState());
             for (var c : h.getControllers()) if (c instanceof IOpticalComputationProvider p) state.providers.add(p);
         }
         for (var h : CLOUD_RECEIVER_HATCH_SET) {
             var team = h.getTeamId();
-            var state = TEAM_STATES.computeIfAbsent(team, k -> new TeamState());
+            var state = TEAM_STATES.computeIfAbsent(getTeamUUID(team), k -> new TeamState());
             for (var c : h.getControllers()) if (c instanceof MetaMachine m) state.receiverControllers.add(m);
         }
         cacheDirty = false;
@@ -155,7 +158,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
     private static TeamState getTeamState(UUID teamId) {
         if (cacheDirty) rebuildProviderCache();
-        return TEAM_STATES.computeIfAbsent(teamId, k -> new TeamState());
+        return TEAM_STATES.computeIfAbsent(getTeamUUID(teamId), k -> new TeamState());
     }
 
     public static long getMaxCWU(UUID teamId) {
