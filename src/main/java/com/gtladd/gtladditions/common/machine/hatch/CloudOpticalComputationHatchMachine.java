@@ -67,7 +67,6 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return InteractionResult.PASS;
         bindTeam(player);
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
@@ -78,7 +77,6 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return false;
         this.teamId = null;
         CloudOpticalComputationMonitorMachine.markCacheDirty();
         if (player instanceof ServerPlayer sp) {
@@ -96,7 +94,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (!isRemote() && player instanceof Player p) {
+        if (player instanceof Player p) {
             bindTeam(p);
             if (transmitter) CloudOpticalComputationMonitorMachine.CLOUD_TRANSMITTER_HATCH_SET.add(this);
             else CloudOpticalComputationMonitorMachine.CLOUD_RECEIVER_HATCH_SET.add(this);

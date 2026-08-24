@@ -118,7 +118,6 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (isRemote()) return;
         if (player instanceof Player p) this.teamId = p.getUUID();
         CLOUD_DATA_MACHINE_SET.add(this);
         markRecipesDirty();
@@ -126,7 +125,6 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return InteractionResult.PASS;
         this.teamId = player.getUUID();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
@@ -136,7 +134,6 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return false;
         this.teamId = null;
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
@@ -166,7 +163,6 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     private void updateEnergy() {
-        if (isRemote()) return;
         long demand = getEnergyDemand();
         if (demand <= 0) {
             hasPower = true;
@@ -176,7 +172,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     public void rebuildData() {
-        if (isRemote() || getLevel() == null) return;
+        if (getLevel() == null) return;
         this.recipes.clear();
         for (int i = 0; i < importItems.getSlots(); i++) {
             var stack = importItems.getStackInSlot(i);
@@ -194,7 +190,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     private void refreshRecipesIfNeeded() {
         if (!this.recipesDirty) return;
-        if (isRemote() || getLevel() == null) return;
+        if (getLevel() == null) return;
         rebuildData();
         this.recipesDirty = false;
     }

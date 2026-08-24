@@ -116,8 +116,25 @@ public class AutoConfigurationMaintenanceHatchPartMachineMixin extends TieredPar
                 else if (componentData.equals("add")) this.setAddDuration(multiplier);
             }
         }))).setBackground(GuiTextures.BACKGROUND_INVERSE);
-        group.addWidget((new SlotWidget(gtladditions$max.storage, 0, 120, 40, true, true))
-                .setBackground(GuiTextures.SLOT).setHoverTooltips(gtladditions$setMaxTooltips()));
+        var slot = new SlotWidget(gtladditions$max.storage, 0, 120, 40) {
+
+            @Override
+            public List<Component> getTooltipTexts() {
+                List<Component> tooltips = new ArrayList<>();
+                tooltips.addAll(gtladditions$setMaxTooltips());
+                return tooltips;
+            }
+
+            @Override
+            protected void drawTooltipTexts(int mouseX, int mouseY) {
+                if (isMouseOverElement(mouseX, mouseY) && getHoverElement(mouseX, mouseY) == this && gui != null && gui.getModularUIGui() != null) {
+                    this.setHoverTooltips(gtladditions$setMaxTooltips());
+                    gui.getModularUIGui().setHoverTooltip(tooltipTexts, getRealStack(slotReference.getItem()), null, null);
+                }
+            }
+        }
+                .setBackground(GuiTextures.SLOT);
+        group.addWidget(slot);
         this.setSubDuration(0);
         this.setAddDuration(0);
         return group;

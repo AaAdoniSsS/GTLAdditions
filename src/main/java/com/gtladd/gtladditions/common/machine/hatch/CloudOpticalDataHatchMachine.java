@@ -55,14 +55,13 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (!isRemote() && player instanceof Player p) {
+        if (player instanceof Player p) {
             this.teamId = p.getUUID();
         }
     }
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return InteractionResult.PASS;
         this.teamId = player.getUUID();
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
@@ -72,7 +71,6 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        if (isRemote() || player == null) return false;
         this.teamId = null;
         if (player instanceof ServerPlayer sp) {
             sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
