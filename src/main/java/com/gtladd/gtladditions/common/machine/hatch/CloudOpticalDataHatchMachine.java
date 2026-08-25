@@ -11,6 +11,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.MultiblockPartMachine;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.DataBankMachine;
+import com.gregtechceu.gtceu.common.recipe.condition.ResearchCondition;
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
@@ -86,6 +87,7 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
 
     @Override
     public GTRecipe modifyRecipe(GTRecipe recipe) {
+        if (recipe.conditions.stream().noneMatch(ResearchCondition.class::isInstance)) return recipe;
         if (CloudOpticalDataMachine.isRecipeAvailableInCloud(recipe, this.teamId)) return recipe;
         for (var c : this.getControllers()) {
             if (c instanceof DataBankMachine) continue;
