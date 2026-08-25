@@ -65,16 +65,17 @@ This mod added many better machines to replace original machines
 
 ### Multiblock Machine Part
 
-| Hatch                       | General                                                                                                                        |
-|-----------------------------|--------------------------------------------------------------------------------------------------------------------------------|
-| Laser Hatch                 | A larger laser Hatch than the original version , The ampere is `16777216A` *and* `67108863A`                                   |
-| Wireless Laser Hatch        | Similar with `Laser Hatch` but No wiring is required                                                                           |
-| Huge Output Dual Hatch      | Similar with `Huge Input Dual Hatch` but with a larger capacity                                                                |
-| Huge Steam Input Hatch      | Like Large Steam Input Hatch . Raise the steam multiblock recipe restriction to **HV** *and* The duration taken becomes **1t** |
-| Super Input Dual Hatch      | Similar to `Huge Input Dual Hatch` , but with more input space                                                                 |
-| Spectral Analysis Hatch     | Enhanced Integrated Ore Processor and Advanced Integrated Ore Processor                                                        |
-| Transmutation Bus Hatch     | Used on Atomic Transmutation Core , Door of Creation and Creative Aggregator                                                   |
-| Ventiane Transcription Node | Output red stone signal for Catalytic Cascade Array and Reverse Time Boosting Engine                                           |
+| Hatch                                             | General                                                                                                                        |
+|---------------------------------------------------|--------------------------------------------------------------------------------------------------------------------------------|
+| Laser Hatch                                       | A larger laser Hatch than the original version , The ampere is `16777216A` *and* `67108863A`                                   |
+| Wireless Laser Hatch                              | Similar with `Laser Hatch` but No wiring is required                                                                           |
+| Huge Output Dual Hatch                            | Similar with `Huge Input Dual Hatch` but with a larger capacity                                                                |
+| Huge Steam Input Hatch                            | Like Large Steam Input Hatch . Raise the steam multiblock recipe restriction to **HV** *and* The duration taken becomes **1t** |
+| Super Input Dual Hatch                            | Similar to `Huge Input Dual Hatch` , but with more input space                                                                 |
+| Spectral Analysis Hatch                           | Enhanced Integrated Ore Processor and Advanced Integrated Ore Processor                                                        |
+| Transmutation Bus Hatch                           | Used on Atomic Transmutation Core , Door of Creation and Creative Aggregator                                                   |
+| Ventiane Transcription Node                       | Output red stone signal for Catalytic Cascade Array and Reverse Time Boosting Engine                                           |
+| Cloud Computation / Research Data Hatch / Machine | More advanced computation / research data systems                                                                              |
 
 In addition, there are also some defiled Part
 
