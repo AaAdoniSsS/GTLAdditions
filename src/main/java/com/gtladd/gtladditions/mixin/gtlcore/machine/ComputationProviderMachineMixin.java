@@ -50,6 +50,7 @@ public abstract class ComputationProviderMachineMixin extends WorkableElectricMu
 
     @Override
     public long getMaxCWU() {
+        if (energyContainer.getEnergyStored() == 0) return 0;
         if (this.inf) {
             return Integer.MAX_VALUE;
         } else {
