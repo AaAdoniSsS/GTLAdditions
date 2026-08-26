@@ -29,6 +29,7 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
@@ -41,6 +42,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.Set;
@@ -198,6 +200,37 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     public Set<GTRecipe> getRecipes() {
         refreshRecipesIfNeeded();
         return recipes;
+    }
+
+    public interface ICloudTeamBindable {
+
+        @Nullable
+        UUID getTeamId();
+
+        void setTeamId(@Nullable UUID id);
+
+        @Unique
+        void loadCustomPersistedData(@NotNull CompoundTag tag);
+
+        @Unique
+        void saveCustomPersistedData(@NotNull CompoundTag tag, boolean forDrop);
+    }
+
+    public static boolean uploadDataStickToCloud(ItemStack dataStick, UUID teamId) {
+        if (dataStick.isEmpty() || teamId == null) return false;
+        if (!ResearchManager.isStackDataItem(dataStick, true)) return false;
+        for (CloudOpticalDataMachine machine : CLOUD_DATA_MACHINE_SET) {
+            if (machine.teamId == null) continue;
+            if (!TeamUtil.getTeamUUID(machine.teamId).equals(TeamUtil.getTeamUUID(teamId))) continue;
+            for (int i = 0; i < machine.importItems.getSlots(); i++) {
+                if (machine.importItems.getStackInSlot(i).isEmpty()) {
+                    machine.importItems.setStackInSlot(i, dataStick.copy());
+                    machine.markRecipesDirty();
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID teamId) {

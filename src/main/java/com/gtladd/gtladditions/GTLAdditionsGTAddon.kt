@@ -7,6 +7,7 @@ import com.gregtechceu.gtceu.api.registry.registrate.GTRegistrate
 import net.minecraft.data.recipes.FinishedRecipe
 
 import com.gtladd.gtladditions.api.registry.GTLAddRegistration
+import com.gtladd.gtladditions.common.data.TooltipsModify
 import com.gtladd.gtladditions.common.machine.GTLAddMachines
 import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.data.recipes.*
@@ -25,6 +26,7 @@ class GTLAdditionsGTAddon : IGTAddon {
     override fun initializeAddon() {
         GTLAddItems.init()
         GTLAddMachines.init()
+        TooltipsModify.init()
     }
 
     override fun addRecipes(provider: Consumer<FinishedRecipe>) {

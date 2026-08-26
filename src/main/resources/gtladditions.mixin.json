@@ -21,6 +21,8 @@
     "gtceu.api.recipe.ItemRecipeCapabilityMixin",
     "gtceu.api.recipe.SizedIngredientMixin",
     "gtceu.common.machine.HPCAMachineMixin",
+    "gtceu.common.machine.ResearchStationMachineMixin",
+    "gtceu.common.machine.ResearchStationRecipeLogicMixin",
     "gtceu.integration.GTRecipeWidgetMixin",
     "gtceu.integration.jade.MachineModeProviderMixin",
     "gtceu.integration.jade.RecipeLogicProviderMixin",

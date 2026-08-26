@@ -16,6 +16,7 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import com.gtladd.gtladditions.api.registry.GTLAddRegistration;
 import com.gtladd.gtladditions.common.data.GTLAddCreativeModeTabs;
 import com.gtladd.gtladditions.common.machine.GTLAddMachines;
+import com.gtladd.gtladditions.common.machine.ResearchStationInteractionHandler;
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes;
 import com.gtladd.gtladditions.common.register.GTLAddMaterial;
 import com.gtladd.gtladditions.config.ConfigHolder;
@@ -39,6 +40,7 @@ public class GTLAdditions {
         GTLAddRegistration.REGISTRATE.registerEventListeners(modEventBus);
         modEventBus.addGenericListener(GTRecipeType.class, this::registerRecipeTypes);
         modEventBus.addGenericListener(MachineDefinition.class, this::registerMachines);
+        MinecraftForge.EVENT_BUS.register(new ResearchStationInteractionHandler());
     }
 
     public static void init() {
