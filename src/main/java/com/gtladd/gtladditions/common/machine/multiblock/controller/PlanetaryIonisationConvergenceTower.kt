@@ -422,12 +422,12 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
     }
 
     enum class CoilToEnergy(val material: Material, val instantPower: Long, val dischargePower: Long, val workTier: Int) {
-        TITAN_STEEL(TitanSteel, 0x7fffffff00, 0x7fffffff, 1),
-        ADAMANTINE(Adamantine, 0x7fffffff000, 0x7fffffff0, 1),
-        NAQUADRIATIC_TARANIUM(NaquadriaticTaranium, 0x3fffffff8000, 0x7fffffff0, 2),
-        STAR_METAL(Starmetal, 0x3fffffff80000, 0x7fffffff00, 2),
-        INFINITY(Infinity, 0x7fffffff00000, 0xfffffffe00, 3),
-        HYPOGEN(Hypogen, 0x7fffffff000000, 0xfffffffe000, 3),
+        TITAN_STEEL(TitanSteel, 0x7fffffff000, 0x7fffffff0, 1),
+        ADAMANTINE(Adamantine, 0x3fffffff8000, 0x3fffffff80, 1),
+        NAQUADRIATIC_TARANIUM(NaquadriaticTaranium, 0x3fffffff80000, 0x7fffffff00, 2),
+        STAR_METAL(Starmetal, 0x1ffffffffc0000, 0x3fffffff800, 2),
+        INFINITY(Infinity, 0x3fffffff80000, 0x7fffffff000, 3),
+        HYPOGEN(Hypogen, 0x1ffffffffc00000, 0x3fffffff8000, 3),
         ETERNITY(Eternity, 0x7fffffff0000000, 0xfffffffe0000, 3)
     }
 
