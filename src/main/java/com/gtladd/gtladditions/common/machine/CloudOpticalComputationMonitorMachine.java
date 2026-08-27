@@ -197,7 +197,6 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         }
         textList.add(self().getBlockState().getBlock().getName());
         if (TeamUtil.hasOwner(getLevel(), teamId)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
-        textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.provider_count", getTeamState(teamId).providers.size()));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.max_cwu", FormattingUtil.formatNumbers(getMaxCWU(this.teamId))));
         textList.add(Component.translatable("gui.gtladditions.cloud_computation_monitor.requestable_cwu", FormattingUtil.formatNumbers(getRemainingCWU(this.teamId))));
     }
@@ -236,10 +235,12 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
     private static class CloudOverviewWidget extends WidgetGroup {
 
         CloudOverviewWidget(UUID uuid) {
-            super(0, 0, 280, 222);
+            super(0, 0, 280, calcFittedHeight());
+
+            int scrollHeight = (getSize().height - 36) / 2;
 
             addWidget(new ExtendLabelWidget(6, 4, Component.translatable("gui.gtladditions.cloud_monitor.providers")));
-            var providerScroll = new DraggableScrollableWidgetGroup(4, 18, 272, 95).setBackground(GuiTextures.DISPLAY);
+            var providerScroll = new DraggableScrollableWidgetGroup(4, 18, 272, scrollHeight).setBackground(GuiTextures.DISPLAY);
             providerScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
             int i = 0;
             var state = getTeamState(uuid);
@@ -253,8 +254,8 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
             addWidget(providerScroll);
 
-            addWidget(new ExtendLabelWidget(6, 117, Component.translatable("gui.gtladditions.cloud_monitor.requesters")));
-            var receiverScroll = new DraggableScrollableWidgetGroup(4, 131, 272, 87).setBackground(GuiTextures.DISPLAY);
+            addWidget(new ExtendLabelWidget(6, 22 + scrollHeight, Component.translatable("gui.gtladditions.cloud_monitor.requesters")));
+            var receiverScroll = new DraggableScrollableWidgetGroup(4, 36 + scrollHeight, 272, getSize().height - 36 - scrollHeight).setBackground(GuiTextures.DISPLAY);
             receiverScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
             i = 0;
             int otherReceivers = 0;
@@ -267,12 +268,16 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
             addWidget(receiverScroll);
         }
+
+        private static int calcFittedHeight() {
+            int scaledWindowHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
+            return Math.max(150, scaledWindowHeight - 126);
+        }
     }
 
     private static class RowWidgets extends WidgetGroup {
 
         enum Kind {
-            EMPTY,
             MACHINE,
             NO_ENTRIES,
             OTHER_TEAM
@@ -282,15 +287,12 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         @Nullable
         final MetaMachine machine;
 
-        Kind kind;
         String dim = "";
         BlockPos pos;
         BlockPos frontPos;
-        ItemStack item = ItemStack.EMPTY;
         long current;
         long max;
         int cwu;
-        int otherCount;
 
         long lastCurrent;
         long lastMax;
@@ -305,19 +307,30 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         RowWidgets(int y, boolean provider, Kind kind, @Nullable MetaMachine machine, int otherCount) {
             super(4, y + 4, 260, 18);
             this.provider = provider;
-            this.kind = kind;
             this.machine = machine;
-            this.otherCount = otherCount;
+            ItemStack item;
             if (kind == Kind.MACHINE && machine != null) {
                 this.dim = machine.getLevel() != null ? machine.getLevel().dimension().location().toString() : "";
                 this.pos = machine.getPos();
                 this.frontPos = machine.getLevel() != null ? machine.getPos().relative(machine.getFrontFacing()) : null;
-                this.item = machine.getDefinition().asStack();
+                item = machine.getDefinition().asStack();
                 refreshValues();
+            } else {
+                item = ItemStack.EMPTY;
             }
             this.icon = new ImageWidget(0, 0, 18, 18, () -> new ItemStackTexture(item));
             this.icon.setHoverTooltips(item.getHoverName());
-            this.label = new ComponentPanelWidget(24, 4, this::buildText).setMaxWidthLimit(172);
+            this.label = new ComponentPanelWidget(24, 4, list -> {
+                switch (kind) {
+                    case MACHINE -> {
+                        if (provider) list.add(Component.translatable("gui.gtladditions.cloud_monitor.provider_info", FormattingUtil.formatNumbers(current), FormattingUtil.formatNumbers(max)));
+                        else list.add(Component.translatable("gui.gtladditions.cloud_monitor.requester_info", FormattingUtil.formatNumbers(cwu)));
+                    }
+                    case NO_ENTRIES -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.no_providers" : "gui.gtladditions.cloud_monitor.no_requesters").withStyle(ChatFormatting.GRAY));
+                    case OTHER_TEAM -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.other_team_providers" : "gui.gtladditions.cloud_monitor.other_team_receivers", otherCount).withStyle(ChatFormatting.YELLOW));
+                    default -> {}
+                }
+            }).setMaxWidthLimit(172);
             this.label.setClientSideWidget();
             this.button = new ButtonWidget(200, 2, 56, 14,
                     new TextTexture(Component.translatable("gui.gtladditions.cloud_monitor.highlight").getString(), 16777045),
@@ -354,31 +367,21 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     return false;
                 }
             };
-            if (this.kind != Kind.MACHINE) {
+            if (kind != Kind.MACHINE) {
                 button.setActive(false);
                 button.setVisible(false);
                 this.setSizeHeight(26);
+                label.setSelfPosition(0, 4);
+                label.setMaxWidthLimit(252);
+            } else {
+                button.setHoverTooltips(
+                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_dim", dim),
+                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_pos",
+                                pos.getX(), pos.getY(), pos.getZ()));
             }
             this.addWidget(icon);
             this.addWidget(label);
             this.addWidget(button);
-        }
-
-        private void buildText(List<Component> list) {
-            switch (kind) {
-                case MACHINE -> {
-                    if (provider) {
-                        list.add(Component.translatable("gui.gtladditions.cloud_monitor.provider_info",
-                                FormattingUtil.formatNumbers(current), FormattingUtil.formatNumbers(max)));
-                    } else {
-                        list.add(Component.translatable("gui.gtladditions.cloud_monitor.requester_info",
-                                FormattingUtil.formatNumbers(cwu)));
-                    }
-                }
-                case NO_ENTRIES -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.no_providers" : "gui.gtladditions.cloud_monitor.no_requesters").withStyle(ChatFormatting.GRAY));
-                case OTHER_TEAM -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.other_team_providers" : "gui.gtladditions.cloud_monitor.other_team_receivers", otherCount).withStyle(ChatFormatting.YELLOW));
-                default -> {}
-            }
         }
 
         @OnlyIn(Dist.CLIENT)
@@ -394,36 +397,18 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                     coords), false);
         }
 
-        private void refreshButtonTooltip() {
-            if (kind == Kind.MACHINE && pos != null) {
-                button.setHoverTooltips(
-                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_dim", dim),
-                        Component.translatable("gui.gtladditions.cloud_monitor.tooltip_pos",
-                                pos.getX(), pos.getY(), pos.getZ()));
-            }
-        }
-
         private void refreshValues() {
             if (provider && machine instanceof IOpticalComputationProvider p) {
-                try {
-                    current = p.remainCWU();
-                    max = p.getMaxCWU();
-                } catch (Exception e) {
-                    current = 0;
-                    max = 0;
-                }
+                current = p.remainCWU();
+                max = p.getMaxCWU();
             } else if (machine instanceof IRecipeLogicMachine rm) {
-                try {
-                    var recipe = rm.getRecipeLogic().getLastRecipe();
-                    cwu = 0;
-                    if (recipe != null && rm.getRecipeLogic().isWorking()) {
-                        var cwuInputs = recipe.tickInputs.get(CWURecipeCapability.CAP);
-                        if (cwuInputs != null) {
-                            cwu = cwuInputs.stream().map(Content::getContent).mapToInt(CWURecipeCapability.CAP::of).sum();
-                        }
+                var recipe = rm.getRecipeLogic().getLastRecipe();
+                cwu = 0;
+                if (recipe != null && rm.getRecipeLogic().isWorking()) {
+                    var cwuInputs = recipe.tickInputs.get(CWURecipeCapability.CAP);
+                    if (cwuInputs != null) {
+                        cwu = cwuInputs.stream().map(Content::getContent).mapToInt(CWURecipeCapability.CAP::of).sum();
                     }
-                } catch (Exception e) {
-                    cwu = 0;
                 }
             }
         }
@@ -431,15 +416,12 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         @Override
         public void writeInitialData(FriendlyByteBuf buffer) {
             super.writeInitialData(buffer);
-            buffer.writeByte(kind.ordinal());
             buffer.writeUtf(dim);
             buffer.writeBlockPos(pos == null ? BlockPos.ZERO : pos);
             buffer.writeBlockPos(frontPos == null ? BlockPos.ZERO : frontPos);
-            buffer.writeItem(item);
             buffer.writeLong(current);
             buffer.writeLong(max);
             buffer.writeInt(cwu);
-            buffer.writeInt(otherCount);
             lastCurrent = current;
             lastMax = max;
             lastCwu = cwu;
@@ -448,17 +430,13 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         @Override
         public void readInitialData(FriendlyByteBuf buffer) {
             super.readInitialData(buffer);
-            kind = Kind.values()[buffer.readByte()];
             dim = buffer.readUtf();
             pos = buffer.readBlockPos();
             frontPos = buffer.readBlockPos();
             if (frontPos.equals(BlockPos.ZERO)) frontPos = null;
-            item = buffer.readItem();
             current = buffer.readLong();
             max = buffer.readLong();
             cwu = buffer.readInt();
-            otherCount = buffer.readInt();
-            refreshButtonTooltip();
         }
 
         @Override
@@ -469,7 +447,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                 lastCurrent = current;
                 lastMax = max;
                 lastCwu = cwu;
-                writeUpdateInfo(0, buffer -> {
+                writeUpdateInfo(31, buffer -> {
                     buffer.writeLong(current);
                     buffer.writeLong(max);
                     buffer.writeInt(cwu);
@@ -479,7 +457,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
         @Override
         public void readUpdateInfo(int id, FriendlyByteBuf buffer) {
-            if (id == 0) {
+            if (id == 31) {
                 current = buffer.readLong();
                 max = buffer.readLong();
                 cwu = buffer.readInt();

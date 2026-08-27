@@ -56,7 +56,6 @@
   "gui.gtladditions.cloud.unbind_success": "Unbound",
   "gui.gtladditions.cloud.not_bound": "Not Bound to any Team",
   "gui.gtladditions.cloud_computation_monitor.max_cwu": "Max Available Computation: %s/CWUt",
-  "gui.gtladditions.cloud_computation_monitor.provider_count": "Cloud Computation Network: %s Providers",
   "gui.gtladditions.cloud_computation_monitor.requestable_cwu": "Remaining Requestable Computation: %s/CWUt",
   "gui.gtladditions.cloud_data_machine.cloud_count": "Cloud Research Data Machines: %s",
   "gui.gtladditions.cloud_data_machine.create": "Can only be placed in the Creative Data Access Hatch",

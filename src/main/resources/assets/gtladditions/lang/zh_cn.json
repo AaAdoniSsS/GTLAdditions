@@ -56,7 +56,6 @@
   "gui.gtladditions.cloud.unbind_success": "已解除绑定",
   "gui.gtladditions.cloud.not_bound": "未绑定至任意团队",
   "gui.gtladditions.cloud_computation_monitor.max_cwu": "最大可用算力：%s/CWUt",
-  "gui.gtladditions.cloud_computation_monitor.provider_count": "云端算力网络共有%s个提供端",
   "gui.gtladditions.cloud_computation_monitor.requestable_cwu": "剩余可请求算力：%s/CWUt",
   "gui.gtladditions.cloud_data_machine.cloud_count": "云端研究数据机器：%s 台",
   "gui.gtladditions.cloud_data_machine.create": "只能放入创造模式数据访问仓",
