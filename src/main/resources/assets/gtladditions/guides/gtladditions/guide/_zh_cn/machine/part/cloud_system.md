@@ -33,5 +33,5 @@ item_ids:
 * <ItemLink id="gtceu:network_switch" />*不能放置*云端算力供应/请求仓
 * 云端研究数据请求仓请求仓等价于<ItemLink id="gtceu:wireless_data_receiver_hatch" />
 * 云端研究数据存储器负责将数据模块/数据球/闪存存储至云端研究数据系统，每个数据模块/数据球/闪存增加393,216EU/t的能耗，当放入<ItemLink id="gtceu:creative_data_access_hatch" />时可为所有请求仓提供所有研究数据和锁定能耗为393,216EU/t（拆除存储器时创造模式数据访问仓*不会*掉落）
-* 使用闪存绑定后，在<ItemLink id="gtceu:research_station" />完成研究时会自动尝试将研究数据上传至可用的云端研究数据存储器
+* 使用闪存绑定后，在<ItemLink id="gtceu:research_station" />完成研究时会自动尝试将研究数据上传至可用的云端研究数据存储器；研究站的结构内空气检测也已移除
 * 云端算力/研究数据系统均可以*跨维度*工作

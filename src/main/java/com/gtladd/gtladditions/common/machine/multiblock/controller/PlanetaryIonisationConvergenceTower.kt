@@ -238,9 +238,7 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
         val offsets = getSphereOffsets(radius)
         val mutablePos = BlockPos.MutableBlockPos()
         val airState = Blocks.AIR.defaultBlockState()
-        val resistanceOffset = 0.3f
-        val resistanceFactor = 0.11f
-        val invPower = 1.0f / explosionPower
+        val minResistanceToKeep = 3_600_000f
 
         for (enc in offsets) {
             val dx = (enc shr 16 and 0xFF) - radius
@@ -251,11 +249,8 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
             val state = level.getBlockState(mutablePos)
             if (state.isAir) continue
 
-            val distSq = dx * dx + dy * dy + dz * dz
             val resistance = state.block.getExplosionResistance(state, level, mutablePos, null)
-
-            val threshold = radius * (1.0 - (resistance + resistanceOffset) * resistanceFactor * invPower)
-            if (threshold <= 0 || distSq >= threshold * threshold) continue
+            if (resistance >= minResistanceToKeep) continue
 
             level.setBlock(mutablePos, airState, 2)
         }

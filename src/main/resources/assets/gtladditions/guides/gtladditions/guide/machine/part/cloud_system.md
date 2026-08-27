@@ -33,5 +33,5 @@ item_ids:
 * <ItemLink id="gtceu:network_switch" /> *can not place* the Cloud Computation Transmitter/Receiver Hatch
 * The Cloud Research Data Hatch is equivalent to <ItemLink id="gtceu:wireless_data_receiver_hatch" />
 * The Cloud Research Data Machine is responsible for storing data modules, data spheres and flash memory in the cloud research data system; each data module, data sphere or flash memory unit increases energy consumption by 393,216 EU/t. When placed within the Creative Data Access Hatch, it provides all research data to all the Data Hatch and locked energy consumption is 393,216 EU/t(The Creative Data Access Hatch *will not* drop when the machine is broke)
-* Once flash storage has been linked, the system will automatically attempt to upload research data to the available Cloud Research Data Machine upon completion of research at <ItemLink id="gtceu:research_station" />.
+* Once flash storage has been linked, the system will automatically attempt to upload research data to the available Cloud Research Data Machine upon completion of research at <ItemLink id="gtceu:research_station" />; Air detect within the research station’s structure has also been discontinued
 * All Cloud Computation/Research Data Systems are capable of working *across dimensions*
