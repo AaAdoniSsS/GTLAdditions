@@ -2,13 +2,24 @@ package com.gtladd.gtladditions.mixin.gtceu.common.machine;
 
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
+import com.gregtechceu.gtceu.common.data.GTItems;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.ResearchStationMachine;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 import com.gtladd.gtladditions.common.machine.CloudOpticalDataMachine;
 import com.hepdd.gtmthings.utils.TeamUtil;
+import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -16,29 +27,15 @@ import org.spongepowered.asm.mixin.Unique;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
-
 @Mixin(ResearchStationMachine.class)
 public class ResearchStationMachineMixin extends WorkableElectricMultiblockMachine implements CloudOpticalDataMachine.ICloudTeamBindable {
 
     @Unique
+    @Getter
     private UUID teamId;
 
     public ResearchStationMachineMixin(IMachineBlockEntity holder, Object... args) {
         super(holder, args);
-    }
-
-    @Unique
-    @Nullable
-    @Override
-    public UUID getTeamId() {
-        return teamId;
-    }
-
-    @Unique
-    @Override
-    public void setTeamId(@Nullable UUID id) {
-        this.teamId = id;
     }
 
     @Override
@@ -63,5 +60,23 @@ public class ResearchStationMachineMixin extends WorkableElectricMultiblockMachi
             }
         }
         super.addDisplayText(textList);
+    }
+
+    @Override
+    public InteractionResult onUse(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        var item = player.getMainHandItem();
+        if (!item.is(GTItems.TOOL_DATA_STICK.asItem())) return super.onUse(state, world, pos, player, hand, hit);
+        this.teamId = player.getUUID();
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
+        return InteractionResult.SUCCESS;
+    }
+
+    @Override
+    public boolean onLeftClick(Player player, Level world, InteractionHand hand, BlockPos pos, Direction direction) {
+        var item = player.getMainHandItem();
+        if (!item.is(GTItems.TOOL_DATA_STICK.asItem())) return super.onLeftClick(player, world, hand, pos, direction);
+        this.teamId = null;
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
+        return true;
     }
 }

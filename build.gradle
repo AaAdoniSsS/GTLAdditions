@@ -148,7 +148,7 @@ dependencies {
     modImplementation("dev:gtlcore-1.2.3.1-fix11")
 
     // Adds KFF as dependency and Kotlin libs (use the variant matching your mod loader)
-    include(modImplementation("thedarkcolour:kotlinforforge:4.11.0"))
+    modImplementation("thedarkcolour:kotlinforforge:4.11.0")
 
     modImplementation("curse.maven:glodium-957920:5006780")
     modImplementation("curse.maven:ex-pattern-provider-892005:7144417")
