@@ -267,5 +267,34 @@ object MultiBlockModify {
                 }
                 ).apply(GTResearchMachines.NETWORK_SWITCH as MultiblockMachineDefinition)
         }
+
+        (GTResearchMachines.RESEARCH_STATION as MultiblockMachineDefinition).patternFactory = SupplierMemoizer.memoize {
+            (
+                Function { _: MultiblockMachineDefinition ->
+                    FactoryBlockPattern.start()
+                        .aisle("XXX", "VVV", "PPP", "PPP", "PPP", "VVV", "XXX")
+                        .aisle("XXX", "VAV", "AAA", "AAA", "AAA", "VAV", "XXX")
+                        .aisle("XXX", "VAV", "XAX", "XSX", "XAX", "VAV", "XXX")
+                        .aisle("XXX", "XAX", "   ", "   ", "   ", "XAX", "XXX")
+                        .aisle(" X ", "XAX", "   ", "   ", "   ", "XAX", " X ")
+                        .aisle(" X ", "XAX", " A ", " H ", " A ", "XAX", " X ")
+                        .aisle("   ", "XXX", "   ", "   ", "   ", "XXX", "   ")
+                        .where('S', Predicates.controller(blocks(GTResearchMachines.RESEARCH_STATION.block)))
+                        .where('X', blocks(GTBlocks.COMPUTER_CASING.get()))
+                        .where(' ', Predicates.any())
+                        .where('V', blocks(GTBlocks.COMPUTER_HEAT_VENT.get()))
+                        .where('A', blocks(GTBlocks.ADVANCED_COMPUTER_CASING.get()))
+                        .where(
+                            'P',
+                            blocks(GTBlocks.COMPUTER_CASING.get())
+                                .or(abilities(PartAbility.INPUT_ENERGY).setMinGlobalLimited(1))
+                                .or(abilities(PartAbility.MAINTENANCE).setExactLimit(1))
+                                .or(abilities(PartAbility.COMPUTATION_DATA_RECEPTION).setExactLimit(1))
+                        )
+                        .where('H', abilities(PartAbility.OBJECT_HOLDER))
+                        .build()
+                }
+                ).apply(GTResearchMachines.RESEARCH_STATION as MultiblockMachineDefinition)
+        }
     }
 }
