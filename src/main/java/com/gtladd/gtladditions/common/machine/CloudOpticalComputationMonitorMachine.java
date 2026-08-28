@@ -39,7 +39,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -209,7 +208,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
 
     private record CloudOverviewPage(CloudOpticalComputationMonitorMachine machine) implements IFancyUIProvider {
 
-        public static final IGuiTexture ICON = new ResourceTexture(new ResourceLocation("gtceu", "textures/item/computer_monitor_cover.png"));
+        public static final IGuiTexture ICON = new ResourceTexture("gtceu:textures/item/computer_monitor_cover.png");
 
         @Override
         public Widget createMainPage(FancyMachineUIWidget widget) {
@@ -245,7 +244,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             int i = 0;
             var state = getTeamState(uuid);
             int otherProviders = 0;
-            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!Objects.equals(h.getTeamId(), uuid)) otherProviders++;
+            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!Objects.equals(TeamUtil.getTeamUUID(h.getTeamId()), TeamUtil.getTeamUUID(uuid))) otherProviders++;
             for (var p : state.providers) {
                 if (p instanceof MetaMachine m) providerScroll.addWidget(new RowWidgets((i++) * 20, true, RowWidgets.Kind.MACHINE, m, 0));
             }
@@ -259,7 +258,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             receiverScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
             i = 0;
             int otherReceivers = 0;
-            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!Objects.equals(h.getTeamId(), uuid)) otherReceivers++;
+            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!Objects.equals(TeamUtil.getTeamUUID(h.getTeamId()), TeamUtil.getTeamUUID(uuid))) otherReceivers++;
             for (var c : state.receiverControllers) {
                 receiverScroll.addWidget(new RowWidgets((i++) * 20, false, RowWidgets.Kind.MACHINE, c, 0));
             }

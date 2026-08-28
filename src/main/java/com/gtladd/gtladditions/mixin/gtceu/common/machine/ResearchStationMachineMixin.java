@@ -42,12 +42,17 @@ public class ResearchStationMachineMixin extends WorkableElectricMultiblockMachi
     public void loadCustomPersistedData(@NotNull CompoundTag tag) {
         super.loadCustomPersistedData(tag);
         if (tag.contains("teamId")) teamId = tag.getUUID("teamId");
+        else teamId = null;
     }
 
     @Override
     public void saveCustomPersistedData(@NotNull CompoundTag tag, boolean forDrop) {
         super.saveCustomPersistedData(tag, forDrop);
-        tag.putUUID("teamId", teamId);
+        if (teamId != null) {
+            tag.putUUID("teamId", teamId);
+        } else {
+            tag.remove("teamId");
+        }
     }
 
     @Override
