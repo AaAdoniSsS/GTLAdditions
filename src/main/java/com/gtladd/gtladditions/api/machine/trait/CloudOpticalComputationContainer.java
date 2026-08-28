@@ -23,15 +23,15 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
         super(machine, handlerIO, transmitter);
     }
 
-    private UUID getTeamId() {
-        return this.machine instanceof CloudOpticalComputationHatchMachine h ? h.getTeamId() : null;
+    private UUID getUUID() {
+        return this.machine instanceof CloudOpticalComputationHatchMachine h ? h.getPlayer() : null;
     }
 
     @Override
     public List<Integer> handleRecipeInner(IO io, GTRecipe recipe, List<Integer> left, @Nullable String slotName, boolean simulate) {
         int sum = left.stream().reduce(0, Integer::sum);
         if (io == IO.IN) {
-            UUID teamId = getTeamId();
+            UUID teamId = getUUID();
             int availableCWU = (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, Integer.MAX_VALUE, true);
             if (availableCWU >= sum) {
                 if (recipe.data.getBoolean("duration_is_total_cwu")) {
@@ -60,7 +60,7 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
     @Override
     public int requestCWUt(int cwut, boolean simulate, @NotNull Collection<com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider> seen) {
         if (this.handlerIO == IO.IN && !this.isTransmitter()) {
-            return (int) CloudOpticalComputationMonitorMachine.requestCWU(getTeamId(), cwut, simulate);
+            return (int) CloudOpticalComputationMonitorMachine.requestCWU(getUUID(), cwut, simulate);
         }
         return 0;
     }

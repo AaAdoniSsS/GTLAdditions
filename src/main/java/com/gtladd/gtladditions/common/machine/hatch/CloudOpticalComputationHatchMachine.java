@@ -11,7 +11,6 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder;
 
-import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -44,7 +43,7 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     @Getter
     @Persisted
     @DescSynced
-    private UUID teamId;
+    private UUID player;
 
     public CloudOpticalComputationHatchMachine(IMachineBlockEntity holder, boolean transmitter) {
         super(holder);
@@ -62,26 +61,22 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     }
 
     private void bindTeam(Player player) {
-        this.teamId = player.getUUID();
+        this.player = player.getUUID();
     }
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
         bindTeam(player);
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
-        }
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         CloudOpticalComputationMonitorMachine.markCacheDirty();
         return InteractionResult.SUCCESS;
     }
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        this.teamId = null;
+        this.player = null;
         CloudOpticalComputationMonitorMachine.markCacheDirty();
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
-        }
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         return true;
     }
 
@@ -143,21 +138,16 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof CloudOpticalComputationHatchMachine h) {
-            return this.getPos().equals(h.getPos()) && Objects.equals(getLevel(), h.getLevel());
-        } else if (obj instanceof BlockPos pos) {
-            return this.getPos().equals(pos);
-        }
-        return false;
+        return obj instanceof CloudOpticalComputationHatchMachine h && this.getPos().equals(h.getPos()) && Objects.equals(getLevel(), h.getLevel());
     }
 
     @Override
     public UUID getUUID() {
-        return teamId;
+        return player;
     }
 
     @Override
     public void setUUID(UUID uuid) {
-        this.teamId = uuid;
+        this.player = uuid;
     }
 }

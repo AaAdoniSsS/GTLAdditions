@@ -16,6 +16,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
 
+import com.lowdragmc.lowdraglib.LDLib;
 import com.lowdragmc.lowdraglib.gui.editor.ColorPattern;
 import com.lowdragmc.lowdraglib.gui.texture.IGuiTexture;
 import com.lowdragmc.lowdraglib.gui.texture.ItemStackTexture;
@@ -53,6 +54,7 @@ import com.gtladd.gtladditions.client.renderer.ClientCloudHighlighter;
 import com.gtladd.gtladditions.common.machine.hatch.CloudOpticalComputationHatchMachine;
 import com.gtladd.gtladditions.utils.MathUtil;
 import com.hepdd.gtmthings.utils.TeamUtil;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
@@ -62,7 +64,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -140,12 +141,12 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
     private static void rebuildProviderCache() {
         TEAM_STATES.values().forEach(TeamState::clear);
         for (var h : CLOUD_TRANSMITTER_HATCH_SET) {
-            var team = h.getTeamId();
+            var team = h.getPlayer();
             var state = TEAM_STATES.computeIfAbsent(getTeamUUID(team), k -> new TeamState());
             for (var c : h.getControllers()) if (c instanceof IOpticalComputationProvider p) state.providers.add(p);
         }
         for (var h : CLOUD_RECEIVER_HATCH_SET) {
-            var team = h.getTeamId();
+            var team = h.getPlayer();
             var state = TEAM_STATES.computeIfAbsent(getTeamUUID(team), k -> new TeamState());
             for (var c : h.getControllers()) if (c instanceof MetaMachine m) state.receiverControllers.add(m);
         }
@@ -241,36 +242,65 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             addWidget(new ExtendLabelWidget(6, 4, Component.translatable("gui.gtladditions.cloud_monitor.providers")));
             var providerScroll = new DraggableScrollableWidgetGroup(4, 18, 272, scrollHeight).setBackground(GuiTextures.DISPLAY);
             providerScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
+            var providerRows = new ArrayList<RowWidgets>();
             int i = 0;
             var state = getTeamState(uuid);
             int otherProviders = 0;
-            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!Objects.equals(TeamUtil.getTeamUUID(h.getTeamId()), TeamUtil.getTeamUUID(uuid))) otherProviders++;
+            for (var h : CLOUD_TRANSMITTER_HATCH_SET) if (!FTBTeamsAPI.api().getManager().arePlayersInSameTeam(h.getPlayer(), uuid)) otherProviders++;
             for (var p : state.providers) {
-                if (p instanceof MetaMachine m) providerScroll.addWidget(new RowWidgets((i++) * 20, true, RowWidgets.Kind.MACHINE, m, 0));
+                if (p instanceof MetaMachine m) providerRows.add(new RowWidgets((i++) * 20, true, RowWidgets.Kind.MACHINE, m, 0));
             }
-            if (i == 0) providerScroll.addWidget(new RowWidgets(i++ * 20, true, RowWidgets.Kind.NO_ENTRIES, null, 0));
-            if (otherProviders > 0) providerScroll.addWidget(new RowWidgets(i * 20, true, RowWidgets.Kind.OTHER_TEAM, null, otherProviders));
+            if (i == 0) providerRows.add(new RowWidgets(i++ * 20, true, RowWidgets.Kind.NO_ENTRIES, null, 0));
+            if (otherProviders > 0) providerRows.add(new RowWidgets(i * 20, true, RowWidgets.Kind.OTHER_TEAM, null, otherProviders));
+            providerRows.forEach(providerScroll::addWidget);
 
             addWidget(providerScroll);
+            addWidget(createSortButton(3, providerScroll, providerRows, true));
 
             addWidget(new ExtendLabelWidget(6, 22 + scrollHeight, Component.translatable("gui.gtladditions.cloud_monitor.requesters")));
             var receiverScroll = new DraggableScrollableWidgetGroup(4, 36 + scrollHeight, 272, getSize().height - 36 - scrollHeight).setBackground(GuiTextures.DISPLAY);
             receiverScroll.setYScrollBarWidth(4).setYBarStyle(null, ColorPattern.T_WHITE.rectTexture().setRadius(1.0F));
+            var receiverRows = new ArrayList<RowWidgets>();
             i = 0;
             int otherReceivers = 0;
-            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!Objects.equals(TeamUtil.getTeamUUID(h.getTeamId()), TeamUtil.getTeamUUID(uuid))) otherReceivers++;
+            for (var h : CLOUD_RECEIVER_HATCH_SET) if (!FTBTeamsAPI.api().getManager().arePlayersInSameTeam(h.getPlayer(), uuid)) otherReceivers++;
             for (var c : state.receiverControllers) {
-                receiverScroll.addWidget(new RowWidgets((i++) * 20, false, RowWidgets.Kind.MACHINE, c, 0));
+                receiverRows.add(new RowWidgets((i++) * 20, false, RowWidgets.Kind.MACHINE, c, 0));
             }
-            if (i == 0) receiverScroll.addWidget(new RowWidgets(i++ * 20, false, RowWidgets.Kind.NO_ENTRIES, null, 0));
-            if (otherReceivers > 0) receiverScroll.addWidget(new RowWidgets(i * 20, false, RowWidgets.Kind.OTHER_TEAM, null, otherReceivers));
+            if (i == 0) receiverRows.add(new RowWidgets(i++ * 20, false, RowWidgets.Kind.NO_ENTRIES, null, 0));
+            if (otherReceivers > 0) receiverRows.add(new RowWidgets(i * 20, false, RowWidgets.Kind.OTHER_TEAM, null, otherReceivers));
+            receiverRows.forEach(receiverScroll::addWidget);
 
             addWidget(receiverScroll);
+            addWidget(createSortButton(21 + scrollHeight, receiverScroll, receiverRows, false));
+        }
+
+        private ButtonWidget createSortButton(int y, DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax) {
+            boolean[] descending = { true };
+            var button = new ButtonWidget(258, y, 18, 13,
+                    new TextTexture(() -> descending[0] ? "▼" : "▲").setColor(16777045),
+                    cd -> {
+                        applySort(scroll, rows, byMax, descending[0]);
+                        descending[0] = !descending[0];
+                    });
+            button.setClientSideWidget();
+            button.setHoverTooltips(Component.translatable("gui.gtladditions.cloud_monitor.sort"));
+            return button;
+        }
+
+        private void applySort(DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax, boolean descending) {
+            scroll.setScrollYOffset(0);
+            rows.sort((a, b) -> {
+                if (a.machine == null || b.machine == null) return Boolean.compare(a.machine == null, b.machine == null);
+                int c = byMax ? Long.compare(a.max, b.max) : Integer.compare(a.cwu, b.cwu);
+                return descending ? -c : c;
+            });
+            for (int j = 0; j < rows.size(); j++) rows.get(j).setSelfPositionY(j * 20 + 4);
         }
 
         private static int calcFittedHeight() {
-            int scaledWindowHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
-            return Math.max(150, scaledWindowHeight - 126);
+            if (!LDLib.isRemote()) return 150;
+            return Math.max(150, Minecraft.getInstance().getWindow().getGuiScaledHeight() - 126);
         }
     }
 

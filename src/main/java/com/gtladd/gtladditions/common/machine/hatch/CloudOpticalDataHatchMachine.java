@@ -43,7 +43,7 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
     @Getter
     @Persisted
     @DescSynced
-    private UUID teamId;
+    private UUID player;
 
     public CloudOpticalDataHatchMachine(IMachineBlockEntity holder) {
         super(holder);
@@ -56,39 +56,33 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (player instanceof Player p) {
-            this.teamId = p.getUUID();
-        }
+        if (player instanceof Player p) this.player = p.getUUID();
     }
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
-        this.teamId = player.getUUID();
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
-        }
+        this.player = player.getUUID();
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         return InteractionResult.SUCCESS;
     }
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        this.teamId = null;
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
-        }
+        this.player = null;
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         return true;
     }
 
     @Override
     public boolean isRecipeAvailable(@NotNull GTRecipe recipe, @NotNull Collection<IDataAccessHatch> seen) {
         seen.add(this);
-        return CloudOpticalDataMachine.isRecipeAvailableInCloud(recipe, this.teamId);
+        return this.player != null && CloudOpticalDataMachine.isRecipeAvailableInCloud(recipe, this.player);
     }
 
     @Override
     public GTRecipe modifyRecipe(GTRecipe recipe) {
         if (recipe.conditions.stream().noneMatch(ResearchCondition.class::isInstance)) return recipe;
-        if (CloudOpticalDataMachine.isRecipeAvailableInCloud(recipe, this.teamId)) return recipe;
+        if (this.player != null && CloudOpticalDataMachine.isRecipeAvailableInCloud(recipe, this.player)) return recipe;
         for (var c : this.getControllers()) {
             if (c instanceof DataBankMachine) continue;
             RecipeResult.of((IRecipeLogicMachine) c, RecipeResult.FAIL_NO_FIND_RESEARCHED);
@@ -113,11 +107,11 @@ public class CloudOpticalDataHatchMachine extends MultiblockPartMachine implemen
 
     @Override
     public UUID getUUID() {
-        return this.teamId;
+        return this.player;
     }
 
     @Override
     public void setUUID(UUID uuid) {
-        this.teamId = uuid;
+        this.player = uuid;
     }
 }

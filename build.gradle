@@ -162,7 +162,7 @@ dependencies {
     // ftb-chunk
     modImplementation("curse.maven:ftb-chunks-314906:5378090"){ transitive = false }
     modRuntimeOnly("curse.maven:ftb-library-404465:5567591"){ transitive = false }
-    modRuntimeOnly("curse.maven:ftb-teams-404468:5267190"){ transitive = false }
+    modImplementation("curse.maven:ftb-teams-404468:5267190"){ transitive = false }
 
     // ftbu
     modImplementation("curse.maven:ftb-ultimine-386134:5363345"){ transitive = false }

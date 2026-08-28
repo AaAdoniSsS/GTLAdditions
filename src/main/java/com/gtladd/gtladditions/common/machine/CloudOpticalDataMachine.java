@@ -37,6 +37,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 import com.hepdd.gtmthings.utils.TeamUtil;
+import dev.ftb.mods.ftbteams.api.FTBTeamsAPI;
+import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
+import it.unimi.dsi.fastutil.ints.IntSet;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -56,13 +59,13 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     @Getter
     @Persisted
     @DescSynced
-    private UUID teamId;
+    private UUID player;
 
     @Persisted
     protected final NotifiableItemStackHandler importItems;
     @Persisted
     protected final NotifiableItemStackHandler createItem;
-    private final Set<GTRecipe> recipes = new ObjectOpenHashSet<>();
+    private final IntSet recipes = new IntOpenHashSet();
     private boolean recipesDirty = true;
     @Persisted
     private boolean isCreate = false;
@@ -118,26 +121,22 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
-        if (player instanceof Player p) this.teamId = p.getUUID();
+        if (player instanceof Player p) this.player = p.getUUID();
         CLOUD_DATA_MACHINE_SET.add(this);
         markRecipesDirty();
     }
 
     @Override
     public InteractionResult onDataStickRightClick(Player player, ItemStack stack) {
-        this.teamId = player.getUUID();
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
-        }
+        this.player = player.getUUID();
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(sp)));
         return InteractionResult.SUCCESS;
     }
 
     @Override
     public boolean onDataStickLeftClick(Player player, ItemStack stack) {
-        this.teamId = null;
-        if (player instanceof ServerPlayer sp) {
-            sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
-        }
+        this.player = null;
+        if (player instanceof ServerPlayer sp) sp.sendSystemMessage(Component.translatable("gui.gtladditions.cloud.unbind_success"));
         return true;
     }
 
@@ -151,7 +150,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     public long getDataCount() {
         long count = 1;
         for (int i = 0; i < importItems.getSlots(); i++) {
-            ItemStack stack = importItems.getStackInSlot(i);
+            var stack = importItems.getStackInSlot(i);
             if (!stack.isEmpty() && ResearchManager.isStackDataItem(stack, true)) count++;
         }
         return count;
@@ -180,7 +179,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
             var researchId = ResearchManager.readResearchId(stack);
             if (researchId == null || !ResearchManager.isStackDataItem(stack, true)) continue;
             var entries = researchId.getFirst().getDataStickEntry(researchId.getSecond());
-            if (entries != null) this.recipes.addAll(entries);
+            if (entries != null) this.recipes.addAll(entries.stream().mapToInt(GTRecipe::hashCode).collect(IntOpenHashSet::new, IntSet::add, IntSet::addAll));
         }
     }
 
@@ -195,7 +194,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         this.recipesDirty = false;
     }
 
-    public Set<GTRecipe> getRecipes() {
+    public IntSet getRecipes() {
         refreshRecipesIfNeeded();
         return recipes;
     }
@@ -206,11 +205,11 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         UUID getTeamId();
     }
 
-    public static boolean uploadDataStickToCloud(ItemStack dataStick, UUID teamId) {
-        if (dataStick.isEmpty() || teamId == null) return false;
+    public static boolean uploadDataStickToCloud(ItemStack dataStick, UUID uuid) {
+        if (dataStick.isEmpty() || uuid == null) return false;
         if (!ResearchManager.isStackDataItem(dataStick, true)) return false;
         for (var machine : CLOUD_DATA_MACHINE_SET) {
-            if (machine.teamId == null || !TeamUtil.getTeamUUID(machine.teamId).equals(TeamUtil.getTeamUUID(teamId))) continue;
+            if (machine.player == null || !FTBTeamsAPI.api().getManager().arePlayersInSameTeam(machine.player, uuid)) continue;
             for (int i = 0; i < machine.importItems.getSlots(); i++) {
                 if (machine.importItems.getStackInSlot(i).isEmpty()) {
                     machine.importItems.setStackInSlot(i, dataStick);
@@ -221,12 +220,12 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         return false;
     }
 
-    public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID teamId) {
+    public static boolean isRecipeAvailableInCloud(GTRecipe recipe, UUID uuid) {
         for (var machine : CLOUD_DATA_MACHINE_SET) {
-            if (machine.teamId == null || !TeamUtil.getTeamUUID(machine.teamId).equals(TeamUtil.getTeamUUID(teamId))) continue;
+            if (machine.player == null || !FTBTeamsAPI.api().getManager().arePlayersInSameTeam(machine.player, uuid)) continue;
             if (machine.hasPower) {
                 if (machine.isCreate) return true;
-                else if (machine.getRecipes().contains(recipe)) return true;
+                else if (machine.getRecipes().contains(recipe.hashCode())) return true;
             }
         }
         return false;
@@ -260,7 +259,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     private void addDisplayText(List<Component> textList) {
         if (isRemote()) return;
         textList.add(self().getBlockState().getBlock().getName());
-        if (TeamUtil.hasOwner(getLevel(), teamId)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), teamId)));
+        if (TeamUtil.hasOwner(getLevel(), player)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), player)));
         if (!isCreate) {
             textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count.0", getRecipes().size()));
         } else {

@@ -78,6 +78,7 @@
   "gui.gtladditions.cloud_monitor.providers": "供应端",
   "gui.gtladditions.cloud_monitor.requester_info": "消耗 %s CWUt",
   "gui.gtladditions.cloud_monitor.requesters": "请求端",
+  "gui.gtladditions.cloud_monitor.sort": "排序",
   "gui.gtladditions.floating_light_deep_space_industrial_vessel_module_connect": "已连接至浮光号深空工业舰",
   "gui.gtladditions.floating_light_deep_space_industrial_vessel_module_disconnect": "未连接至浮光号深空工业舰",
   "gui.gtladditions.modify": "由GTLAdditions修改",
