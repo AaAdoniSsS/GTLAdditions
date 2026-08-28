@@ -19,9 +19,9 @@ item_ids:
 * At the start of the operational cycle, an _instantaneous_, extremely high-power EU pulse (1 tick) is injected into the internal energy buffer, followed by a smooth _discharge_ of lower power into the buffer for the remainder of the cycle;
 * After the pulse ends, the internal energy buffer will output power to the external environment via the power bay/laser source bay:
 * The Stellar Thermodynamic Container tier affects the internal energy buffer capacity:
-> Basic: 54,120,000,000,000 EU \
-> Advanced: 3,475,000,000,000,000 EU\
-> Ultimate: 1,160,000,000,000,000,000 EU
+> Basic: 890,000,000,000,000 EU \
+> Advanced: 132,000,000,000,000,000 EU\
+> Ultimate: 1,570,000,000,000,000,000 EU
 * Coil tier affects the type of fluid consumed, the consumption rate per cycle, and power generation
 > Titan Steel to Exquisite Gold: <FluidLink id="gtceu:rhenium" /> 73,728 mB, <FluidLink id="gtceu:ice" /> 8 KB, <ItemLink id="kubejs:space_drone_mk2" /> 2×10⁻⁴ units \
 > Naquadriatic_Taranium to Star Metal: <FluidLink id="gtceu:promethium" /> 36,864 MB, <FluidLink id="gtceu:liquid_helium" /> 4 KB, <ItemLink id="kubejs:space_drone_mk4" /> 1×10⁻⁴ units \
