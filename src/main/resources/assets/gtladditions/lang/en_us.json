@@ -79,7 +79,7 @@
   "gui.gtladditions.cloud_monitor.providers": "Providers",
   "gui.gtladditions.cloud_monitor.requester_info": "Using %s CWUt",
   "gui.gtladditions.cloud_monitor.requesters": "Requesters",
-  "gui.gtladditions.cloud_monitor.sort": "Sort",
+  "gui.gtladditions.cloud_monitor.sort": "Sort Methods",
   "gui.gtladditions.floating_light_deep_space_industrial_vessel_module_connect": "Connected to Floating Light Deep Space Industrial Vessel",
   "gui.gtladditions.floating_light_deep_space_industrial_vessel_module_disconnect": "Not connected to Floating Light Deep Space Industrial Vessel",
   "gui.gtladditions.modify": "Modified by GTLAdditions",

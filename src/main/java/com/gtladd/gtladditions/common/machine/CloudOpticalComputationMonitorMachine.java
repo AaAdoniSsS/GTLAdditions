@@ -279,7 +279,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         private ButtonWidget createSortButton(int y, DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax) {
             boolean[] descending = { true };
             var button = new ButtonWidget(258, y, 18, 13,
-                    new TextTexture(() -> descending[0] ? "▼" : "▲").setColor(16777045),
+                    new TextTexture(() -> descending[0] ? "数量▼" : "数量▲").setColor(16777045),
                     cd -> {
                         applySort(scroll, rows, byMax, descending[0]);
                         descending[0] = !descending[0];
