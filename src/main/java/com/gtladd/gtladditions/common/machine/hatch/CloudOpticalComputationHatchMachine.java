@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.feature.multiblock.IMultiController;
 import com.gregtechceu.gtceu.api.machine.multiblock.part.MultiblockPartMachine;
+import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.ResearchStationMachine;
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
@@ -129,6 +130,11 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
         if (transmitter) CloudOpticalComputationMonitorMachine.CLOUD_TRANSMITTER_HATCH_SET.remove(this);
         else CloudOpticalComputationMonitorMachine.CLOUD_RECEIVER_HATCH_SET.remove(this);
         CloudOpticalComputationMonitorMachine.markCacheDirty();
+    }
+
+    @Override
+    public boolean canShared() {
+        return getControllers().stream().noneMatch(ResearchStationMachine.class::isInstance);
     }
 
     @Override

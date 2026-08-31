@@ -257,9 +257,14 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     private void addDisplayText(List<Component> textList) {
-        if (isRemote()) return;
         textList.add(self().getBlockState().getBlock().getName());
-        if (TeamUtil.hasOwner(getLevel(), player)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), player)));
+        if (player == null) {
+            textList.add(Component.translatable("gui.gtladditions.cloud.not_bound"));
+        } else {
+            if (TeamUtil.hasOwner(getLevel(), player)) textList.add(Component.translatable("gui.gtladditions.cloud.bind_success", TeamUtil.GetName(getLevel(), player)));
+            textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.cloud_count",
+                    CLOUD_DATA_MACHINE_SET.stream().filter(m -> FTBTeamsAPI.api().getManager().arePlayersInSameTeam(m.player, player)).count()));
+        }
         if (!isCreate) {
             textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.recipes_count.0", getRecipes().size()));
         } else {
@@ -269,6 +274,5 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.energy_demand", FormattingUtil.formatNumbers(getEnergyDemand())));
         textList.add(Component.translatable(hasPower ? "gui.gtladditions.cloud_data_machine.power_normal" : "gui.gtladditions.cloud_data_machine.power_insufficient")
                 .withStyle(style -> style.withColor(hasPower ? 0x55FF55 : 0xFF5555)));
-        textList.add(Component.translatable("gui.gtladditions.cloud_data_machine.cloud_count", CLOUD_DATA_MACHINE_SET.size()));
     }
 }

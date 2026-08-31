@@ -19,6 +19,8 @@ import java.util.UUID;
 
 public class CloudOpticalComputationContainer extends NotifiableComputationContainer {
 
+    public int lastResearch;
+
     public CloudOpticalComputationContainer(MetaMachine machine, IO handlerIO, boolean transmitter) {
         super(machine, handlerIO, transmitter);
     }
@@ -31,11 +33,11 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
     public List<Integer> handleRecipeInner(IO io, GTRecipe recipe, List<Integer> left, @Nullable String slotName, boolean simulate) {
         int sum = left.stream().reduce(0, Integer::sum);
         if (io == IO.IN) {
-            UUID teamId = getUUID();
-            int availableCWU = (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, Integer.MAX_VALUE, true);
+            UUID uuid = getUUID();
+            int availableCWU = (int) CloudOpticalComputationMonitorMachine.requestCWU(uuid, Integer.MAX_VALUE, true);
             if (availableCWU >= sum) {
                 if (recipe.data.getBoolean("duration_is_total_cwu")) {
-                    int drawn = simulate ? availableCWU : (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, availableCWU, false);
+                    int drawn = simulate ? availableCWU : (int) CloudOpticalComputationMonitorMachine.requestCWU(uuid, availableCWU, false);
                     if (!simulate) {
                         if (this.machine instanceof IRecipeLogicMachine rlm) {
                             rlm.getRecipeLogic().setProgress(rlm.getRecipeLogic().getProgress() - 1 + drawn);
@@ -47,9 +49,9 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
                             }
                         }
                     }
-                    sum -= drawn;
+                    sum -= (lastResearch = drawn);
                 } else {
-                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(teamId, sum, simulate);;
+                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(uuid, sum, simulate);;
                 }
             }
         }
