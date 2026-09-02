@@ -70,6 +70,11 @@ public class MultiGTRecipeLookup extends GTRecipeLookup {
         return branch;
     }
 
+    @Override
+    public void removeAllRecipes() {
+        this.branch = null;
+    }
+
     public static class MultiRecipeIterator {
 
         final Branch branch;

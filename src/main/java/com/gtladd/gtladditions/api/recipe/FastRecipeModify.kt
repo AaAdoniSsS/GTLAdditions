@@ -1,6 +1,7 @@
 package com.gtladd.gtladditions.api.recipe
 
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
+import org.gtlcore.gtlcore.config.ConfigHolder
 import org.gtlcore.gtlcore.utils.NumberUtils
 
 import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability
@@ -12,9 +13,12 @@ import com.gtladd.gtladditions.api.recipe.ContentList.Companion.getEUtList
 import com.gtladd.gtladditions.utils.GTRecipeUtils.copy
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.longParallel
 import com.gtladd.gtladditions.utils.GTRecipeUtils.modify
+import com.gtladd.gtladditions.utils.GTRecipeUtils.modifyNotTick
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import com.gtladd.gtladditions.utils.MathUtil.maxToLong
+import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.minToLong
 
 object FastRecipeModify {
@@ -23,8 +27,17 @@ object FastRecipeModify {
 
     private val defaultReduceResult = ReduceResult(1.0, 1.0)
 
-    private fun markSubTickParallelized(recipe: GTRecipe, result: SubTickResult, parallelResult: ParallelResult): GTRecipe {
-        IGTRecipe.of(recipe).isSubTickParallelized = result.parallel > parallelResult.actualParallel
+    private fun batchRecipe(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, pResult: ParallelResult): GTRecipe {
+        if (recipe.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
+            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / recipe.longParallel)
+            if (t <= 1) return recipe
+            recipe.modifyNotTick(machine, t.toLong())
+            (recipe as IGTRecipe).let {
+                it.isBatchProcessed = true
+                it.batchSize = t
+                it.realParallels *= t
+            }
+        }
         return recipe
     }
 
@@ -48,7 +61,7 @@ object FastRecipeModify {
                 wireless.iO = IO.OUT
             }
         }
-        return markSubTickParallelized(modify, stResult, pr)
+        return batchRecipe(machine, modify, pr)
     }
 
     fun modify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, machineParallel: Long, isSub: Boolean = true, ocResult: OverClockFactor, reResult: (GTRecipe) -> ReduceResult): GTRecipe? {
@@ -70,11 +83,7 @@ object FastRecipeModify {
             subTickParallelOC(d, peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
 
-        return markSubTickParallelized(
-            useSubTickResult(machine, stResult, recipe, pr, false),
-            stResult,
-            pr
-        )
+        return useSubTickResult(machine, stResult, recipe, pr, false)
     }
 
     fun copyModify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, machineParallel: Long, isSub: Boolean = true, isOC: Boolean = true, ocResult: OverClockFactor, mdRecipe: (GTRecipe) -> GTRecipe): GTRecipe? {
@@ -96,11 +105,7 @@ object FastRecipeModify {
             subTickParallelOC(mr.duration.toDouble(), peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
 
-        return markSubTickParallelized(
-            useSubTickResult(machine, stResult, mr, pr, true),
-            stResult,
-            pr
-        )
+        return useSubTickResult(machine, stResult, mr, pr, true)
     }
 
     fun getParallelResult(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, recipeEUt: Long, machineEnergy: Double, machineParallel: Long): ParallelResult {
@@ -131,7 +136,7 @@ object FastRecipeModify {
         } else if (stResult.eut < 0L) {
             recipe.tickOutputs[EURecipeCapability.CAP] = getEUtList(-eut)
         }
-        return recipe
+        return batchRecipe(machine, recipe, pResult)
     }
 
     private fun subTickParallelOC(duration: Double, eut: Double, ocAmount: Int, maxVoltage: Long, isSub: Boolean, ocFactor: OverClockFactor, pResult: ParallelResult): SubTickResult {

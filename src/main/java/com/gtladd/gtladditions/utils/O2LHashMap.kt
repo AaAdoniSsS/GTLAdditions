@@ -2,6 +2,7 @@ package com.gtladd.gtladditions.utils
 
 import com.gtladd.gtladditions.utils.MathUtil.safePlus
 import it.unimi.dsi.fastutil.Hash
+import it.unimi.dsi.fastutil.HashCommon
 import it.unimi.dsi.fastutil.HashCommon.arraySize
 import it.unimi.dsi.fastutil.HashCommon.mix
 import it.unimi.dsi.fastutil.objects.Object2LongOpenHashMap
@@ -50,6 +51,29 @@ class O2LHashMap<K> : Object2LongOpenHashMap<K> {
             }
         }
         return defaultValue
+    }
+
+    override fun rehash(newN: Int) {
+        val key = this.key
+        val value = this.value
+        val mask = newN - 1
+        val newKey = arrayOfNulls<Any>(newN + 1)
+        val newValue = LongArray(newN + 1)
+        var i = n
+        var pos: Int
+        var j = if (containsNullKey) size - 1 else size
+        while (j-- != 0) {
+            while (key!![--i] == null) { }
+            if (newKey[(mix(strategy?.hashCode(key[i]) ?: key[i].hashCode()) and mask).also { pos = it }] != null) while (newKey[((pos + 1) and mask).also { pos = it }] != null) { }
+            newKey[pos] = key[i]
+            newValue[pos] = value!![i]
+        }
+        newValue[newN] = value!![n]
+        n = newN
+        this.mask = mask
+        maxFill = HashCommon.maxFill(n, f)
+        this.key = newKey as Array<out K>?
+        this.value = newValue
     }
 
     override fun containsKey(k: K): Boolean {

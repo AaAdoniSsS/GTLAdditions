@@ -22,13 +22,14 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
+import com.gtladd.gtladditions.api.manage.HarmonyManager;
 import com.gtladd.gtladditions.api.recipe.ContentList;
 import com.gtladd.gtladditions.common.register.GTLAddItems;
-import com.gtladd.gtladditions.common.saved.HarmonySaved;
 import com.gtladd.gtladditions.utils.MachineUtil;
 import com.llamalad7.mixinextras.sugar.Local;
 import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
@@ -135,18 +136,18 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
 
     @Override
     public void onMachineRemoved() {
-        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().remove(this.getPos().asLong());
+        if (!isRemote()) HarmonyManager.remove((ServerLevel) this.getLevel(), this.getPos());
     }
 
     @Override
     public void onMachinePlaced(@Nullable LivingEntity player, ItemStack stack) {
         if (player != null) this.userid = player.getUUID();
-        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
+        if (!isRemote()) HarmonyManager.update((ServerLevel) this.getLevel(), this.getPos());
     }
 
     @Override
     public void onLoad() {
         super.onLoad();
-        if (!isRemote()) HarmonySaved.Companion.getINSTANCE().update(this.getPos().asLong());
+        if (!isRemote()) HarmonyManager.update((ServerLevel) this.getLevel(), this.getPos());
     }
 }

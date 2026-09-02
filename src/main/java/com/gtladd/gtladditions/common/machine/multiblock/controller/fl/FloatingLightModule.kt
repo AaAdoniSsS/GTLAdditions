@@ -15,6 +15,7 @@ import net.minecraft.network.chat.Component
 
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesTypesMachine
+import com.gtladd.gtladditions.api.machine.logic.GTLAddMultiRecipesTypesLogic
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.ReduceResult
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightPosHelper.calculatePossibleHostPositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
@@ -29,6 +30,8 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
     companion object {
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(FloatingLightModule::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
+
+    override fun createRecipeLogic(vararg args: Any) = FloatingLightModuleLogic(this)
 
     override fun onStructureFormed() {
         super.onStructureFormed()
@@ -63,11 +66,6 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
 
     override fun getThread() = 128 * if (host?.isDouble == true) 2 else 1
 
-    override fun testBefore(obj: Object): Boolean {
-        val circuit = host?.getCircuit()
-        return (host?.tier ?: 0) >= GTValues.UIV && host?.isWorkingEnabled == true && (circuit == 1 || circuit == 2)
-    }
-
     override fun addDisplayText(textList: MutableList<Component>) {
         super.addDisplayText(textList)
         if (isFormed) {
@@ -100,4 +98,12 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
     override fun getHostType() = FloatingLightController::class.java
 
     override fun getHostScanPositions(): Array<BlockPos> = calculatePossibleHostPositions(pos)
+
+    class FloatingLightModuleLogic(val flMachine: FloatingLightModule) : GTLAddMultiRecipesTypesLogic(flMachine) {
+        override fun findAndHandleRecipe() {
+            if ((flMachine.host?.tier ?: 0) >= GTValues.UEV && flMachine.host?.isWorkingEnabled == true && flMachine.host?.getCircuit() == 1) {
+                super.findAndHandleRecipe()
+            }
+        }
+    }
 }

@@ -55,7 +55,7 @@ class AntientropyCondensationCenter(holder: IMachineBlockEntity) : GTLAddWorkabl
         return super.onUse(state, world, pos, player, hand, hit)
     }
 
-    override fun testBefore(obj: Object): Boolean {
+    override fun testBefore(obj: Any): Boolean {
         val l = (obj as? IGTRecipe)?.realParallels ?: (obj as Long)
         val count = 5 * (l / 2.pow(19) + 51.ln(l)) / 1.maxToInt(tier - 9)
         return this.inputItemStack(ItemStack(CryotheumDust, count.safeToInt))

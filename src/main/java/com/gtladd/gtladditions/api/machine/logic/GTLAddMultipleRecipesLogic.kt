@@ -2,6 +2,7 @@ package com.gtladd.gtladditions.api.machine.logic
 
 import org.gtlcore.gtlcore.api.machine.ISuspendableMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
+import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.*
 import org.gtlcore.gtlcore.common.machine.trait.MultipleRecipesLogic
 
@@ -9,11 +10,13 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.lookup.GTRecipeLookup
 
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.ICoilMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.MultiGTRecipeLookup
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getMultipleRecipe
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getOverclockRecipe
+import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 
 open class GTLAddMultipleRecipesLogic(private val gtlAddMachine: GTLAddWorkableElectricMultipleRecipesMachine) :
@@ -107,5 +110,13 @@ open class GTLAddMultipleRecipesLogic(private val gtlAddMachine: GTLAddWorkableE
     }
 
     open fun checkRecipe(recipe: GTRecipe) = matchRecipe(machine, recipe) &&
-        recipe.euTier <= getMachine().getTier() && recipe.checkConditions(machine.recipeLogic).isSuccess
+        recipe.euTier <= getMachine().getTier() && recipe.checkConditions(machine.recipeLogic).isSuccess &&
+        (machine as? ICoilMachine)?.let {
+            val temp = it.coilType.coilTemperature + 100L * (0 maxToInt (getMachine().getTier() - 2))
+            if (temp < recipe.data.getInt("ebf_temp")) {
+                RecipeResult.of(machine, RecipeResult.FAIL_NO_ENOUGH_TEMPERATURE)
+                return@let false
+            }
+            return@let true
+        } ?: true
 }

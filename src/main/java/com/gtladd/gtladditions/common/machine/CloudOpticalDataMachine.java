@@ -66,10 +66,11 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     @Persisted
     protected final NotifiableItemStackHandler createItem;
     private final IntSet recipes = new IntOpenHashSet();
-    private boolean recipesDirty = true;
+    private boolean recipesDirty = true, amountDirty = true, hasPower = true;
+    @Persisted
+    private int dataAmount = 0;
     @Persisted
     private boolean isCreate = false;
-    private boolean hasPower = true;
     private TickableSubscription energySubs;
 
     public CloudOpticalDataMachine(IMachineBlockEntity holder) {
@@ -148,12 +149,11 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
     }
 
     public long getDataCount() {
-        long count = 1;
-        for (int i = 0; i < importItems.getSlots(); i++) {
-            var stack = importItems.getStackInSlot(i);
-            if (!stack.isEmpty() && ResearchManager.isStackDataItem(stack, true)) count++;
-        }
-        return count;
+        if (!this.amountDirty) return dataAmount + 1;
+        dataAmount = 0;
+        for (int i = 0; i < importItems.getSlots(); i++) if (!importItems.getStackInSlot(i).isEmpty()) dataAmount++;
+        this.amountDirty = false;
+        return dataAmount + 1;
     }
 
     public long getEnergyDemand() {
@@ -185,6 +185,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
 
     private void markRecipesDirty() {
         this.recipesDirty = true;
+        this.amountDirty = true;
     }
 
     private void refreshRecipesIfNeeded() {

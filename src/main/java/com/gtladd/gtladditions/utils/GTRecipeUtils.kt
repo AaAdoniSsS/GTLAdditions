@@ -45,7 +45,7 @@ import java.util.function.Predicate
 @Suppress("UNCHECKED_CAST", "CAST_NEVER_SUCCEEDS")
 object GTRecipeUtils {
 
-    fun WorkableElectricMultiblockMachine.getOverclockRecipe(getRecipe: (Long) -> GTRecipe?, testBefore: (Object) -> Boolean = { true }, maxThread: Int, minDuration: Int): GTRecipe? {
+    fun WorkableElectricMultiblockMachine.getOverclockRecipe(getRecipe: (Long) -> GTRecipe?, testBefore: (Any) -> Boolean = { true }, maxThread: Int, minDuration: Int): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
@@ -56,7 +56,7 @@ object GTRecipeUtils {
         var hasSubTickParallelized = false
         for (index in 1..maxThread) {
             val recipe = getRecipe.invoke(p) ?: break
-            if (testBefore.invoke(recipe as Object)) {
+            if (testBefore.invoke(recipe as Any)) {
                 if (handleRecipeInput(this, recipe)) {
                     hasSubTickParallelized = hasSubTickParallelized ||
                         IGTRecipe.of(recipe).isSubTickParallelized
@@ -111,7 +111,7 @@ object GTRecipeUtils {
         return o.buildRawRecipe().markInternallyAggregated()
     }
 
-    fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Object) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int): GTRecipe? {
+    fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Any) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
@@ -146,7 +146,7 @@ object GTRecipeUtils {
             }
         }
         i = 0
-        if (!testBefore.invoke((mp * maxThread - rp) as Object)) return null
+        if (!testBefore.invoke((mp * maxThread - rp) as Any)) return null
         val il = ContentList()
         val fl = ContentList()
         var totalEu = .0
@@ -184,6 +184,13 @@ object GTRecipeUtils {
         this.inputs.contentModify(parallel)
         this.tickInputs.contentModify(parallel)
         this.tickOutputs.contentModify(parallel)
+        val o = copyContentChances(holder, this, parallel)
+        this.outputs.replaceAll { t, _ -> o[t] }
+        return this
+    }
+
+    fun GTRecipe.modifyNotTick(holder: IRecipeLogicMachine, parallel: Long): GTRecipe {
+        this.inputs.contentModify(parallel)
         val o = copyContentChances(holder, this, parallel)
         this.outputs.replaceAll { t, _ -> o[t] }
         return this
@@ -251,15 +258,7 @@ object GTRecipeUtils {
                 }
             }
             if (!ccl!!.isEmpty()) {
-                ccl = LongChanceLogic.OR.roll(
-                    ccl,
-                    recipe.recipeType.chanceFunction,
-                    recipe.euTier,
-                    holder.chanceTier,
-                    holder.recipeLogic.getChanceCaches()[cap],
-                    parallel,
-                    cap
-                )
+                ccl = LongChanceLogic.OR.roll(ccl, recipe.recipeType.chanceFunction, recipe.euTier, holder.chanceTier, holder.recipeLogic.getChanceCaches()[cap], parallel, cap)
                 ccl?.let { it.forEach { c -> cl.add(ContentList.MaxChanceContent(c.content)) } }
             }
             if (cl.isEmpty()) rc.remove(cap)
@@ -292,15 +291,14 @@ object GTRecipeUtils {
 
     fun Content.modify(cap: RecipeCapability<*>, modifier: Number) {
         when (cap) {
-            ItemRecipeCapability.CAP -> (content as? LongIngredient)?.let { it.actualAmount = it.actualAmount * modifier.toLong() }
-            FluidRecipeCapability.CAP -> (content as FluidIngredient).let { it.amount = it.amount * modifier.toLong() }
+            ItemRecipeCapability.CAP -> (content as? LongIngredient)?.let { it.actualAmount *= modifier.toLong() }
+            FluidRecipeCapability.CAP -> (content as FluidIngredient).let { it.amount *= modifier.toLong() }
             EURecipeCapability.CAP -> (content as Long).let { content = it * modifier.toLong() }
         }
     }
 
     fun Content.plus(x: Number): Content {
-        val o = content
-        when (o) {
+        when (val o = content) {
             is LongIngredient -> o.actualAmount = o.actualAmount safePlus x.toLong()
             is FluidIngredient -> o.amount = o.amount safePlus x.toLong()
             is Long -> content = o safePlus x.toLong()
@@ -309,8 +307,7 @@ object GTRecipeUtils {
     }
 
     fun Content.setAmount(x: Number): Content {
-        val o = content
-        return when (o) {
+        return when (val o = content) {
             is LongIngredient -> {
                 o.actualAmount = x.toLong()
                 this

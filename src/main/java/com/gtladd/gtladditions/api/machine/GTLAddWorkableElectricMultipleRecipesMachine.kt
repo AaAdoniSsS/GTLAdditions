@@ -35,7 +35,7 @@ open class GTLAddWorkableElectricMultipleRecipesMachine(holder: IMachineBlockEnt
 
     open fun getThread(): Int = 128
 
-    open fun testBefore(obj: Object) = true
+    open fun testBefore(obj: Any) = true
 
     open fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult = FastRecipeModify.getDefaultReduce()
 

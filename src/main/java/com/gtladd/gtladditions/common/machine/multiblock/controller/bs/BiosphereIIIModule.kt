@@ -14,6 +14,7 @@ import net.minecraft.network.chat.Component
 
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesTypesMachine
+import com.gtladd.gtladditions.api.machine.logic.GTLAddMultiRecipesTypesLogic
 import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.BiosphereIIIPosHelper.calculatePossibleHostPositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
@@ -27,6 +28,8 @@ abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
     companion object {
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(BiosphereIIIModule::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
+
+    override fun createRecipeLogic(vararg args: Any) = BiosphereIIIModuleLogic(this)
 
     override fun onStructureFormed() {
         super.onStructureFormed()
@@ -50,11 +53,6 @@ abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
     override fun getFieldHolder() = MANAGED_FIELD_HOLDER
 
     override fun getHost() = this.host
-
-    override fun testBefore(obj: Object): Boolean {
-        val circuit = host?.getCircuit()
-        return (host?.tier ?: 0) >= GTValues.UEV && host?.isWorkingEnabled == true && circuit == 1
-    }
 
     override fun addDisplayText(textList: MutableList<Component>) {
         super.addDisplayText(textList)
@@ -90,4 +88,12 @@ abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
     override fun getThread() = 128 + 32 * ((host?.tier ?: 0) - GTValues.UEV)
 
     override fun getMaxParallel() = Int.MAX_VALUE minToInt 2.pow(host?.coilType?.coilTemperature?.div(1100) ?: 0)
+
+    class BiosphereIIIModuleLogic(val bmMachine: BiosphereIIIModule) : GTLAddMultiRecipesTypesLogic(bmMachine) {
+        override fun findAndHandleRecipe() {
+            if ((bmMachine.host?.tier ?: 0) >= GTValues.UEV && bmMachine.host?.isWorkingEnabled == true && bmMachine.host?.getCircuit() == 1) {
+                super.findAndHandleRecipe()
+            }
+        }
+    }
 }

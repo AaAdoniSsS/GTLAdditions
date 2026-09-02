@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.api.machine.logic
 import org.gtlcore.gtlcore.api.machine.ISuspendableMachine
 import org.gtlcore.gtlcore.api.machine.trait.ILockRecipe
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
+import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
 
@@ -13,12 +14,18 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import net.minecraft.nbt.CompoundTag
 
 import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipeTypeMachine
+import com.gtladd.gtladditions.api.machine.ICoilMachine
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
+import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 
 class GTLAddMultiRecipeTypeLogic(private val multiTypeMachine: GTLAddWorkableElectricMultipleRecipeTypeMachine) :
     RecipeLogic(multiTypeMachine), ILockRecipe, IRecipeStatus {
     private var eut = 0L
+
+    override fun getMachine(): GTLAddWorkableElectricMultipleRecipeTypeMachine {
+        return super.getMachine() as GTLAddWorkableElectricMultipleRecipeTypeMachine
+    }
 
     override fun findAndHandleRecipe() {
         lastRecipe = null
@@ -113,5 +120,13 @@ class GTLAddMultiRecipeTypeLogic(private val multiTypeMachine: GTLAddWorkableEle
     }
 
     private fun checkRecipe(recipe: GTRecipe): Boolean = matchRecipe(this.machine, recipe) &&
-        recipe.matchTickRecipe(machine).isSuccess && recipe.checkConditions(this).isSuccess
+        recipe.matchTickRecipe(machine).isSuccess && recipe.checkConditions(this).isSuccess &&
+        (machine as? ICoilMachine)?.let {
+            val temp = it.coilType.coilTemperature + 100L * (0 maxToInt (getMachine().getTier() - 2))
+            if (temp < recipe.data.getInt("ebf_temp")) {
+                RecipeResult.of(machine, RecipeResult.FAIL_NO_ENOUGH_TEMPERATURE)
+                return@let false
+            }
+            return@let true
+        } ?: true
 }

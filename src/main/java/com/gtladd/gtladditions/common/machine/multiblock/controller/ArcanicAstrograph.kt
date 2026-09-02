@@ -14,7 +14,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.world.level.Level
 
-import com.gtladd.gtladditions.common.saved.HarmonySaved
+import com.gtladd.gtladditions.api.manage.HarmonyManager
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.MathUtil.ln
 
@@ -29,7 +29,7 @@ class ArcanicAstrograph(holder: IMachineBlockEntity) : HarmonyMachine(holder) {
         }
         fun getMachineParallel(level: Level?, machine: ArcanicAstrograph): Int {
             if (level == null) return 0
-            val machineCount = HarmonySaved.INSTANCE.getMachineCount(level)
+            val machineCount = HarmonyManager.getMachineCount(level)
             return (924 * ln(machineCount.firstInt() + 15 * (machineCount.secondInt() + if (machine.recipeLogic.isWorking) 0 else 1))).toInt()
         }
     }

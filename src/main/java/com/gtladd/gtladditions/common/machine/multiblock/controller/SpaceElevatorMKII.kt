@@ -1,9 +1,9 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
+import org.gtlcore.gtlcore.common.data.GTLBlocks
 import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.*
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.SpaceElevatorMachine
 import org.gtlcore.gtlcore.utils.MachineUtil
-import org.gtlcore.gtlcore.utils.Registries
 import org.gtlcore.gtlcore.utils.datastructure.ModuleRenderInfo
 
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
@@ -164,7 +164,7 @@ open class SpaceElevatorMKII(holder: IMachineBlockEntity) : SpaceElevatorMachine
             )
 
         for (blockPos in coordinates) {
-            if (Registries.getBlockId(level.getBlockState(blockPos).block) == "gtlcore:power_core") {
+            if (level.getBlockState(blockPos).block == GTLBlocks.POWER_CORE.get()) {
                 return blockPos
             }
         }

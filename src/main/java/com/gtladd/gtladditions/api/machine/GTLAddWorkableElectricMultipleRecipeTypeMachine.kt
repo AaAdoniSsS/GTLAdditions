@@ -18,9 +18,9 @@ import com.gtladd.gtladditions.api.machine.logic.GTLAddMultiRecipeTypeLogic
 open class GTLAddWorkableElectricMultipleRecipeTypeMachine(holder: IMachineBlockEntity) :
     WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine {
 
-    override fun getRecipeLogic(): GTLAddMultiRecipeTypeLogic = super.getRecipeLogic() as GTLAddMultiRecipeTypeLogic
+    override fun getRecipeLogic() = super.getRecipeLogic() as GTLAddMultiRecipeTypeLogic
 
-    override fun createRecipeLogic(vararg args: Any): GTLAddMultiRecipeTypeLogic = GTLAddMultiRecipeTypeLogic(this)
+    override fun createRecipeLogic(vararg args: Any) = GTLAddMultiRecipeTypeLogic(this)
 
     open fun modifyRecipe(recipe: GTRecipe): GTRecipe? = recipe
 
