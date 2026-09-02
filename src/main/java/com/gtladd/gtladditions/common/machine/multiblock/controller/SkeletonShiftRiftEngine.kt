@@ -21,6 +21,14 @@ import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
 
 class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) : GTLAddWorkableElectricMultipleRecipeTypeMachine(holder) {
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     private var casingTier = 0
     private var coilType: ICoilType = CoilBlock.CoilType.CUPRONICKEL
 

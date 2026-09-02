@@ -53,6 +53,14 @@ class FractalManipulator(holder: IMachineBlockEntity) :
     IModularMachineModule<RecursiveReverseForge, FractalManipulator>,
     IMachineLife {
 
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     @Persisted
     private var hostPosition: BlockPos? = null
     private var host: RecursiveReverseForge? = null

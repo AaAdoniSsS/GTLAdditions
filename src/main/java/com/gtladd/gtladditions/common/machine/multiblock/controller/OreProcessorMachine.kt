@@ -43,6 +43,14 @@ import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: Boolean) :
     WorkableElectricMultiblockMachine(holder), ParallelMachine {
 
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     private var opHatch: OreProcessorHatch? = null
     private var muffler: IMufflerMachine? = null
 

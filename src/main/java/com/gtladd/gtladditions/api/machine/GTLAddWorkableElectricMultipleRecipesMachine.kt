@@ -1,5 +1,6 @@
 package com.gtladd.gtladditions.api.machine
 
+import org.gtlcore.gtlcore.api.machine.trait.IBatchMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.WorkableElectricMultipleRecipesMachine
 
@@ -19,7 +20,7 @@ import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.config.ConfigHolder
 
 open class GTLAddWorkableElectricMultipleRecipesMachine(holder: IMachineBlockEntity) :
-    WorkableElectricMultipleRecipesMachine(holder), IGTLAddMachine {
+    WorkableElectricMultipleRecipesMachine(holder), IGTLAddMachine, IBatchMachine {
     @Persisted
     private var limitDuration = ConfigHolder.INSTANCE.limitDuration
 
@@ -40,6 +41,14 @@ open class GTLAddWorkableElectricMultipleRecipesMachine(holder: IMachineBlockEnt
     open fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult = FastRecipeModify.getDefaultReduce()
 
     open fun getOverClock(): FastRecipeModify.OverClockFactor = FastRecipeModify.getPerfectOverclock()
+
+    override fun isBatchEnabled(): Boolean = false
+
+    override fun setBatchEnabled(p0: Boolean) {}
+
+    override fun supportsBatchProcessing(): Boolean = false
+
+    override fun canConfigureBatchProcessing(): Boolean = false
 
     public override fun createRecipeLogic(vararg args: Any) = GTLAddMultipleRecipesLogic(this)
 

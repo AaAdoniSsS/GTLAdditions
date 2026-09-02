@@ -32,6 +32,7 @@ object FastRecipeModify {
             val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / recipe.longParallel)
             if (t <= 1) return recipe
             recipe.modifyNotTick(machine, t.toLong())
+            recipe.duration *= t
             (recipe as IGTRecipe).let {
                 it.isBatchProcessed = true
                 it.batchSize = t
@@ -173,7 +174,7 @@ object FastRecipeModify {
             }
         }
 
-        return SubTickResult(eut / vfPowParallel, duration.toInt(), minParallel.toLong(), eut)
+        return SubTickResult(eut / vfPowParallel, duration.maxToInt(1), minParallel.toLong(), eut)
     }
 
     private fun subDoubleTickParallelOC(duration: Int, eut: Double, maxVoltage: Double, ocFactor: OverClockFactor, pResult: ParallelResult): SubTickResult {
@@ -208,7 +209,7 @@ object FastRecipeModify {
             }
         }
 
-        return SubTickResult(eut / vfPowParallel, duration.toInt(), minParallel.toLong(), eut)
+        return SubTickResult(eut / vfPowParallel, duration.maxToInt(1), minParallel.toLong(), eut)
     }
 
     @JvmRecord

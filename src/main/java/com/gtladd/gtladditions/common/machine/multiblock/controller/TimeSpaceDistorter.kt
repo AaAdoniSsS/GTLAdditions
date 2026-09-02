@@ -58,6 +58,15 @@ import it.unimi.dsi.fastutil.ints.IntArrayList
 
 open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
     WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine, ParallelMachine {
+
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     @Persisted
     private var config = 1
 

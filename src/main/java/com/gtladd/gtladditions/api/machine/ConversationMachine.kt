@@ -54,6 +54,14 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
     WorkableElectricMultiblockMachine(holder),
     IMachineModifyDrops {
 
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     protected var bcHatch: MEBlockConversationHatch? = null
     private var busHatch: ItemBusPartMachine? = null
 

@@ -17,6 +17,4 @@ open class GTLAddCoilWorkableElectricMultipleRecipesTypesMultiblockMachine(holde
         super.onStructureFormed()
         this.coilType = multiblockState.matchContext.get("CoilType")
     }
-
-    fun getCoilTier(): Int = coilType.tier
 }

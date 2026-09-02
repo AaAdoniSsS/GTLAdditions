@@ -60,6 +60,14 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
     IModularMachineHost<RecursiveReverseForge>,
     IMultipleRecipeTypeMachine,
     IMachineLife {
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     var ccaModule: CatalyticCascadeArray? = null
     var hecModule: HyperdimensionalEnergyConcentrator? = null
     var mccModule: MagnetorheologicalConvergenceCore? = null

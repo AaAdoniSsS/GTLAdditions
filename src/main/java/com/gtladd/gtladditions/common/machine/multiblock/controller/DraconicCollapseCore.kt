@@ -24,6 +24,14 @@ import com.gtladd.gtladditions.utils.MathUtil.pow
 
 class DraconicCollapseCore(holder: IMachineBlockEntity) : StorageMachine(holder, 1) {
 
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     @Persisted
     var isSuper = false
 

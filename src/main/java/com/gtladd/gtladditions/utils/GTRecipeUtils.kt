@@ -54,6 +54,7 @@ object GTRecipeUtils {
         val p = (this as ParallelMachine).maxParallel.toLong()
         var totalEu = 0.0
         var hasSubTickParallelized = false
+        var batchSize = 1
         for (index in 1..maxThread) {
             val recipe = getRecipe.invoke(p) ?: break
             if (testBefore.invoke(recipe as Any)) {
@@ -63,6 +64,7 @@ object GTRecipeUtils {
                     totalEu += recipe.duration * recipe.getEU.toDouble()
                     il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
                     fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
+                    batchSize = batchSize.coerceAtLeast(IGTRecipe.of(recipe).batchSize)
                 } else {
                     break
                 }
@@ -79,6 +81,7 @@ object GTRecipeUtils {
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
         val result = o.buildRawRecipe().markInternallyAggregated()
         IGTRecipe.of(result).isSubTickParallelized = hasSubTickParallelized
+        if (batchSize > 1) IGTRecipe.of(result).batchSize = batchSize
         return result
     }
 

@@ -13,6 +13,15 @@ import net.minecraft.core.Direction
 import net.minecraft.world.level.Level
 
 open class SpaceElevatorMKII(holder: IMachineBlockEntity) : SpaceElevatorMachine(holder) {
+
+    fun isBatchEnabled(): Boolean = false
+
+    fun setBatchEnabled() {}
+
+    fun supportsBatchProcessing(): Boolean = false
+
+    fun canConfigureBatchProcessing(): Boolean = false
+
     override fun getModuleScanPositions(): Array<out BlockPos>? {
         val level = this.level
         val powerCore = this.getPowerCore(this.pos, level!!)
