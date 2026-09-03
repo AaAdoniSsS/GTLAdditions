@@ -259,7 +259,9 @@ object GTRecipeUtils {
                     cl.add(cont.copy(cap, mdf))
                 } else {
                     val chance = LongChanceLogic.getChance(cont, recipe.recipeType.chanceFunction, recipe.euTier, holder.chanceTier)
-                    cl.add(rollChange(holder.recipeLogic.getChanceCaches()[cap], cap, parallel, cont, cont.maxChance, chance))
+                    rollChange(holder.recipeLogic.getChanceCaches()[cap], cap, parallel, cont, cont.maxChance, chance)?.let { rolled ->
+                        cl.add(ContentList.MaxChanceContent(rolled.content))
+                    }
                 }
             }
             if (cl.isEmpty()) rc.remove(cap)
@@ -267,7 +269,7 @@ object GTRecipeUtils {
         return rc
     }
 
-    private fun rollChange(cache: Object2IntMap<*>?, cap: RecipeCapability<*>, times: Long, content: Content, max: Int, chance: Int): Content {
+    private fun rollChange(cache: Object2IntMap<*>?, cap: RecipeCapability<*>, times: Long, content: Content, max: Int, chance: Int): Content? {
         val remainder = times % max
         var re = (times / max) * chance + (remainder * chance) / max
 
@@ -280,7 +282,8 @@ object GTRecipeUtils {
             new -= bonus * max
         }
         LongChanceLogic.updateCachedChance(content.content, cache, new / 2 + cached)
-        return content.copy(cap, IAdvancedContentModifier.preciseDivision(re, times))
+        if (re <= 0) return null
+        return content.copy(cap, IAdvancedContentModifier.preciseMultiplier(re))
     }
 
     private fun MutableMap<RecipeCapability<*>, MutableList<Content>>.contentModify(parallel: Long) {

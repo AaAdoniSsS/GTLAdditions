@@ -43,7 +43,11 @@ object FastRecipeModify {
         if (isWireless) {
             val wireless = IWirelessGTRecipe.of(mr)
             wireless.wirelessEUt = if (t > 1) stResult.parallelEUt else stResult.eut
-            if (stResult.eut > 0L) wireless.iO = IO.IN else if (stResult.eut < 0L) wireless.iO = IO.OUT
+            if (stResult.eut > 0L) {
+                wireless.iO = IO.IN
+            } else if (stResult.eut < 0L) {
+                wireless.iO = IO.OUT
+            }
         }
 
         if (mr.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
@@ -55,7 +59,9 @@ object FastRecipeModify {
                 mr.batchSize = tp
                 mr.realParallels *= tp
             }
-        } else mr.modifyNotTick(machine, stResult.parallel)
+        } else {
+            mr.modifyNotTick(machine, stResult.parallel)
+        }
         return mr
     }
 
