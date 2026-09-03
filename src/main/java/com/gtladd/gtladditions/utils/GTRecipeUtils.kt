@@ -1,6 +1,7 @@
 package com.gtladd.gtladditions.utils
 
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
+import org.gtlcore.gtlcore.api.recipe.IAdvancedContentModifier
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
 import org.gtlcore.gtlcore.api.recipe.IParallelLogic
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeInput
@@ -36,6 +37,7 @@ import com.gtladd.gtladditions.utils.MachineUtil.maintenance
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import com.gtladd.gtladditions.utils.MathUtil.minToLong
 import com.gtladd.gtladditions.utils.MathUtil.safePlus
+import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue
 import it.unimi.dsi.fastutil.objects.ObjectArrayList
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap
@@ -251,22 +253,34 @@ object GTRecipeUtils {
         val mdf = multiplier(parallel.toDouble())
         val rc = Reference2ObjectOpenHashMap<RecipeCapability<*>, MutableList<Content>>(recipe.outputs.size)
         for ((cap, list) in recipe.outputs) {
-            var ccl: MutableList<Content>? = ObjectArrayList()
             val cl = rc.computeIfAbsent(cap) { ObjectArrayList() }
             for (cont in list) {
                 if (cont.chance >= cont.maxChance) {
                     cl.add(cont.copy(cap, mdf))
                 } else {
-                    ccl!!.add(cont.copy(cap, mdf))
+                    val chance = LongChanceLogic.getChance(cont, recipe.recipeType.chanceFunction, recipe.euTier, holder.chanceTier)
+                    cl.add(rollChange(holder.recipeLogic.getChanceCaches()[cap], cap, parallel, cont, cont.maxChance, chance))
                 }
-            }
-            if (!ccl!!.isEmpty()) {
-                ccl = LongChanceLogic.OR.roll(ccl, recipe.recipeType.chanceFunction, recipe.euTier, holder.chanceTier, holder.recipeLogic.getChanceCaches()[cap], parallel, cap)
-                ccl?.let { it.forEach { c -> cl.add(ContentList.MaxChanceContent(c.content)) } }
             }
             if (cl.isEmpty()) rc.remove(cap)
         }
         return rc
+    }
+
+    private fun rollChange(cache: Object2IntMap<*>?, cap: RecipeCapability<*>, times: Long, content: Content, max: Int, chance: Int): Content {
+        val remainder = times % max
+        var re = (times / max) * chance + (remainder * chance) / max
+
+        var new = ((remainder * chance) % max).toInt()
+        val cached = LongChanceLogic.getCachedChance(content, cache)
+        val sum = new + cached
+        if (sum >= max) {
+            val bonus = sum / max
+            re += bonus
+            new -= bonus * max
+        }
+        LongChanceLogic.updateCachedChance(content.content, cache, new / 2 + cached)
+        return content.copy(cap, IAdvancedContentModifier.preciseDivision(re, times))
     }
 
     private fun MutableMap<RecipeCapability<*>, MutableList<Content>>.contentModify(parallel: Long) {

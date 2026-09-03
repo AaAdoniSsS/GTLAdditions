@@ -13,9 +13,9 @@ import com.gtladd.gtladditions.api.recipe.ContentList.Companion.getEUtList
 import com.gtladd.gtladditions.utils.GTRecipeUtils.copy
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
-import com.gtladd.gtladditions.utils.GTRecipeUtils.longParallel
 import com.gtladd.gtladditions.utils.GTRecipeUtils.modify
 import com.gtladd.gtladditions.utils.GTRecipeUtils.modifyNotTick
+import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import com.gtladd.gtladditions.utils.MathUtil.maxToLong
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
@@ -27,21 +27,6 @@ object FastRecipeModify {
 
     private val defaultReduceResult = ReduceResult(1.0, 1.0)
 
-    private fun batchRecipe(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, pResult: ParallelResult): GTRecipe {
-        if (recipe.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
-            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / recipe.longParallel)
-            if (t <= 1) return recipe
-            recipe.modifyNotTick(machine, t.toLong())
-            recipe.duration *= t
-            (recipe as IGTRecipe).let {
-                it.isBatchProcessed = true
-                it.batchSize = t
-                it.realParallels *= t
-            }
-        }
-        return recipe
-    }
-
     fun rrfModify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, maxEU: Double, isWireless: Boolean = false, machineParallel: Long, ocResult: OverClockFactor, mdRecipe: (GTRecipe) -> GTRecipe?): GTRecipe? {
         if (maxEU <= 0) return null
         val mr = mdRecipe.invoke(recipe.copy) ?: return null
@@ -51,18 +36,27 @@ object FastRecipeModify {
         val peu = eut.toDouble() * pr.actualParallel
         val stResult = subDoubleTickParallelOC(mr.duration, peu, maxEU, ocResult, pr)
         val t = stResult.parallel / pr.actualParallel
-        val modify = mr.modify(machine, stResult.parallel)
-        modify.duration = stResult.duration
+        mr.setEU((if (t > 1) stResult.parallelEUt else stResult.eut).toLong())
+        mr.duration = stResult.duration
+        (mr as IGTRecipe).realParallels = stResult.parallel
+
         if (isWireless) {
-            val wireless = IWirelessGTRecipe.of(modify)
+            val wireless = IWirelessGTRecipe.of(mr)
             wireless.wirelessEUt = if (t > 1) stResult.parallelEUt else stResult.eut
-            if (stResult.eut > 0L) {
-                wireless.iO = IO.IN
-            } else if (stResult.eut < 0L) {
-                wireless.iO = IO.OUT
-            }
+            if (stResult.eut > 0L) wireless.iO = IO.IN else if (stResult.eut < 0L) wireless.iO = IO.OUT
         }
-        return batchRecipe(machine, modify, pr)
+
+        if (mr.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
+            val tp = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / mr.duration) minToInt (pr.maxParallel / stResult.parallel)
+            mr.modifyNotTick(machine, stResult.parallel * (tp maxToLong 1))
+            if (tp > 1) {
+                mr.duration *= tp
+                mr.isBatchProcessed = true
+                mr.batchSize = tp
+                mr.realParallels *= tp
+            }
+        } else mr.modifyNotTick(machine, stResult.parallel)
+        return mr
     }
 
     fun modify(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, machineParallel: Long, isSub: Boolean = true, ocResult: OverClockFactor, reResult: (GTRecipe) -> ReduceResult): GTRecipe? {
@@ -123,21 +117,28 @@ object FastRecipeModify {
 
     private fun useSubTickResult(machine: WorkableElectricMultiblockMachine, stResult: SubTickResult, recipe: GTRecipe, pResult: ParallelResult, isCopy: Boolean): GTRecipe {
         var recipe = recipe
-        val t = stResult.parallel / pResult.actualParallel
-        val eut = if (t > 1) stResult.parallelEUt else stResult.eut
-        recipe = if (isCopy) {
-            recipe.modify(machine, stResult.parallel)
-        } else {
-            recipe.copy(machine, stResult.parallel, stResult.duration)
-        }
+        val eut = if (stResult.parallel / pResult.actualParallel > 1) stResult.parallelEUt else stResult.eut
+        recipe = if (isCopy) recipe else recipe.copy
         recipe.duration = stResult.duration
+        (recipe as IGTRecipe).realParallels = stResult.parallel
 
         if (stResult.eut > 0L) {
             recipe.tickInputs[EURecipeCapability.CAP] = getEUtList(eut)
         } else if (stResult.eut < 0L) {
             recipe.tickOutputs[EURecipeCapability.CAP] = getEUtList(-eut)
         }
-        return batchRecipe(machine, recipe, pResult)
+
+        if (recipe.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
+            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / stResult.parallel) maxToInt 1
+            recipe.modifyNotTick(machine, stResult.parallel * t)
+            if (t > 1) {
+                recipe.duration *= t
+                recipe.isBatchProcessed = true
+                recipe.batchSize = t
+                recipe.realParallels *= t
+            }
+        }
+        return recipe
     }
 
     private fun subTickParallelOC(duration: Double, eut: Double, ocAmount: Int, maxVoltage: Long, isSub: Boolean, ocFactor: OverClockFactor, pResult: ParallelResult): SubTickResult {
