@@ -23,7 +23,8 @@ import static com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachin
 import static com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.TITAN_CRIP_EARTHBORE;
 import static com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.*;
 import static org.gtlcore.gtlcore.common.data.GTLRecipeTypes.*;
-import static org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.*;
+import static org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA.*;
+import static org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.*;
 import static org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*;
 import static org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.SLAUGHTERHOUSE;
 

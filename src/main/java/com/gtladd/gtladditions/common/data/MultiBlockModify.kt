@@ -3,7 +3,7 @@ package com.gtladd.gtladditions.common.data
 import org.gtlcore.gtlcore.common.data.GTLBlocks
 import org.gtlcore.gtlcore.common.data.GTLMaterials
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA
 
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper
@@ -33,8 +33,8 @@ object MultiBlockModify {
 
     @JvmStatic
     fun init() {
-        AdvancedMultiBlockMachine.DOOR_OF_CREATE.setMachineSupplier(::CreateDoorMachine)
-        AdvancedMultiBlockMachine.DOOR_OF_CREATE.patternFactory = SupplierMemoizer.memoize {
+        AdvancedMultiBlockMachineA.DOOR_OF_CREATE.setMachineSupplier(::CreateDoorMachine)
+        AdvancedMultiBlockMachineA.DOOR_OF_CREATE.patternFactory = SupplierMemoizer.memoize {
             (
                 Function { _: MultiblockMachineDefinition ->
                     FactoryBlockPattern.start()
@@ -67,7 +67,7 @@ object MultiBlockModify {
                         .aisle("                             ", "                             ", "                             ", "                             ", "                             ", "              a              ", "             aaa             ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "      a               a      ", "     aa               aa     ", "      a               a      ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "             aaa             ", "              a              ", "                             ", "                             ", "                             ", "                             ", "                             ")
                         .aisle("                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "              a              ", "             aaa             ", "             aaa             ", "             aaa             ", "             aaa             ", "             aaa             ", "            aacaa            ", "       aaaaaacccaaaaaa       ", "      aaaaaacccccaaaaaa      ", "       aaaaaacccaaaaaa       ", "            aacaa            ", "             aaa             ", "             aaa             ", "             aaa             ", "             aaa             ", "             aaa             ", "              a              ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ")
                         .aisle("                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "              a              ", "             aaa             ", "            aaaaa            ", "           aaaaaaa           ", "          aaaaaaaaa          ", "         aaaaaaaaaaa         ", "        aaaaaaaaaaaaa        ", "         aaaaaaaaaaa         ", "          aaaaaaaaa          ", "           aaaaaaa           ", "            aaaaa            ", "             aaa             ", "              a              ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ", "                             ")
-                        .where("b", Predicates.controller(blocks(AdvancedMultiBlockMachine.DOOR_OF_CREATE.get())))
+                        .where("b", Predicates.controller(blocks(AdvancedMultiBlockMachineA.DOOR_OF_CREATE.get())))
                         .where(
                             "d",
                             blocks(GTLBlocks.DIMENSION_CONNECTION_CASING.get())
@@ -80,11 +80,11 @@ object MultiBlockModify {
                         .where(" ", Predicates.any())
                         .build()
                 }
-                ).apply(AdvancedMultiBlockMachine.DOOR_OF_CREATE)
+                ).apply(AdvancedMultiBlockMachineA.DOOR_OF_CREATE)
         }
 
-        AdvancedMultiBlockMachine.CREATE_AGGREGATION.setMachineSupplier(::CreateAggregationMachine)
-        AdvancedMultiBlockMachine.CREATE_AGGREGATION.patternFactory = SupplierMemoizer.memoize {
+        AdvancedMultiBlockMachineA.CREATE_AGGREGATION.setMachineSupplier(::CreateAggregationMachine)
+        AdvancedMultiBlockMachineA.CREATE_AGGREGATION.patternFactory = SupplierMemoizer.memoize {
             (
                 Function { _: MultiblockMachineDefinition ->
                     FactoryBlockPattern.start()
@@ -115,7 +115,7 @@ object MultiBlockModify {
                         .aisle("     aaaaaaaaaaaaaaaaa     ", "     c      bbb      c     ", "     c       b       c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c               c     ", "     c       b       c     ", "     c      bbb      c     ", "     aaaaaaaaaaaaaaaaa     ")
                         .aisle("       aaaaaaaaaaaaa       ", "             b             ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "             b             ", "       aaaaaaaaaaaaa       ")
                         .aisle("          aaaaaaa          ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "                           ", "          aaaaaaa          ")
-                        .where("~", Predicates.controller(blocks(AdvancedMultiBlockMachine.CREATE_AGGREGATION.get())))
+                        .where("~", Predicates.controller(blocks(AdvancedMultiBlockMachineA.CREATE_AGGREGATION.get())))
                         .where(
                             "a",
                             blocks(GTLBlocks.DIMENSION_CONNECTION_CASING.get())
@@ -132,7 +132,7 @@ object MultiBlockModify {
                         .where(" ", Predicates.any())
                         .build()
                 }
-                ).apply(AdvancedMultiBlockMachine.CREATE_AGGREGATION)
+                ).apply(AdvancedMultiBlockMachineA.CREATE_AGGREGATION)
         }
 
         MultiBlockMachineA.INTEGRATED_ORE_PROCESSOR.setMachineSupplier { OreProcessorMachine(it, false) }

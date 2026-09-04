@@ -9,7 +9,8 @@ import org.gtlcore.gtlcore.common.data.GTLMachines.WIRELESS_DATA_HATCH_RECEIVER
 import org.gtlcore.gtlcore.common.data.GTLMachines.WIRELESS_DATA_HATCH_TRANSMITTER
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.SUPRACHRONAL_ASSEMBLY_LINE_RECIPES
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.*
 import org.gtlcore.gtlcore.common.data.machines.GeneratorMachine.DYSON_SPHERE
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineB.WOOD_DISTILLATION

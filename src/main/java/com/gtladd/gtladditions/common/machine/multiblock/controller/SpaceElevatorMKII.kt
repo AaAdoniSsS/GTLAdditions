@@ -1,7 +1,7 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
 import org.gtlcore.gtlcore.common.data.GTLBlocks
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA.*
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.SpaceElevatorMachine
 import org.gtlcore.gtlcore.utils.MachineUtil
 import org.gtlcore.gtlcore.utils.datastructure.ModuleRenderInfo

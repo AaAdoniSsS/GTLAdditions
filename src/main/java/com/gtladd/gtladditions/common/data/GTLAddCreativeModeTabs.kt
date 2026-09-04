@@ -1,6 +1,6 @@
 package com.gtladd.gtladditions.common.data
 
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA
 
 import com.gregtechceu.gtceu.common.data.GTCreativeModeTabs.RegistrateDisplayItemsGenerator
 
@@ -24,7 +24,7 @@ object GTLAddCreativeModeTabs {
     val GTLADD_MACHINE: RegistryEntry<CreativeModeTab> = REGISTRATE.defaultCreativeTab("machine") {
         it.displayItems(RegistrateDisplayItemsGenerator("machine", REGISTRATE))
             .title(REGISTRATE.addLang("itemGroup", GTLAdditions.id("machine"), "GTLAdditions"))
-            .icon { AdvancedMultiBlockMachine.EYE_OF_HARMONY.asStack() }
+            .icon { AdvancedMultiBlockMachineA.EYE_OF_HARMONY.asStack() }
             .build()
     }.register()
 

@@ -7,8 +7,9 @@ import org.gtlcore.gtlcore.common.data.GTLMachines
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.SUPRACHRONAL_ASSEMBLY_LINE_RECIPES
 import org.gtlcore.gtlcore.common.data.machines.AdditionalMultiBlockMachine.ADVANCED_VACUUM_DRYING_FURNACE
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.*
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachine.SLAUGHTERHOUSE
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.SLAUGHTERHOUSE
 import org.gtlcore.gtlcore.common.data.machines.GCyMMachines.*
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*
 
