@@ -1,7 +1,6 @@
 package com.gtladd.gtladditions.utils
 
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
-import org.gtlcore.gtlcore.api.recipe.IAdvancedContentModifier
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
 import org.gtlcore.gtlcore.api.recipe.IParallelLogic
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeInput
@@ -283,7 +282,7 @@ object GTRecipeUtils {
         }
         LongChanceLogic.updateCachedChance(content.content, cache, new / 2 + cached)
         if (re <= 0) return null
-        return content.copy(cap, IAdvancedContentModifier.preciseMultiplier(re))
+        return content.copy(cap, multiplier(re.toDouble()))
     }
 
     private fun MutableMap<RecipeCapability<*>, MutableList<Content>>.contentModify(parallel: Long) {
