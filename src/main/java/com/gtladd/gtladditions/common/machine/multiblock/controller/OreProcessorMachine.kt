@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
 import org.gtlcore.gtlcore.api.machine.trait.ILockRecipe
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
+import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeResult.fail
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
@@ -125,6 +126,7 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
                         if (!opMachine.isAdvanced && !opMachine.muffler?.isFrontFaceFree!!) return false
                         FastRecipeModify.modify(opMachine, recipe, opMachine.maxParallel.toLong(), false, getNoPerfectOverclock()) { FastRecipeModify.ReduceResult(1.0, getMaintenanceModify) }?.let {
                             if (checkRecipe(it)) {
+                                RecipeMultiplierTracker.captureReduction(opMachine, recipe, 1.0, 1.0)
                                 this.lastOriginRecipe = recipe
                                 setupRecipe(it)
                                 return true
@@ -204,6 +206,7 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
         private fun modifyRecipe(recipe: GTRecipe): GTRecipe {
             takeIf { opMachine.opHatch != null }?.let {
                 if (!opMachine.isAdvanced) {
+                    RecipeMultiplierTracker.captureReduction(opMachine, recipe, 1.0, getRecipeReduceTime)
                     recipe.duration = 1 maxToInt (recipe.duration * getMaintenanceModify * getRecipeReduceTime).toInt()
                 } else {
                     recipe.inputs[CAP]?.forEach { (it.content as FluidIngredient).let { ing -> ing.amount = (ing.amount * getRecipeReduceFluid).toLong() } }
