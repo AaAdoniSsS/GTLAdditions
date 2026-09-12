@@ -377,7 +377,7 @@ object MultiBlockMachine {
     @JvmField
     val TITAN_CRIP_EARTHBORE: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "titan_crip_earthbore",
-        ::TitanCripEarthboreMachine
+        ::WorkableElectricMultiblockMachine
     )
         .noneRotation()
         .tooltipTextKey(

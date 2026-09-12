@@ -30,6 +30,7 @@
     "gtceu.recipe.IGTRecipeLookupInvoker",
     "gtceu.recipe.RecyclingRecipesMixin",
     "gtlcore.api.NotifiableCircuitItemStackHandlerMixin",
+    "gtlcore.api.recipe.BatchProcessingMixin",
     "gtlcore.integration.jade.RecipeMultiplierProviderMixin",
     "gtlcore.machine.ComputationProviderMachineMixin",
     "gtlcore.machine.HarmonyMachineMixin",

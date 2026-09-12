@@ -21,8 +21,7 @@ public class ConfigHolder {
     }
 
     @Configurable
-    @Configurable.Comment({ "均分模式(EQUALLY_DIVIDED_MODE)、极限模式(EXTREME_MODE)",
-            "Equally Divided Recipes Mode(EQUALLY_DIVIDED_MODE), Extreme Mode(EXTREME_MODE)" })
+    @Configurable.Comment("config.gtladditions.option.isMultiple.comment")
     public GTLAddMachineMode isMultiple = GTLAddMachineMode.EQUALLY_DIVIDED_MODE;
     @Configurable
     @Configurable.Range(min = 5, max = 200)

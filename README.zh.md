@@ -17,8 +17,9 @@
 
 ## 前置需求
 
-- GTLCore  `版本 >= 1.2.3.2-fix1`
+- GTLCore  `版本 >= 1.2.3.2-fix2`
 - Kotlin For Forge `版本 >= 4.11.0`
+- Java `版本 >= 21`
 
 ## 安装流程
 

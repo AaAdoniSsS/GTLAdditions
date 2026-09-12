@@ -63,14 +63,6 @@ import kotlin.streams.toList
 @MethodsReturnNonnullByDefault
 open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(holder, "SCTier"), IMachineModifyDrops {
 
-    fun isBatchEnabled(): Boolean = false
-
-    fun setBatchEnabled() {}
-
-    fun supportsBatchProcessing(): Boolean = false
-
-    fun canConfigureBatchProcessing(): Boolean = false
-
     @Persisted
     val machineStorage: NotifiableItemStackHandler = NotifiableItemStackHandler(this, 1, IO.NONE, IO.BOTH) { ItemStackTransfer(1) }.setFilter(::filter)
     private var coilType: ICoilType = CoilBlock.CoilType.CUPRONICKEL

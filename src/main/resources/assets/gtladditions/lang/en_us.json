@@ -48,6 +48,7 @@
   "block.gtladditions.vientiane_transcription_node": "Vientiane Transcription Node",
   "config.gtladditions.option.isMultiple": "GTLAdditions is the default mode of the machine",
   "config.gtladditions.option.limitDuration": "GTLAdditions machine defaults to the minimum recipe duration",
+  "config.gtladditions.option.isMultiple.comment": "Equally Divided Recipes Mode (EQUALLY_DIVIDED_MODE), Extreme Mode (EXTREME_MODE)",
   "gtladditions.guide_name": "GTLAdditions Guide",
   "gui.gtladditions.add": "Added by GTLAdditions",
   "gui.gtladditions.biosphere_iii_module_connect": "Connected to Biosphere III",
