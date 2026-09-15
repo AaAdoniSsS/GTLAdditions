@@ -179,7 +179,6 @@ open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(hol
         private val SpacetimeNano: Item by lazy { ChemicalHelper.get(nanoswarm, SpaceTime).item }
         private val EternityNano: Item by lazy { ChemicalHelper.get(nanoswarm, Eternity).item }
         private val CREATE: Item by lazy { CreativeMachines.CREATIVE_ENERGY_INPUT_HATCH.asStack().item }
-
         fun recipeModifier(machine: MetaMachine, recipe: GTRecipe, params: OCParams, result: OCResult): GTRecipe? {
             (machine as TaixuTurbidArray).let {
                 val maxParallel = IParallelLogic.getMaxParallel(it, recipe, it.getMaxParallel().toLong())
@@ -193,7 +192,7 @@ open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(hol
                 }
                 if (!fluidList.isEmpty) recipe.outputs[FluidRecipeCapability.CAP] = fluidList
                 val minParallel = IParallelLogic.getMinParallel(it, recipe, maxParallel)
-                val copy = recipe.copy(it, (maxParallel minToLong minParallel), 100)
+                val copy = recipe.copy(it, (maxParallel minToLong minParallel), if (it.machineStorage.getStackInSlot(0).`is`(CREATE)) 20 else 100)
                 copy.setEU(524288L * GTValues.V[it.tier])
                 return copy
             }

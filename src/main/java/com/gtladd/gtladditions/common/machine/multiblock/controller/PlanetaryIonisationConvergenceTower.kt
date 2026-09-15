@@ -227,9 +227,17 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
     }
 
     override fun doExplosion(pos: BlockPos, explosionPower: Float) {
+        uuid?.let { id ->
+            coilEnergy?.let { coil ->
+                WirelessEnergyManager.addEUToGlobalEnergyMap(
+                    id,
+                    coil.instantPower * -1024,
+                    this
+                )
+            }
+        }
         val machine = this.self()
         val level = machine.level ?: return
-
         level.removeBlock(machine.pos, false)
 
         val radius = explosionPower.toInt()

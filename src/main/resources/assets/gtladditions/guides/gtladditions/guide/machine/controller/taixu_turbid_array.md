@@ -25,7 +25,7 @@ item_ids:
 * When the machine voltage tier is greater than or equal to <Color color="#FFFF00">**UXV**</Color>, **UU Amplifier** output is unlocked
 * When the machine voltage tier is greater than or equal to <Color color="#FF0000">**MAX**</Color>, **UU Matter** output is unlocked
 * ~~When the machine voltage tier is not reached, there will be no additional UU Amplifier or UU Matter output~~
-* The machine has a fixed processing time of 5 seconds, with fixed energy consumption of 524288 times the power corresponding to the current machine voltage tier
+* The machine’s fixed energy consumption is 524,288 times the power corresponding to its current voltage rating; the default operating time is 5 seconds, which is reduced to 1 second when placed in the Energy Creation Chamber.
 
 > **~~Lots of formulas warning~~**
 
