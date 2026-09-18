@@ -79,7 +79,7 @@ object FastRecipeModify {
         var ocAmount = NumberUtils.getFakeVoltageTier(mov) - rt
         if (rt == 0) ocAmount--
         val stResult = if (ocAmount <= 0) {
-            SubTickResult(peu.toDouble(), 1 maxToInt d, 0, peu.toDouble())
+            SubTickResult(peu.toDouble(), 1 maxToInt d, pr.actualParallel, peu.toDouble())
         } else {
             subTickParallelOC(d, peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
@@ -101,7 +101,7 @@ object FastRecipeModify {
         var ocAmount = NumberUtils.getFakeVoltageTier(mov) - rt
         if (rt == 0) ocAmount--
         val stResult = if (ocAmount <= 0) {
-            SubTickResult(peu.toDouble(), mr.duration, 0, peu.toDouble())
+            SubTickResult(peu.toDouble(), mr.duration, pr.actualParallel, peu.toDouble())
         } else {
             subTickParallelOC(mr.duration.toDouble(), peu.toDouble(), ocAmount, mov, isSub, ocResult, pr)
         }
@@ -135,7 +135,7 @@ object FastRecipeModify {
         }
 
         if (recipe.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
-            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / stResult.parallel) maxToInt 1
+            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / (stResult.parallel maxToLong 1)) maxToInt 1
             recipe.modifyNotTick(machine, stResult.parallel * t)
             if (t > 1) {
                 recipe.duration *= t
@@ -143,6 +143,8 @@ object FastRecipeModify {
                 recipe.batchSize = t
                 recipe.realParallels *= t
             }
+        } else {
+            recipe.modifyNotTick(machine, stResult.parallel)
         }
         return recipe
     }

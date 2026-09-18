@@ -146,8 +146,10 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             } else {
                 lookup.find(machine, ::checkRecipe)?.let { recipe ->
                     this.modifyRecipe(recipe, tsdMachine.maxParallel.toLong())?.let {
-                        lastOriginRecipe = recipe
-                        setupRecipe(it)
+                        if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) {
+                            lastOriginRecipe = recipe
+                            setupRecipe(it)
+                        }
                     }
                 }
             }
@@ -212,9 +214,11 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                     } else {
                         (lastOriginRecipe ?: lookup.find(machine, ::checkRecipe))?.let { recipe ->
                             this.modifyRecipe(recipe, tsdMachine.maxParallel.toLong())?.let {
-                                lastOriginRecipe = recipe
-                                setupRecipe(it)
-                                return
+                                if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) {
+                                    lastOriginRecipe = recipe
+                                    setupRecipe(it)
+                                    return
+                                }
                             }
                         }
                     }
@@ -240,6 +244,7 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             IGTRecipe.of(recipe).euTier <= tsdMachine.tier && recipe.checkConditions(this).isSuccess
 
         private fun modifyRecipe(recipe: GTRecipe, parallel: Long): GTRecipe? {
+            if (!RecipeRunnerHelper.matchRecipeInput(tsdMachine, recipe)) return null
             val parallels = when (recipe.recipeType) {
                 DISTORT_RECIPES -> parallel / (recipe.data.getInt("ebf_temp") maxToLong 1L).pow(0.8)
                 else -> parallel
