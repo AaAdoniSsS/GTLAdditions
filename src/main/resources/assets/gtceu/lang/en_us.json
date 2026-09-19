@@ -100,7 +100,7 @@
   "gtceu.multiblock.draconic_collapse_core.tooltip.2": "When not placed in the harmonizing core, n = 8; after being placed, n = 12",
   "gtceu.multiblock.draconic_collapse_core.tooltip.3": "After placing the harmonizing core, the ME Pattern Buffer can be used at the output position",
   "gtceu.multiblock.fuxi_bagua_heaven_forging_furnace.tooltip.0": "§7易有太极,是生两仪,两仪生四象,四象生八卦",
-  "gtceu.multiblock.fuxi_bagua_heaven_forging_furnace.tooltip.1": "Time consumption multiplier：0.8",
+  "gtceu.multiblock.fuxi_bagua_heaven_forging_furnace.tooltip.1": "Time consumption multiplier：0.2",
   "gtceu.multiblock.fuxi_bagua_heaven_forging_furnace.tooltip.2": "Energy consumption multiplier：0.6",
   "gtceu.multiblock.max_parallel": "Maximum parallel number: %d",
   "gtceu.multiblock.max_parallel.space_elevator_module": "n^(Power module grade - 1), when connecting to Space Elevator, n = 8; when connecting to Space Elevator MKII, n = 12",

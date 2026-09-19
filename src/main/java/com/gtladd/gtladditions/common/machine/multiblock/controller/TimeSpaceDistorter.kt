@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
+import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
@@ -249,6 +250,13 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                 DISTORT_RECIPES -> parallel / (recipe.data.getInt("ebf_temp") maxToLong 1L).pow(0.8)
                 else -> parallel
             }
+            val reduction = FastRecipeModify.ReduceResult(.1, tsdMachine.maintenance())
+            RecipeMultiplierTracker.captureReduction(
+                tsdMachine,
+                recipe,
+                reduction.reduceEUt,
+                1.0
+            )
             (
                 if (tsdMachine.isMultiple) {
                     FastRecipeModify.modify(
@@ -256,14 +264,14 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                         recipe,
                         parallels,
                         ocResult = FastRecipeModify.OverClockFactor(.25, 4.0)
-                    ) { FastRecipeModify.ReduceResult(.1, tsdMachine.maintenance()) }
+                    ) { reduction }
                 } else {
                     FastRecipeModify.modify(
                         tsdMachine,
                         recipe,
                         parallels,
                         ocResult = FastRecipeModify.OverClockFactor(.5, 6.0)
-                    ) { FastRecipeModify.ReduceResult(.1, tsdMachine.maintenance()) }
+                    ) { reduction }
                 }
                 )?.let { recipe ->
                 if (!beforeConsume(recipe.longParallel, tsdMachine)) return null
@@ -289,7 +297,7 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
         private fun beforeConsume(parallels: Long, machine: TimeSpaceDistorter): Boolean {
             if (machine.isMultiple) {
                 return machine.inputItemStack(
-                    ItemStack(QuantumAnomaly, (parallels / 27).safeToInt),
+                    ItemStack(QuantumAnomaly, (parallels / 108).safeToInt),
                     ItemStack(Hypercube, (parallels / 623).safeToInt)
                 )
             }

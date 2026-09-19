@@ -16,5 +16,5 @@ item_ids:
 * **Molecular Deconstruction**: Directly converts previously unextractable powders into fluids, skip the electric blast furnace and the extraction machine
 * **Stellar Lgnition**: Directly converts fluids into plasma, skip the complicated intermediate processing steps
 * **Chaos Alchemy**: Integrates the alloy smelter and vacuum freezer into a single-step reaction
-* **Ultimate Matter Forge**: Higher parallel processing
+* **Ultimate Matter Forge**: Higher parallel processing, the actual parallel is set to 16 times the upper limit for parallel hatch
 * ~~(You need to modify a lot of patterns)~~

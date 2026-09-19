@@ -584,8 +584,13 @@ object MultiBlockMachine {
         "fuxi_bagua_heaven_forging_furnace",
         Function {
             return@Function object : GTLAddCoilWorkableElectricParallelHatchMultipleRecipesMachine(it) {
+                override fun getMaxParallel(): Int {
+                    val parallel = super.getMaxParallel()
+                    return if (recipeType === ULTIMATE_MATERIAL_FORGE_RECIPES) parallel * 16 else parallel
+                }
+
                 override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
-                    val multiplier = FastRecipeModify.ReduceResult(0.6, 0.8)
+                    val multiplier = FastRecipeModify.ReduceResult(0.6, 0.2)
                     getRecipeLogic().setReduction(multiplier.reduceEUt, multiplier.reduceDuration)
                     return multiplier
                 }
