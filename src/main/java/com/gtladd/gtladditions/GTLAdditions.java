@@ -14,17 +14,23 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 import com.gtladd.gtladditions.api.registry.GTLAddRegistration;
+import com.gtladd.gtladditions.common.ExplosiveChargeHandler;
+import com.gtladd.gtladditions.common.ForgeEvent;
 import com.gtladd.gtladditions.common.data.GTLAddCreativeModeTabs;
+import com.gtladd.gtladditions.common.data.TooltipsModify;
 import com.gtladd.gtladditions.common.machine.GTLAddMachines;
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes;
 import com.gtladd.gtladditions.common.register.GTLAddMaterial;
 import com.gtladd.gtladditions.config.ConfigHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Mod(GTLAdditions.MOD_ID)
 public class GTLAdditions {
 
     public static final String MOD_ID = "gtladditions";
     public static final String NAME = "GTLAdditions";
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static ResourceLocation id(String name) {
         return new ResourceLocation(GTLAdditions.MOD_ID, name);
@@ -34,6 +40,11 @@ public class GTLAdditions {
         init();
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.addListener(ForgeEvent::onLevelTick);
+        MinecraftForge.EVENT_BUS.addListener(ForgeEvent::onServerStarted);
+        MinecraftForge.EVENT_BUS.addListener(ForgeEvent::onLevelUnload);
+        MinecraftForge.EVENT_BUS.addListener(ExplosiveChargeHandler::onRightClickBlock);
+        MinecraftForge.EVENT_BUS.addListener(TooltipsModify::onItemTooltip);
         modEventBus.addListener(this::addMaterialRegistries);
         modEventBus.addListener(this::addMaterials);
         GTLAddRegistration.REGISTRATE.registerEventListeners(modEventBus);

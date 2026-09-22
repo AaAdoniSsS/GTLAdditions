@@ -34,5 +34,14 @@ public abstract class ItemBuilderMixin extends BuilderBase<Item> {
             maxStackSize = 64;
             tooltip.add(Component.translatable("tooltip.gtladditions.item.max_stack_size"));
         }
+        if (id.getPath().contains("naquadria_charge")) {
+            tooltip.add(Component.translatable("tooltip.gtladditions.item.explosion.0"));
+        }
+        if (id.getPath().contains("leptonic_charge")) {
+            tooltip.add(Component.translatable("tooltip.gtladditions.item.explosion.1"));
+        }
+        if (id.getPath().contains("quantum_chromodynamic_charge")) {
+            tooltip.add(Component.translatable("tooltip.gtladditions.item.explosion.2"));
+        }
     }
 }

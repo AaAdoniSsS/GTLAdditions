@@ -15,7 +15,7 @@ item_ids:
 
 * Only coils of Titan-grade or higher may be used;
 * The operational cycle lasts 3 seconds;
-* If energy continues to enter whilst the internal energy buffer is full, a massive explosion will occur centred on the machine , and will dissipate an amount of energy in the wireless power grid equivalent to 1,024 times the instantaneous pulse energy of the coil;
+* If energy continues to enter whilst the internal energy buffer is full, an explosion of radius 100 blocks will occur centred on the machine, and will dissipate an amount of energy in the wireless power grid equivalent to 1,024 times the instantaneous pulse energy of the coil;
 * At the start of the operational cycle, an _instantaneous_, extremely high-power EU pulse (1 tick) is injected into the internal energy buffer, followed by a smooth _discharge_ of lower power into the buffer for the remainder of the cycle;
 * After the pulse ends, the internal energy buffer will output power to the external environment via the power bay/laser source bay:
 * The Stellar Thermodynamic Container tier affects the internal energy buffer capacity:

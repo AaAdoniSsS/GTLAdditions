@@ -42,6 +42,8 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 
 import appeng.client.render.effects.ParticleTypes
+import com.gtladd.gtladditions.api.async.StagedBlastManager
+import com.gtladd.gtladditions.api.async.StagedSphereExplosion
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.Cryotheum
@@ -76,6 +78,10 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
     @Persisted
     private var startCycle = false
 
+    /** 引爆幂等标记：一次溢出只扣一次电网、只拆一次机器 */
+    @Persisted
+    private var fired = false
+
     private var coilEnergy: CoilToEnergy? = null
     private var stellarTier = 0
     private var maxStorageEUt = 0L
@@ -91,13 +97,19 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
         } else {
             coilEnergy?.dischargePower ?: 0
         }
-        storageEUt += addEUt
-        if (storageEUt > maxStorageEUt) doExplosion(this.pos, 80f)
+        val next = storageEUt + addEUt
+        if (next > maxStorageEUt) {
+            storageEUt = maxStorageEUt
+            doExplosion(this.pos, BLAST_RADIUS.toFloat())
+            return 0L
+        }
+        storageEUt = next
         return addEUt
     }
 
     fun renderParticles() {
-        particlePos?.let { (level as ServerLevel).sendParticles(ParticleTypes.LIGHTNING, it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), 200, 4.0, 4.0, 4.0, 0.01) }
+        val serverLevel = level as? ServerLevel ?: return
+        particlePos?.let { serverLevel.sendParticles(ParticleTypes.LIGHTNING, it.x.toDouble(), it.y.toDouble(), it.z.toDouble(), 200, 4.0, 4.0, 4.0, 0.01) }
     }
 
     override fun filter(itemStack: ItemStack) = when (coilEnergy?.workTier) {
@@ -204,29 +216,16 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
 
     override fun getFieldHolder() = MANAGED_FIELD_HOLDER
 
-    private val sphereOffsetCache = mutableMapOf<Int, IntArray>()
-
-    private fun getSphereOffsets(radius: Int): IntArray {
-        return sphereOffsetCache.getOrPut(radius) {
-            val list = ArrayList<Int>((4.19 * radius * radius * radius).toInt() + 100)
-            val r2 = radius * radius
-            for (dx in -radius..radius) {
-                val dx2 = dx * dx
-                for (dy in -radius..radius) {
-                    val dx2dy2 = dx2 + dy * dy
-                    for (dz in -radius..radius) {
-                        if (dx2dy2 + dz * dz <= r2) {
-                            val enc = ((dx + radius) shl 16) or ((dy + radius) shl 8) or (dz + radius)
-                            list.add(enc)
-                        }
-                    }
-                }
-            }
-            list.toIntArray()
-        }
-    }
-
     override fun doExplosion(pos: BlockPos, explosionPower: Float) {
+        if (fired) return
+        fired = true
+
+        val radius = explosionPower.toInt()
+
+        val machine = this.self()
+        val serverLevel = machine.level as? ServerLevel ?: return
+        if (radius <= 0) return
+
         uuid?.let { id ->
             coilEnergy?.let { coil ->
                 WirelessEnergyManager.addEUToGlobalEnergyMap(
@@ -236,32 +235,14 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
                 )
             }
         }
-        val machine = this.self()
-        val level = machine.level ?: return
-        level.removeBlock(machine.pos, false)
 
-        val radius = explosionPower.toInt()
-        if (radius <= 0) return
+        serverLevel.setBlock(machine.pos, Blocks.AIR.defaultBlockState(), StagedSphereExplosion.FLAG_QUIET)
 
-        val offsets = getSphereOffsets(radius)
-        val mutablePos = BlockPos.MutableBlockPos()
-        val airState = Blocks.AIR.defaultBlockState()
-        val minResistanceToKeep = 3_600_000f
+        storageEUt = 0L
+        startCycle = false
+        isWorkingEnabled = false
 
-        for (enc in offsets) {
-            val dx = (enc shr 16 and 0xFF) - radius
-            val dy = (enc shr 8 and 0xFF) - radius
-            val dz = (enc and 0xFF) - radius
-
-            mutablePos.set(pos.x + dx, pos.y + dy, pos.z + dz)
-            val state = level.getBlockState(mutablePos)
-            if (state.isAir) continue
-
-            val resistance = state.block.getExplosionResistance(state, level, mutablePos, null)
-            if (resistance >= minResistanceToKeep) continue
-
-            level.setBlock(mutablePos, airState, 2)
-        }
+        StagedBlastManager.spawn(serverLevel, pos, radius)
     }
 
     class PICTRecipeLogic(val pictMachine: PlanetaryIonisationConvergenceTower) : RecipeLogic(pictMachine), IRecipeStatus {
@@ -442,6 +423,9 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
     companion object {
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(PlanetaryIonisationConvergenceTower::class.java, StorageMachine.MANAGED_FIELD_HOLDER)
         val maxEUt: BigInteger = BigInteger.valueOf(Long.MAX_VALUE).multiply(BigInteger.valueOf(64))
+
+        const val BLAST_RADIUS = 100
+
         val SpaceDroneMK2 = "kubejs:space_drone_mk2".getItem
         val SpaceDroneMK4 = "kubejs:space_drone_mk4".getItem
         val SpaceDroneMK6 = "kubejs:space_drone_mk6".getItem
