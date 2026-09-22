@@ -9,7 +9,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 
-import com.gtladd.gtladditions.api.recipe.ContentList.Companion.getEUtList
+import com.gtladd.gtladditions.api.recipe.content.ContentList.Companion.getEUtList
 import com.gtladd.gtladditions.utils.GTRecipeUtils.copy
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU

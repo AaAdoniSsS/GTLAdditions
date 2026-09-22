@@ -3,14 +3,14 @@ package com.gtladd.gtladditions.data.recipes
 import org.gtlcore.gtlcore.api.data.tag.GTLTagPrefix.nanoswarm
 import org.gtlcore.gtlcore.common.data.GTLBlocks.*
 import org.gtlcore.gtlcore.common.data.GTLItems.*
-import org.gtlcore.gtlcore.common.data.GTLItems.REALLY_ULTIMATE_BATTERY
 import org.gtlcore.gtlcore.common.data.GTLMachines
 import org.gtlcore.gtlcore.common.data.GTLMachines.WIRELESS_DATA_HATCH_RECEIVER
 import org.gtlcore.gtlcore.common.data.GTLMachines.WIRELESS_DATA_HATCH_TRANSMITTER
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.SUPRACHRONAL_ASSEMBLY_LINE_RECIPES
 import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineA.*
-import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.*
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.CREATE_COMPUTATION
+import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.SPACE_ELEVATOR
 import org.gtlcore.gtlcore.common.data.machines.GeneratorMachine.DYSON_SPHERE
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineB.WOOD_DISTILLATION
@@ -66,10 +66,7 @@ import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.common.register.GTLAddItems.OUTSTANDING_SOC_WAFER
 import com.gtladd.gtladditions.utils.Registries.getFluid
 import com.gtladd.gtladditions.utils.Registries.getItemStack
-import com.hepdd.gtmthings.data.WirelessMachines
-import com.hepdd.gtmthings.data.WirelessMachines.WIRELESS_COMPUTATION_HATCH_RECEIVER
-import com.hepdd.gtmthings.data.WirelessMachines.WIRELESS_COMPUTATION_HATCH_TRANSMITTER
-import com.hepdd.gtmthings.data.WirelessMachines.WIRELESS_ENERGY_MONITOR
+import com.hepdd.gtmthings.data.WirelessMachines.*
 
 import java.util.function.Consumer
 
@@ -227,7 +224,7 @@ object NewMachineRecipe2 {
             .inputItems(CREATE_COMPUTATION, 64)
             .inputItems("kubejs:hyperdimensional_drone".getItemStack(8))
             .inputItems(GTLAddMachines.WIRELESS_LASER_INPUT_HATCH_67108864A[14].asStack(64))
-            .inputItems(WirelessMachines.WIRELESS_ENERGY_MONITOR.asStack(64))
+            .inputItems(WIRELESS_ENERGY_MONITOR.asStack(64))
             .inputItems(CREATE_CASING.asStack(56))
             .inputItems(wireGtHex, SpaceTime, 32)
             .inputItems(plateDouble, Shirabon, 48)

@@ -20,6 +20,8 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 
 import net.minecraft.world.item.crafting.Ingredient
 
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
+import com.gtladd.gtladditions.api.recipe.content.ContentStrategy
 import com.gtladd.gtladditions.utils.GTRecipeUtils.amount
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.test
@@ -37,6 +39,12 @@ import java.util.function.Predicate
 object ParallelCalculate {
 
     fun getParallel(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, parallelAmount: Long): Long {
+        val ctx = (machine as? IRecipeSearchProvider)?.getActiveSearchContext()
+        if (ctx != null) {
+            val mp = ctx.getPoolParallel(recipe, parallelAmount)
+            if (mp <= 0L) return 0L
+            return IParallelLogic.getMinParallel(machine, recipe, mp) minToLong mp
+        }
         if (parallelAmount <= 1) return parallelAmount
         val maxParallel = getMaxParallel(machine, recipe, parallelAmount)
         if (maxParallel == 0L) return 0L
@@ -44,6 +52,8 @@ object ParallelCalculate {
     }
 
     fun getMaxParallel(machine: WorkableElectricMultiblockMachine, recipe: GTRecipe, parallelAmount: Long): Long {
+        val ctx = (machine as? IRecipeSearchProvider)?.getActiveSearchContext()
+        if (ctx != null) return ctx.getPoolParallel(recipe, parallelAmount)
         var amount = parallelAmount
         for (cap in recipe.inputs.keys) {
             if (cap === ItemRecipeCapability.CAP) {

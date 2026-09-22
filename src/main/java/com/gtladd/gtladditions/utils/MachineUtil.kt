@@ -21,7 +21,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 import net.minecraft.network.chat.Component.translatable
 import net.minecraft.world.item.ItemStack
 
-import com.gtladd.gtladditions.api.recipe.ContentList
+import com.gtladd.gtladditions.api.recipe.content.ContentList
 import com.gtladd.gtladditions.utils.MathUtil.safeToInt
 import com.hepdd.gtmthings.common.block.machine.multiblock.part.HugeBusPartMachine
 import it.unimi.dsi.fastutil.objects.Object2LongMaps

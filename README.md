@@ -4,7 +4,7 @@
 # GTLAdditions
 </div>
 
-> [!TIP]
+> **[!TIP]**
 > GTLAdditions is a mod which adds some new recipes and macthines to `GregTech Leisure`
 > 
 > You can load it in your GTL with **Newest** core!
@@ -30,6 +30,11 @@ Second delete `GTLCore` and install the newest one,you can find it in [here](htt
 Finally, add this mod to `/mods` folder
 
 Enjoy Your GregTech Leisure experience! ~~you may see these machines after you don't want to play GregTech Leisure anymore~~
+
+## Recommend the JVM parameter
+
+> -Xms4G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:G1HeapWastePercent=8 -XX:G1MixedGCCountTarget=6 -XX:G1ReservePercent=10 \
+> -XX:+UseCompactObjectHeaders (if you use Java25)
 
 ## Features
 

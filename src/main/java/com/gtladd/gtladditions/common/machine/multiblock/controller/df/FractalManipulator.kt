@@ -31,16 +31,20 @@ import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
 import net.minecraft.network.chat.HoverEvent
 
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
-import com.gtladd.gtladditions.api.recipe.ContentList
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.IWirelessGTRecipe
+import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
+import com.gtladd.gtladditions.api.recipe.content.ContentList
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.create
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MachineUtil.inputItemStack
 import com.gtladd.gtladditions.utils.MathUtil.maxToLong
 import com.gtladd.gtladditions.utils.Registries.getItemStack
@@ -51,7 +55,16 @@ import java.math.BigInteger
 class FractalManipulator(holder: IMachineBlockEntity) :
     WorkableElectricMultiblockMachine(holder),
     IModularMachineModule<RecursiveReverseForge, FractalManipulator>,
-    IMachineLife {
+    IMachineLife,
+    IRecipeSearchProvider {
+
+    private var searchCtx: RecipeSearchContext? = null
+
+    override fun getSearchContext(): RecipeSearchContext? = searchCtx
+
+    override fun setSearchContext(ctx: RecipeSearchContext?) {
+        searchCtx = ctx
+    }
 
     @Persisted
     private var hostPosition: BlockPos? = null
@@ -110,7 +123,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
             .addWorkingStatusLine()
             .addProgressLine(recipeLogic.progressPercent)
             .addRecipeStatus(recipeLogic as IRecipeStatus)
-            .addComponent(translatable("gtceu.machine.recursive_reverse_forge.gui.module.4", if (host == null) "×" else "✓"),)
+            .addComponent(translatable("gtceu.machine.recursive_reverse_forge.gui.module.4", if (host == null) "×" else "✓"))
         builder.addComponent(
             translatable("gtceu.machine.fractal_manipulator.gui.module.$m1", translatable("block.gtladditions.catalytic_cascade_array")),
             translatable("gtceu.machine.fractal_manipulator.gui.module.$m2", translatable("block.gtladditions.hyperdimensional_energy_concentrator"))
@@ -125,6 +138,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
     override fun onStructureInvalid() {
         super.onStructureInvalid()
         removeFromHost(this.host)
+        searchCtx = null
     }
 
     override fun onPartUnload() {
@@ -177,10 +191,17 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                     } else {
                         fmMachine.tier
                     }
+                val ctx = fmMachine.getActiveSearchContext()
                 (
-                    lastOriginRecipe ?: fmMachine.recipeType.lookup.find(fmMachine) {
-                        matchRecipe(fmMachine, it) && it.euTier <= effectiveTier
-                    }
+                    lastOriginRecipe ?: (
+                        if (ctx != null) {
+                            OptimizedRecipeSearch.find(fmMachine, OptimizedRecipeSearch.branchOf(fmMachine.recipeType.lookup)) {
+                                it.euTier <= effectiveTier
+                            }
+                        } else {
+                            null
+                        }
+                        )
                     )?.let { recipe ->
                     val isWireless = fmMachine.host?.hecModule?.isWorkingEnabled == true
                     FastRecipeModify.rrfModify(
@@ -191,11 +212,9 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                         Int.MAX_VALUE.toLong(),
                         FastRecipeModify.getPerfectOverclock()
                     ) { copiedRecipe ->
-                        val modifiedRecipe = fmMachine.host?.ccaModule?.modifyRecipe(copiedRecipe)
-                            ?: copiedRecipe
+                        val modifiedRecipe = fmMachine.host?.ccaModule?.modifyRecipe(copiedRecipe) ?: copiedRecipe
 
                         modifiedRecipe.setEU((modifiedRecipe.getEU * 0.8) maxToLong 1)
-
                         val originalEUt = recipe.getEU.toDouble()
                         val energyMultiplier = if (originalEUt == 0.0) {
                             1.0
@@ -237,7 +256,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
             lastRecipe = null
             lastOriginRecipe = null
             recipeStatus = null
-            handleGTRecipe()
+            fmMachine.withSearchContext { handleGTRecipe() }
         }
 
         override fun setupRecipe(recipe: GTRecipe) {
@@ -249,6 +268,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                 this.status = Status.WORKING
                 this.progress = 0
                 this.duration = recipe.duration
+                fmMachine.getActiveSearchContext()?.deductRecipe(recipe) // 消耗后扣账
             }
         }
 
@@ -279,7 +299,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                     this.status = Status.SUSPEND
                     ism.`gtlcore$setSuspendAfterFinish`(false)
                 } else {
-                    if (handleGTRecipe()) return
+                    if (fmMachine.withSearchContext { handleGTRecipe() }) return
                     status = Status.IDLE
                 }
             }

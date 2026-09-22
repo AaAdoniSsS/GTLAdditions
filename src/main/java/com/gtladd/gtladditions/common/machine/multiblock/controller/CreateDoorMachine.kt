@@ -31,13 +31,15 @@ import com.glodblock.github.extendedae.common.EPPItemAndBlock
 import com.gtladd.gtladditions.api.machine.ConversationMachine
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import com.gtladd.gtladditions.utils.MathUtil.minToLong
 import com.gtladd.gtladditions.utils.Registries.getItemStack
 
 class CreateDoorMachine(holder: IMachineBlockEntity) : ConversationMachine(holder) {
 
     override fun onWorking(): Boolean {
-        this.recipeLogic.progress.takeIf { it == 5 && level is ServerLevel }?.let {
+        if (this.recipeLogic.progress == 5 && level is ServerLevel) {
             val sl = level as ServerLevel
             val pos = pos.offset(0, -13, 0)
             sl.sendParticles(ParticleTypes.DRAGON_BREATH, pos.x.toDouble(), pos.y.toDouble(), pos.z.toDouble(), 1000, 4.0, 4.0, 4.0, 0.01)
@@ -132,16 +134,15 @@ class CreateDoorMachine(holder: IMachineBlockEntity) : ConversationMachine(holde
 
     override fun getStartRecipe() = dRecipe
 
-    override fun isWork(): Boolean {
+    override fun beforeWork(): Boolean {
         val c = getCircuit()
-        return c == 1 || c == 24
+        return (c == 1 || c == 24) && super.beforeWork()
     }
 
     @Suppress("CAST_NEVER_SUCCEEDS")
     override fun tickConsume(): Boolean {
-        val ecList = (this as IEnergyMachine).energyContainerList
-        if (EU <= ecList.energyStored) {
-            ecList.changeEnergy(-EU)
+        if (EU.matchEUt(this as IEnergyMachine)) {
+            EU.handleEUt(this)
             return true
         }
         return false

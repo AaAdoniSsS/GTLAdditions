@@ -25,7 +25,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.HoverEvent;
 import net.minecraft.network.chat.Style;
 
-import com.gtladd.gtladditions.api.recipe.ContentList;
+import com.gtladd.gtladditions.api.recipe.content.ContentList;
 import com.gtladd.gtladditions.common.machine.GTLAddMachines;
 import com.gtladd.gtladditions.common.machine.hatch.HugeSteamHatchPartMachine;
 import com.gtladd.gtladditions.utils.GTRecipeUtils;

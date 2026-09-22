@@ -10,9 +10,10 @@ import net.minecraft.world.level.saveddata.SavedData
 import net.minecraftforge.event.TickEvent
 
 import com.gtladd.gtladditions.GTLAdditions
+import it.unimi.dsi.fastutil.objects.ObjectArrayList
 
 class StagedBlastManager(private val level: ServerLevel) {
-    private val active = ArrayList<StagedSphereExplosion>()
+    private val active = ObjectArrayList<StagedSphereExplosion>()
     private var persistCooldown = 0
 
     fun submit(blast: StagedSphereExplosion) {
@@ -21,7 +22,7 @@ class StagedBlastManager(private val level: ServerLevel) {
     }
 
     fun tick(event: TickEvent.LevelTickEvent) {
-        if (active.isEmpty()) return
+        if (active.isEmpty) return
 
         val iterator = active.iterator()
         var finishedAny = false
@@ -35,7 +36,7 @@ class StagedBlastManager(private val level: ServerLevel) {
         }
 
         if (finishedAny || --persistCooldown <= 0) {
-            persistCooldown = PERSIST_INTERVAL_TICKS
+            persistCooldown = 20
             persist()
         }
     }
@@ -53,7 +54,7 @@ class StagedBlastManager(private val level: ServerLevel) {
             DATA_NAME
         )
         val dimension = level.dimension().location().toString()
-        val records = data.blasts.filterTo(ArrayList()) { it.dimension != dimension }
+        val records = data.blasts.filterTo(ObjectArrayList()) { it.dimension != dimension }
         for (blast in active) {
             records.add(
                 BlastRecord(
@@ -72,7 +73,6 @@ class StagedBlastManager(private val level: ServerLevel) {
 
     companion object {
         private const val DATA_NAME = GTLAdditions.MOD_ID + "_staged_blasts"
-        private const val PERSIST_INTERVAL_TICKS = 20
 
         const val PROTECTED_RESISTANCE = 3_600_000f
 
@@ -81,13 +81,13 @@ class StagedBlastManager(private val level: ServerLevel) {
         private fun manager(level: ServerLevel): StagedBlastManager = MANAGERS.getOrPut(level.dimension().location()) { StagedBlastManager(level) }
 
         @JvmStatic
-        fun spawn(level: ServerLevel, centre: BlockPos, radius: Int, protectedResistance: Float? = PROTECTED_RESISTANCE) {
+        fun spawn(level: ServerLevel, centre: BlockPos, radius: Int) {
             manager(level).submit(
                 StagedSphereExplosion(
                     level = level,
                     centre = centre,
                     radius = radius,
-                    protectedResistance = protectedResistance,
+                    protectedResistance = PROTECTED_RESISTANCE,
                     removalsPerFrame = StagedSphereExplosion.removalsForRadius(radius),
                     sectionsPerFrame = StagedSphereExplosion.sectionsForRadius(radius),
                     chunkWindow = StagedSphereExplosion.chunkWindowForRadius(radius),
@@ -141,7 +141,7 @@ class StagedBlastManager(private val level: ServerLevel) {
         var blasts: List<BlastRecord> = emptyList()
 
         init {
-            val list = tag.getList("Blasts", NBT_TYPE_COMPOUND)
+            val list = tag.getList("Blasts", 10)
             val parsed = ArrayList<BlastRecord>(list.size)
             for (i in list.indices) parsed.add(BlastRecord.read(list.getCompound(i)))
             blasts = parsed
@@ -186,5 +186,3 @@ class StagedBlastManager(private val level: ServerLevel) {
         }
     }
 }
-
-private const val NBT_TYPE_COMPOUND = 10

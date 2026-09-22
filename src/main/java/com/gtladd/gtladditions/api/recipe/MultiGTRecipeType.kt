@@ -6,6 +6,8 @@ import com.gregtechceu.gtceu.api.registry.GTRegistries
 
 import net.minecraft.resources.ResourceLocation
 
+import com.gtladd.gtladditions.api.recipe.lookup.MultiGTRecipeLookup
+
 class MultiGTRecipeType : GTRecipeType {
     private val typeList: Array<GTRecipeType>
     private val lookup: MultiGTRecipeLookup

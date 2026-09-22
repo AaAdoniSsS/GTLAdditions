@@ -13,7 +13,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import it.unimi.dsi.fastutil.longs.LongArraySet;
 
-public class HarmonyManager {
+public final class HarmonyManager {
 
     private static final Int2ObjectOpenHashMap<LongArraySet> MACHINE = new Int2ObjectOpenHashMap<>(4);
 

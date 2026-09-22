@@ -32,15 +32,17 @@ import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
-import com.gtladd.gtladditions.api.machine.logic.GTLAddMultipleRecipesLogic
+import com.gtladd.gtladditions.api.machine.MultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.logic.MultipleRecipesLogic
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
+import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 
 import java.util.function.BiPredicate
 
 class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
-    GTLAddWorkableElectricMultipleRecipesMachine(holder), IMachineModifyDrops {
+    MultipleRecipesMachine(holder), IMachineModifyDrops {
 
     @Persisted
     val machineStorage: NotifiableItemStackHandler = NotifiableItemStackHandler(this, 1, IO.NONE, IO.BOTH) {
@@ -138,12 +140,14 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
     override fun getMaxParallel(): Int = maxParallels
 
     class BiologicalSimulationLaboratoryLogic(val bslMachine: BiologicalSimulationLaboratory) :
-        GTLAddMultipleRecipesLogic(bslMachine) {
+        MultipleRecipesLogic(bslMachine) {
 
         override fun findAndHandleRecipe() {
             lastRecipe = null
-            (if (this.isMultipleRecipe) getMultipleRecipe else this.oneRecipe)?.let {
-                if (matchRecipeOutput(this.bslMachine, it)) setupRecipe(it)
+            bslMachine.withSearchContext { ctx ->
+                (if (this.isMultipleRecipe) getMultipleRecipe(ctx) else this.oneRecipe)?.let {
+                    if (matchRecipeOutput(this.bslMachine, it)) setupRecipe(it)
+                }
             }
         }
 
@@ -152,7 +156,7 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
         val oneRecipe: GTRecipe?
             get() {
                 if (!bslMachine.hasProxies()) return null
-                (bslMachine.recipeType.lookup.find(bslMachine, this::checkRecipe))?.let {
+                (OptimizedRecipeSearch.find(bslMachine, OptimizedRecipeSearch.branchOf(bslMachine.recipeType.lookup), this::checkConditionsOnly))?.let {
                     return FastRecipeModify.modify(
                         bslMachine,
                         it,
@@ -171,10 +175,16 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
                     this.status = Status.SUSPEND
                     ism.`gtlcore$setSuspendAfterFinish`(false)
                 } else {
-                    (if (this.isMultipleRecipe) getMultipleRecipe else this.oneRecipe)?.let {
-                        if (matchRecipeOutput(this.bslMachine, it)) setupRecipe(it)
-                        return
+                    val continued = bslMachine.withSearchContext { ctx ->
+                        (if (this.isMultipleRecipe) getMultipleRecipe(ctx) else this.oneRecipe)?.let {
+                            if (matchRecipeOutput(this.bslMachine, it)) {
+                                setupRecipe(it)
+                                return@withSearchContext true
+                            }
+                        }
+                        false
                     }
+                    if (continued) return
                     status = Status.IDLE
                 }
             }
@@ -182,7 +192,7 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
             duration = 0
         }
 
-        override fun checkRecipe(recipe: GTRecipe): Boolean = BeforeTest.test(recipe, bslMachine) && super.checkRecipe(recipe)
+        override fun checkConditionsOnly(recipe: GTRecipe): Boolean = BeforeTest.test(recipe, bslMachine) && super.checkConditionsOnly(recipe)
     }
 
     companion object {
@@ -200,6 +210,6 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
             }
             return@BiPredicate false
         }
-        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(BiologicalSimulationLaboratory::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
+        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(BiologicalSimulationLaboratory::class.java, MultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
 }

@@ -41,8 +41,11 @@ import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.hatch.MEBlockConversationHatch
 import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import com.gtladd.gtladditions.utils.MathUtil.exp
 import com.gtladd.gtladditions.utils.MathUtil.pow
+import com.gtladd.gtladditions.utils.MathUtil.safeMultiply
 import com.gtladd.gtladditions.utils.Registries.getBlock
 import com.gtladd.gtladditions.utils.Registries.getItemStack
 import it.unimi.dsi.fastutil.Hash
@@ -98,15 +101,14 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
     open fun getStartRecipe(): GTRecipe = recipe
 
     open fun tickConsume(): Boolean {
-        val ecList = (this as IEnergyMachine).energyContainerList
-        if (this.maxVoltage > 0 && this.maxVoltage <= ecList.energyStored) {
-            ecList.changeEnergy(-this.maxVoltage)
+        if (this.maxVoltage.matchEUt(this as IEnergyMachine)) {
+            this.maxVoltage.handleEUt(this)
             return true
         }
         return false
     }
 
-    open fun isWork(): Boolean = true
+    open fun beforeWork(): Boolean = bcHatch!!.getAmount() >= (parallel safeMultiply if (cardId == 3) 8 else 1)
 
     override fun onStructureFormed() {
         super.onStructureFormed()
@@ -175,7 +177,7 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
 
         override fun findAndHandleRecipe() {
             lastRecipe = null
-            if (!cMachine.isWork()) return
+            if (!cMachine.beforeWork()) return
             setupRecipe(cMachine.getStartRecipe())
         }
 
@@ -201,7 +203,7 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
 
         override fun onRecipeFinish() {
             cMachine.afterWorking()
-            if (!cMachine.isWork()) {
+            if (!cMachine.beforeWork()) {
                 this.status = Status.IDLE
                 this.progress = 0
                 this.duration = 0

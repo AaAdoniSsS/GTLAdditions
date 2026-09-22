@@ -21,7 +21,7 @@ import net.minecraft.world.item.Item
 import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.level.material.Fluid
 
-import com.gtladd.gtladditions.api.recipe.ContentList
+import com.gtladd.gtladditions.api.recipe.content.ContentList
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.cellSet
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.itemSet
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
@@ -69,8 +69,8 @@ object RecipesModify {
         DISTORT_RECIPES.onRecipeBuild { recipeBuilder, provider ->
             val builder = GTLAddRecipesTypes.TIME_SPACE_DISTORTER.copyFrom(recipeBuilder)
             val (i, o) = modify(builder)
-            builder.input.replaceAll { t, u -> i[t] }
-            builder.output.replaceAll { t, u -> o[t] }
+            builder.input.replaceAll { t, _ -> i[t] }
+            builder.output.replaceAll { t, _ -> o[t] }
             builder.save(provider)
         }
         QFT_RECIPES.onRecipeBuild { recipeBuilder, provider ->
@@ -80,14 +80,14 @@ object RecipesModify {
                 return@onRecipeBuild
             }
             val (i, o) = modify(builder)
-            builder.input.replaceAll { t, u -> i[t] }
-            builder.output.replaceAll { t, u -> o[t] }
+            builder.input.replaceAll { t, _ -> i[t] }
+            builder.output.replaceAll { t, _ -> o[t] }
             builder.save(provider)
         }
         DIMENSIONALLY_TRANSCENDENT_PLASMA_FORGE_RECIPES.onRecipeBuild { recipeBuilder, provider ->
             val builder = GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.copyFrom(recipeBuilder)
             builder.id(recipeBuilder.id.withSuffix("_1"))
-            builder.input.forEach { t, u ->
+            builder.input.forEach { (t, u) ->
                 if (t == ItemRecipeCapability.CAP) {
                     u.forEach {
                         val item = (it.content as Ingredient).`kjs$getFirst`().item
@@ -98,12 +98,11 @@ object RecipesModify {
                     }
                 }
             }
-            builder.output.forEach { t, u ->
+            builder.output.forEach { (t, u) ->
                 if (t == ItemRecipeCapability.CAP) {
                     val a = ObjectArrayList<ObjectIntPair<Item>>()
                     u.forEach {
-                        val item = (it.content as Ingredient).`kjs$getFirst`().item
-                        when (item) {
+                        when (val item = (it.content as Ingredient).`kjs$getFirst`().item) {
                             in cellSet -> it.slotName = "c"
                             in itemSet -> it.slotName = "i"
                             else -> a.add(ObjectIntPair.of(item, it.amount(t).safeToInt))
@@ -127,7 +126,7 @@ object RecipesModify {
         STELLAR_FORGE_RECIPES.onRecipeBuild { recipeBuilder, provider ->
             val builder = GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.copyFrom(recipeBuilder)
             builder.id(recipeBuilder.id.withSuffix("_2"))
-            builder.input.forEach { t, u ->
+            builder.input.forEach { (t, u) ->
                 if (t == ItemRecipeCapability.CAP) {
                     u.forEach {
                         val item = (it.content as Ingredient).`kjs$getFirst`().item
@@ -138,12 +137,11 @@ object RecipesModify {
                     }
                 }
             }
-            builder.output.forEach { t, u ->
+            builder.output.forEach { (t, u) ->
                 if (t == ItemRecipeCapability.CAP) {
                     val a = ObjectArrayList<ObjectIntPair<Item>>()
                     u.forEach {
-                        val item = (it.content as Ingredient).`kjs$getFirst`().item
-                        when (item) {
+                        when (val item = (it.content as Ingredient).`kjs$getFirst`().item) {
                             in cellSet -> it.slotName = "c"
                             in itemSet -> it.slotName = "i"
                             else -> a.add(ObjectIntPair.of(item, it.amount(t).safeToInt))
@@ -170,7 +168,7 @@ object RecipesModify {
             val fluidIngredient = content.content as FluidIngredient
             val id = (fluidIngredient.stack.fluid as Fluid).builtInRegistryHolder().key().location().toString()
             if (id.contains("molten")) {
-                builder.output.put(CAP, listOf(Content(FluidIngredient.fromValues(SingleStream.createSingle(FluidIngredient.FluidValue(id.replace("molten_", "").getFluid)), fluidIngredient.amount, fluidIngredient.nbt), content.chance, content.maxChance, content.tierChanceBoost, content.slotName, content.uiName)))
+                builder.output[CAP] = listOf(Content(FluidIngredient.fromValues(SingleStream.createSingle(FluidIngredient.FluidValue(id.replace("molten_", "").getFluid)), fluidIngredient.amount, fluidIngredient.nbt), content.chance, content.maxChance, content.tierChanceBoost, content.slotName, content.uiName))
             }
             builder.duration((builder.duration * 0.8) maxToInt 1).save(provider)
         }
@@ -197,7 +195,7 @@ object RecipesModify {
                         }
                     }
                 }
-                ci.put(c, cl)
+                ci[c] = cl
             }
         }
         val co = Reference2ObjectOpenHashMap<RecipeCapability<*>, MutableList<Content>>(builder.output.size)
@@ -205,7 +203,7 @@ object RecipesModify {
             if (!l.isEmpty()) {
                 val cl = ContentList(l.size)
                 l.forEach { cl.addMaxChanceContent(it.content) }
-                co.put(c, cl)
+                co[c] = cl
             }
         }
         return Pair(ci, co)

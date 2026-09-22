@@ -22,16 +22,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Mod.EventBusSubscriber(modid = GTLAdditions.MOD_ID, value = Dist.CLIENT)
-public class ClientCloudHighlighter {
+public final class ClientCloudHighlighter {
 
-    private record Entry(BlockPos pos, String dim, long expireTick) {}
+    record Entry(BlockPos pos, String dim, long expireTick) {}
 
-    private static final List<Entry> ENTRIES = new ArrayList<>();
-    private static final long HIGHLIGHT_TICKS = 300;
-    private static final long COLOR_CYCLE_MS = 4000;
-    private static final float LINE_WIDTH = 5.0f;
+    static final List<Entry> ENTRIES = new ArrayList<>();
+    static final long HIGHLIGHT_TICKS = 300;
+    static final long COLOR_CYCLE_MS = 4000;
+    static final float LINE_WIDTH = 5.0f;
 
-    private static final RenderType HIGHLIGHT_LINES = RenderType.create(
+    static final RenderType HIGHLIGHT_LINES = RenderType.create(
             "gtladditions_highlight_lines",
             DefaultVertexFormat.POSITION_COLOR_NORMAL,
             VertexFormat.Mode.LINES,

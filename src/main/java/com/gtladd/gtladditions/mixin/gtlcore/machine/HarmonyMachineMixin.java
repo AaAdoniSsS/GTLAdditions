@@ -28,20 +28,21 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 
 import com.gtladd.gtladditions.api.manage.HarmonyManager;
-import com.gtladd.gtladditions.api.recipe.ContentList;
+import com.gtladd.gtladditions.api.recipe.content.ContentList;
 import com.gtladd.gtladditions.common.register.GTLAddItems;
 import com.gtladd.gtladditions.utils.MachineUtil;
 import com.llamalad7.mixinextras.sugar.Local;
-import dev.architectury.patchedmixin.staticmixin.spongepowered.asm.mixin.Overwrite;
 import lombok.val;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
+import java.util.Map;
 import java.util.UUID;
 
 import static org.gtlcore.gtlcore.utils.MachineIO.inputFluid;
@@ -67,9 +68,12 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
         super(holder, args);
     }
 
-    @Unique
+    /**
+     * @author .
+     * @reason .
+     */
     @Overwrite(remap = false)
-    protected void gTLAdditions$StartupUpdate() {
+    protected void StartupUpdate() {
         if (this.getOffsetTimer() % 20L == 0L) {
             this.oc = 0;
             if (this.hydrogen < 10000000000L && inputFluid(this, gTLAdditions$Hydrogen)) this.hydrogen += 100000000L;
@@ -95,11 +99,11 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
     private static @NotNull GTRecipe modify(GTRecipe instance, @Local(name = "machine") MetaMachine machine) {
         val hm = (HarmonyMachineMixin) machine;
         if (hm.gTLAdditions$machineStorage.storage.getStackInSlot(0).is(GTLAddItems.CREATE_DATA.get())) {
-            GTRecipe modified = new GTRecipe(
+            return new GTRecipe(
                     instance.recipeType,
                     instance.id,
                     instance.inputs,
-                    instance.outputs,
+                    Map.of(FluidRecipeCapability.CAP, ContentList.Companion.getFluidStackList(GTLMaterials.RawStarMatter.getFluid(FluidStorageKeys.PLASMA, 1310720 * 12))),
                     instance.tickInputs,
                     instance.tickOutputs,
                     instance.inputChanceLogics,
@@ -111,9 +115,6 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
                     instance.data,
                     instance.duration,
                     instance.isFuel);
-            modified.outputs.clear();
-            modified.outputs.put(FluidRecipeCapability.CAP, ContentList.Companion.getFluidStackList(GTLMaterials.RawStarMatter.getFluid(FluidStorageKeys.PLASMA, 1310720 * 12)));
-            return modified;
         } else {
             return instance.copy();
         }
@@ -149,5 +150,11 @@ public class HarmonyMachineMixin extends NoEnergyMultiblockMachine implements IM
     public void onLoad() {
         super.onLoad();
         if (!isRemote()) HarmonyManager.update((ServerLevel) this.getLevel(), this.getPos());
+    }
+
+    @Override
+    public void onUnload() {
+        super.onUnload();
+        if (!isRemote()) HarmonyManager.remove((ServerLevel) this.getLevel(), this.getPos());
     }
 }

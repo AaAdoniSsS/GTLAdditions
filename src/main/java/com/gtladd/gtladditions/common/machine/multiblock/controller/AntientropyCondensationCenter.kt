@@ -1,6 +1,7 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
+import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
 
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
@@ -17,8 +18,7 @@ import net.minecraft.world.level.Level
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricParallelHatchMultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipesMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.CreateUltimateBattery
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.CryotheumDust
@@ -28,9 +28,11 @@ import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
 import com.gtladd.gtladditions.utils.MathUtil.safeToInt
 
-class AntientropyCondensationCenter(holder: IMachineBlockEntity) : GTLAddWorkableElectricParallelHatchMultipleRecipesMachine(holder) {
+class AntientropyCondensationCenter(holder: IMachineBlockEntity) : MultipleRecipesMachine(holder) {
     @Persisted
     private var isModify = false
+
+    override fun getMaxParallel(): Int = GTLRecipeModifiers.getHatchParallel(this)
 
     override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
         val multiplier = if (isModify) {
@@ -64,6 +66,6 @@ class AntientropyCondensationCenter(holder: IMachineBlockEntity) : GTLAddWorkabl
     override fun getFieldHolder() = MANAGED_FIELD_HOLDER
 
     companion object {
-        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(AntientropyCondensationCenter::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
+        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(AntientropyCondensationCenter::class.java, MultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
 }

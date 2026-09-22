@@ -3,7 +3,6 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
 
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
-import com.gregtechceu.gtceu.api.machine.MetaMachine
 import com.gregtechceu.gtceu.api.pattern.MultiblockWorldSavedData
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.logic.OCParams
@@ -63,18 +62,16 @@ class DraconicCollapseCore(holder: IMachineBlockEntity) : StorageMachine(holder,
 
     override fun getFieldHolder() = MANAGED_FIELD_HOLDER
 
+    override fun fullModifyRecipe(recipe: GTRecipe, params: OCParams, result: OCResult): GTRecipe? {
+        return FastRecipeModify.modify(
+            this,
+            recipe,
+            (if (isSuper) 12L else 8L).pow(tier - 10),
+            ocResult = FastRecipeModify.getPerfectOverclock()
+        ) { FastRecipeModify.getDefaultReduce() }
+    }
+
     companion object {
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(DraconicCollapseCore::class.java, StorageMachine.MANAGED_FIELD_HOLDER)
-        fun recipeModify(machine: MetaMachine, recipe: GTRecipe, ocParams: OCParams, ocResult: OCResult): GTRecipe? {
-            if (machine is DraconicCollapseCore) {
-                return FastRecipeModify.modify(
-                    machine,
-                    recipe,
-                    (if (machine.isSuper) 12L else 8L).pow(machine.tier - 10),
-                    ocResult = FastRecipeModify.getPerfectOverclock()
-                ) { FastRecipeModify.getDefaultReduce() }
-            }
-            return null
-        }
     }
 }

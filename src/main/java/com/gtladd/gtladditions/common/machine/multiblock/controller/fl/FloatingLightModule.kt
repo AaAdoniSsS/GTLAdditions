@@ -13,8 +13,8 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesTypesMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipesTypesMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.ReduceResult
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightPosHelper.calculatePossibleHostPositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
@@ -22,12 +22,12 @@ import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import kotlin.math.pow
 
 abstract class FloatingLightModule(holder: IMachineBlockEntity) :
-    GTLAddWorkableElectricMultipleRecipesTypesMachine(holder),
+    MultipleRecipesTypesMachine(holder),
     IModularMachineModule<FloatingLightController, FloatingLightModule>,
     IMachineLife {
 
     companion object {
-        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(FloatingLightModule::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
+        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(FloatingLightModule::class.java, MultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
 
     override fun onStructureFormed() {

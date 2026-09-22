@@ -21,7 +21,7 @@ import net.minecraft.world.item.Items
 
 import com.gtladd.gtladditions.api.machine.ConversationMachine.Companion.MagmatterBlock
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
-import com.gtladd.gtladditions.api.recipe.ContentList
+import com.gtladd.gtladditions.api.recipe.content.ContentList
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.BlackBodyNaquadriaSupersolid
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.HyperStableSelfHealingAdhesive
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.QuantumAnomaly

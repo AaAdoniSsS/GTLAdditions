@@ -18,8 +18,8 @@ import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
-import com.gtladd.gtladditions.api.machine.logic.GTLAddMultipleRecipesLogic
+import com.gtladd.gtladditions.api.machine.MultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.logic.MultipleRecipesLogic
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.format
@@ -28,7 +28,7 @@ import com.gtladd.gtladditions.utils.MathUtil.pow
 import kotlin.math.pow
 
 class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
-    GTLAddWorkableElectricMultipleRecipesMachine(holder),
+    MultipleRecipesMachine(holder),
     IModularMachineModule<SpaceElevatorMachine, AdvancedSpaceElevatorModuleMachine>,
     IMachineLife {
 
@@ -43,7 +43,7 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
     companion object {
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(
             AdvancedSpaceElevatorModuleMachine::class.java,
-            GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER
+            MultipleRecipesMachine.MANAGED_FIELD_HOLDER
         )
     }
 
@@ -229,11 +229,11 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
     }
 
     class AdvancedSpaceElevatorModuleMachineRecipeLogic(val asemMachine: AdvancedSpaceElevatorModuleMachine) :
-        GTLAddMultipleRecipesLogic(asemMachine) {
+        MultipleRecipesLogic(asemMachine) {
 
-        override fun checkRecipe(recipe: GTRecipe): Boolean {
+        override fun checkConditionsOnly(recipe: GTRecipe): Boolean {
             if (asemMachine.spaceElevatorTier < 1) asemMachine.getSpaceElevatorTier()
-            return asemMachine.spaceElevatorTier >= 1 && super.checkRecipe(recipe)
+            return asemMachine.spaceElevatorTier >= 1 && super.checkConditionsOnly(recipe)
         }
     }
 }

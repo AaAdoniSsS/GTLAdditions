@@ -20,7 +20,7 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.material.Fluids
 
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
-import com.gtladd.gtladditions.api.recipe.ContentList.MaxChanceContent
+import com.gtladd.gtladditions.api.recipe.content.ContentList.MaxChanceContent
 import com.gtladd.gtladditions.common.data.RecipesModify
 import com.gtladd.gtladditions.common.machine.hatch.SuperDualHatchPartMachine
 import com.gtladd.gtladditions.common.machine.hatch.VientianeTranscriptionNode

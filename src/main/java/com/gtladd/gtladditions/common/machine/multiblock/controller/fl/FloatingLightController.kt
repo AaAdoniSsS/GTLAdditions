@@ -32,6 +32,8 @@ import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightPosHelper.calculateModulePositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 
 import java.util.function.Consumer
@@ -58,6 +60,7 @@ class FloatingLightController(holder: IMachineBlockEntity) :
 
     override fun onStructureInvalid() {
         super.onStructureInvalid()
+        this.fluidHatch = null
         safeClearModules()
     }
 
@@ -106,8 +109,6 @@ class FloatingLightController(holder: IMachineBlockEntity) :
     override fun getModuleSet() = this.modulePos
 
     override fun getModuleScanPositions(): Array<out BlockPos> = calculateModulePositions(pos, frontFacing)
-
-    override fun isFormed() = this.isFormed
 
     override fun getMaxModuleCount() = 32
 
@@ -382,9 +383,8 @@ class FloatingLightController(holder: IMachineBlockEntity) :
         }
 
         override fun handleRecipeWorking() {
-            val ecList = (flMachine as IEnergyMachine).energyContainerList
-            if (flMachine.maxVoltage > 0 && flMachine.maxVoltage <= ecList.energyStored) {
-                ecList.removeEnergy(flMachine.maxVoltage)
+            if (flMachine.maxVoltage.matchEUt(flMachine as IEnergyMachine)) {
+                flMachine.maxVoltage.handleEUt(flMachine)
                 this.status = Status.WORKING
                 ++this.progress
                 if (progress == 3) {

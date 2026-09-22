@@ -35,7 +35,7 @@ import dev.latvian.mods.kubejs.KubeJS
 class CreateAggregationMachine(holder: IMachineBlockEntity) : ConversationMachine(holder) {
 
     override fun onWorking(): Boolean {
-        recipeLogic.progress.takeIf { it == 19 && level is ServerLevel && getCircuit() == 1 }?.let {
+        if (recipeLogic.progress == 19 && level is ServerLevel && getCircuit() == 1) {
             val pos = pos.offset(0, -16, 0)
             when (level!!.getBlockState(pos).block) {
                 CommandBlockBroken -> if (this.inputItemStack(ChainCommandBlockCore)) {
@@ -106,9 +106,9 @@ class CreateAggregationMachine(holder: IMachineBlockEntity) : ConversationMachin
         }
     }
 
-    override fun isWork(): Boolean {
+    override fun beforeWork(): Boolean {
         val c = getCircuit()
-        return c == 1 || c == 24
+        return (c == 1 || c == 24) && super.beforeWork()
     }
 
     @Suppress("CAST_NEVER_SUCCEEDS")

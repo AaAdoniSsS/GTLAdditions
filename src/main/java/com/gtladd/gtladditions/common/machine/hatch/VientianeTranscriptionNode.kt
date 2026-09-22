@@ -19,10 +19,7 @@ import com.lowdragmc.lowdraglib.utils.Position
 import com.lowdragmc.lowdraglib.utils.Size
 
 import net.minecraft.core.Direction
-import net.minecraft.network.chat.Component
 import net.minecraft.util.Mth
-
-import java.util.List
 
 class VientianeTranscriptionNode(holder: IMachineBlockEntity) : MultiblockPartMachine(holder) {
 
@@ -79,7 +76,7 @@ class VientianeTranscriptionNode(holder: IMachineBlockEntity) : MultiblockPartMa
         ) {
             override fun updateScreen() {
                 super.updateScreen()
-                setHoverTooltips(List.copyOf<Component>(LangHandler.getMultiLang("gui.gtceu.vientiane_transcription_node.invert." + (if (isPressed) "enabled" else "disabled"))))
+                setHoverTooltips(LangHandler.getMultiLang("gui.gtceu.vientiane_transcription_node.invert." + (if (isPressed) "enabled" else "disabled")).map { it.`kjs$self`() })
             }
         })
         return group

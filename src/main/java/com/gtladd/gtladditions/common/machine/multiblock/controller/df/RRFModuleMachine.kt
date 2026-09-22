@@ -106,9 +106,8 @@ abstract class RRFModuleMachine(holder: IMachineBlockEntity) :
             IFancyConfiguratorButton.Toggle(
                 GuiTextures.BUTTON_POWER.getSubTexture(0.0, 0.0, 1.0, 0.5),
                 GuiTextures.BUTTON_POWER.getSubTexture(0.0, 0.5, 1.0, 0.5),
-                this::isWorking,
-                { _, pressed -> this.setWorkable(pressed) }
-            )
+                this::isWorking
+            ) { _, pressed -> this.setWorkable(pressed) }
                 .setTooltipsSupplier { listOf((if (it) "behaviour.soft_hammer.enabled" else "behaviour.soft_hammer.disabled").toComponent) }
         )
     }

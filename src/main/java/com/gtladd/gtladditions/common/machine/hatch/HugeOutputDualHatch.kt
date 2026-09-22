@@ -18,9 +18,8 @@ class HugeOutputDualHatch(holder: IMachineBlockEntity, tier: Int, io: IO, vararg
         val button = IFancyConfiguratorButton.Toggle(
             GuiTextures.BUTTON_POWER.getSubTexture(0.0f, 0.0f, 1.0f, 0.5f),
             GuiTextures.BUTTON_POWER.getSubTexture(0.0f, 0.5f, 1.0f, 0.5f),
-            this::isWorkingEnabled,
-            { _: ClickData, pressed: Boolean -> this.isWorkingEnabled = pressed }
-        ).setTooltipsSupplier { pressed ->
+            this::isWorkingEnabled
+        ) { _: ClickData, pressed: Boolean -> this.isWorkingEnabled = pressed }.setTooltipsSupplier { pressed ->
             listOf(
                 Component.translatable(
                     if (pressed) {

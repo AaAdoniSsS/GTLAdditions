@@ -37,8 +37,11 @@ import net.minecraft.world.item.ItemStack
 
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.IMultipleRecipeTypeMachine
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
+import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.Hypercube
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.QuantumAnomaly
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
@@ -47,8 +50,11 @@ import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getOverclockRecipe
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.longParallel
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.modify
+import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MachineUtil.inputFluidStack
 import com.gtladd.gtladditions.utils.MachineUtil.inputItemStack
 import com.gtladd.gtladditions.utils.MachineUtil.maintenance
@@ -58,7 +64,15 @@ import com.gtladd.gtladditions.utils.MathUtil.safeToInt
 import it.unimi.dsi.fastutil.ints.IntArrayList
 
 open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
-    WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine, ParallelMachine {
+    WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine, ParallelMachine, IRecipeSearchProvider {
+
+    private var searchCtx: RecipeSearchContext? = null
+
+    override fun getSearchContext(): RecipeSearchContext? = searchCtx
+
+    override fun setSearchContext(ctx: RecipeSearchContext?) {
+        searchCtx = ctx
+    }
 
     @Persisted
     private var config = 1
@@ -71,6 +85,11 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
     override fun getRecipeLogic(): TimeSpaceDistorterRecipeLogic = super.getRecipeLogic() as TimeSpaceDistorterRecipeLogic
 
     override fun getFieldHolder(): ManagedFieldHolder = MANAGED_FIELD_HOLDER
+
+    override fun onStructureInvalid() {
+        super.onStructureInvalid()
+        searchCtx = null
+    }
 
     override fun attachConfigurators(configuratorPanel: ConfiguratorPanel) {
         configuratorPanel.attachConfigurators(
@@ -140,24 +159,50 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             this.lastOriginRecipe = null
             this.recipeStatus = null
             this.recipeList.clear()
-            if (tsdMachine.isMultiple) {
-                tsdMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = 16, minDuration = 1)?.let {
-                    if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) setupRecipe(it)
-                }
-            } else {
-                lookup.find(machine, ::checkRecipe)?.let { recipe ->
-                    this.modifyRecipe(recipe, tsdMachine.maxParallel.toLong())?.let {
-                        if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) {
-                            lastOriginRecipe = recipe
-                            setupRecipe(it)
-                        }
+            tsdMachine.withSearchContext { ctx ->
+                if (tsdMachine.isMultiple) {
+                    tsdMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = 16, minDuration = 1, ctx = ctx)?.let {
+                        if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) setupRecipe(it)
                     }
+                } else {
+                    findAndSetupSingle(ctx, reuseLast = false)
                 }
             }
         }
 
+        private fun checkConditionsOnly(recipe: GTRecipe): Boolean = !this.recipeList.contains(recipe.id.hashCode()) &&
+            IGTRecipe.of(recipe).euTier <= tsdMachine.tier && recipe.checkConditions(this).isSuccess
+
+        private fun findAndSetupSingle(ctx: RecipeSearchContext?, reuseLast: Boolean): Boolean {
+            val recipe = (
+                if (reuseLast) {
+                    lastOriginRecipe
+                } else if (ctx != null) {
+                    OptimizedRecipeSearch.find(tsdMachine, OptimizedRecipeSearch.branchOf(lookup), ::checkConditionsOnly)
+                } else {
+                    null
+                }
+                ) ?: return false
+            var p = tsdMachine.maxParallel.toLong()
+            if (ctx != null) {
+                p = ctx.getMaxParallel(recipe, p)
+                if (p < 1) return false
+            }
+            val modified = this.modifyRecipe(recipe, p) ?: return false
+            if (!RecipeRunnerHelper.matchRecipe(tsdMachine, modified)) return false
+            lastOriginRecipe = recipe
+            setupRecipe(modified)
+            return true
+        }
+
         private fun findAndModifyRecipe(parallel: Long): GTRecipe? {
-            lookup.find(machine, ::checkRecipe)?.let { recipe ->
+            val ctx = tsdMachine.getActiveSearchContext()
+            val found = if (ctx != null) {
+                OptimizedRecipeSearch.find(tsdMachine, OptimizedRecipeSearch.branchOf(lookup), ::checkConditionsOnly)
+            } else {
+                lookup.find(machine, ::checkRecipe)
+            }
+            found?.let { recipe ->
                 this.modifyRecipe(recipe, parallel)?.let {
                     this.recipeList.add(recipe.id.hashCode())
                     return it
@@ -176,6 +221,7 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                 this.status = Status.WORKING
                 this.progress = 0
                 this.duration = recipe.duration
+                tsdMachine.getActiveSearchContext()?.deductRecipe(recipe)
             }
         }
 
@@ -185,10 +231,9 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                 return
             }
             checkNotNull(lastRecipe)
-            val energyMachine = tsdMachine as IEnergyMachine
-            if (eut > 0 && eut <= energyMachine.energyContainerList.energyStored) {
+            if (eut.matchEUt(tsdMachine as IEnergyMachine)) {
                 this.status = Status.WORKING
-                energyMachine.energyContainerList.changeEnergy(-eut)
+                eut.handleEUt(tsdMachine)
                 ++this.progress
             } else {
                 this.setWaiting(null)
@@ -205,24 +250,20 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                     this.status = Status.SUSPEND
                     ism.`gtlcore$setSuspendAfterFinish`(false)
                 } else {
-                    if (tsdMachine.isMultiple) {
-                        tsdMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = 16, minDuration = 1)?.let {
-                            if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) {
-                                setupRecipe(it)
-                                return
-                            }
-                        }
-                    } else {
-                        (lastOriginRecipe ?: lookup.find(machine, ::checkRecipe))?.let { recipe ->
-                            this.modifyRecipe(recipe, tsdMachine.maxParallel.toLong())?.let {
+                    var continued = false
+                    tsdMachine.withSearchContext { ctx ->
+                        if (tsdMachine.isMultiple) {
+                            tsdMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = 16, minDuration = 1, ctx = ctx)?.let {
                                 if (RecipeRunnerHelper.matchRecipeOutput(tsdMachine, it)) {
-                                    lastOriginRecipe = recipe
                                     setupRecipe(it)
-                                    return
+                                    continued = true
                                 }
                             }
+                        } else {
+                            continued = findAndSetupSingle(ctx, reuseLast = lastOriginRecipe != null)
                         }
                     }
+                    if (continued) return
                     this.status = Status.IDLE
                 }
             }

@@ -51,7 +51,7 @@ public class CloudOpticalComputationContainer extends NotifiableComputationConta
                     }
                     sum -= (lastResearch = drawn);
                 } else {
-                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(uuid, sum, simulate);;
+                    sum -= (int) CloudOpticalComputationMonitorMachine.requestCWU(uuid, sum, simulate);
                 }
             }
         }

@@ -1,8 +1,8 @@
 package com.gtladd.gtladditions.utils
 
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
+import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
-import org.gtlcore.gtlcore.api.recipe.IParallelLogic
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeInput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipeInput
 import org.gtlcore.gtlcore.api.recipe.chance.LongChanceLogic
@@ -29,8 +29,12 @@ import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.Ingredient
 import net.minecraft.world.level.material.Fluid
 
-import com.gtladd.gtladditions.api.recipe.ContentList
+import com.gtladd.gtladditions.api.machine.IEnergyMachine
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
+import com.gtladd.gtladditions.api.recipe.ParallelCalculate
+import com.gtladd.gtladditions.api.recipe.content.ContentList
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.mixin.gtceu.api.FluidValueAccessor
 import com.gtladd.gtladditions.utils.MachineUtil.maintenance
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
@@ -46,7 +50,19 @@ import java.util.function.Predicate
 @Suppress("UNCHECKED_CAST", "CAST_NEVER_SUCCEEDS")
 object GTRecipeUtils {
 
-    fun WorkableElectricMultiblockMachine.getOverclockRecipe(getRecipe: (Long) -> GTRecipe?, testBefore: (Any) -> Boolean = { true }, maxThread: Int, minDuration: Int): GTRecipe? {
+    fun <T> WorkableElectricMultiblockMachine.withSearchContext(block: (RecipeSearchContext?) -> T): T {
+        val provider = this as? IRecipeSearchProvider
+        if (provider == null || this !is IRecipeCapabilityMachine) return block(null)
+        provider.getActiveSearchContext()?.let { return block(it) }
+        val ctx = provider.beginSearchCycle(this)
+        return try {
+            block(ctx)
+        } finally {
+            provider.endSearchCycle()
+        }
+    }
+
+    fun WorkableElectricMultiblockMachine.getOverclockRecipe(getRecipe: (Long) -> GTRecipe?, testBefore: (Any) -> Boolean = { true }, maxThread: Int, minDuration: Int, ctx: RecipeSearchContext? = null): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
@@ -60,13 +76,15 @@ object GTRecipeUtils {
             val recipe = getRecipe.invoke(p) ?: break
             if (testBefore.invoke(recipe as Any)) {
                 if (handleRecipeInput(this, recipe)) {
+                    ctx?.deductRecipe(recipe)
                     hasSubTickParallelized = hasSubTickParallelized ||
                         IGTRecipe.of(recipe).isSubTickParallelized
                     totalEu += recipe.duration * recipe.getEU.toDouble()
-                    il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
-                    fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
+                    recipe.getOutputContents(ItemRecipeCapability.CAP)?.let { il.addAll(it) }
+                    recipe.getOutputContents(FluidRecipeCapability.CAP)?.let { fl.addAll(it) }
                     batchSize = batchSize.coerceAtLeast(IGTRecipe.of(recipe).batchSize)
                 } else {
+                    ctx?.markStale()
                     break
                 }
             } else {
@@ -86,7 +104,7 @@ object GTRecipeUtils {
         return result
     }
 
-    fun WorkableElectricMultiblockMachine.getFastMultipleRecipe(getRecipe: (Long) -> GTRecipe?, maxThread: Int, minDuration: Int): GTRecipe? {
+    fun WorkableElectricMultiblockMachine.getFastMultipleRecipe(getRecipe: (Long) -> GTRecipe?, maxThread: Int, minDuration: Int, ctx: RecipeSearchContext? = null): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
@@ -97,11 +115,13 @@ object GTRecipeUtils {
         while (rp > 0) {
             val recipe = getRecipe.invoke(rp) ?: break
             if (handleRecipeInput(this, recipe)) {
+                ctx?.deductRecipe(recipe)
                 rp -= recipe.longParallel
                 totalEu += recipe.duration * recipe.getEU.toDouble()
                 il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
                 fl.addAll(recipe.getOutputContents(FluidRecipeCapability.CAP))
             } else {
+                ctx?.markStale()
                 break
             }
             if (totalEu > maxEUt.toDouble() * 20 * 500) break
@@ -115,7 +135,7 @@ object GTRecipeUtils {
         return o.buildRawRecipe().markInternallyAggregated()
     }
 
-    fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Any) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int): GTRecipe? {
+    fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Any) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int, ctx: RecipeSearchContext? = null): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
@@ -128,7 +148,7 @@ object GTRecipeUtils {
         val q = ObjectArrayFIFOQueue<RecipeData>(length)
         val recipeList = ObjectArrayList<GTRecipe>(length)
         for (r in getRecipeSet) {
-            val p = IParallelLogic.getMaxParallel(this, r, mp * maxThread)
+            val p = ctx?.getPoolParallel(r, mp * maxThread) ?: ParallelCalculate.getMaxParallel(this, r, mp * maxThread)
             if (p <= 0) continue
             recipeList.add(r)
             pa[i] = p minToLong (mp * maxThread / length)
@@ -155,9 +175,22 @@ object GTRecipeUtils {
         val fl = ContentList()
         var totalEu = .0
         for (recipe in recipeList) {
-            val c = recipe.copy(this, if (pa[i] > 1) pa[i] else 1, recipe.duration)
+            val par = if (pa[i] > 1) pa[i] else 1
+            var ok = false
+            var c: GTRecipe? = null
+            if (ctx != null) {
+                val plan = ctx.allocate(recipe, par)
+                if (plan != null) {
+                    c = recipe.copy(this, plan.parallel, recipe.duration)
+                    ok = handleRecipeInput(this, c)
+                    if (ok) ctx.deduct(recipe, c, plan) else ctx.markStale()
+                }
+            } else {
+                c = recipe.copy(this, par, recipe.duration)
+                ok = matchRecipeInput(this, c) && handleRecipeInput(this, c)
+            }
             i++
-            if (matchRecipeInput(this, c) && handleRecipeInput(this, c)) {
+            if (ok && c != null) {
                 val red = modifyRecipe.invoke(c)
                 totalEu += c.getEU.toDouble() * c.duration * this.maintenance() * red.reduceEUt * red.reduceDuration
                 il.addAll(c.getOutputContents(ItemRecipeCapability.CAP))
@@ -172,6 +205,14 @@ object GTRecipeUtils {
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
         return o.buildRawRecipe().markInternallyAggregated()
+    }
+
+    fun GTRecipe.matchEUt(machine: IEnergyMachine) = this.getEU <= machine.energyContainerList.energyStored
+
+    fun Long.matchEUt(machine: IEnergyMachine) = this > 0 && this <= machine.energyContainerList.energyStored
+
+    fun Long.handleEUt(machine: IEnergyMachine) {
+        machine.energyContainerList.removeEnergy(this)
     }
 
     val GTRecipe.copy: GTRecipe get() = GTRecipe(

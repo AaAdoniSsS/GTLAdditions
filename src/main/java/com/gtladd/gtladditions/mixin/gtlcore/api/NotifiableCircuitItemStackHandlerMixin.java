@@ -14,7 +14,7 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer;
 
 import net.minecraft.world.item.crafting.Ingredient;
 
-import com.gtladd.gtladditions.mixin.gtceu.api.recipe.IIntCircuitIngredientAccessor;
+import com.gtladd.gtladditions.mixin.gtceu.api.recipe.ingredient.IntCircuitIngredientAccessor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,9 +53,9 @@ public class NotifiableCircuitItemStackHandlerMixin extends NotifiableItemStackH
 
     @Unique
     private int gTLAdditions$getCircuit(Ingredient ingredient) {
-        if (ingredient instanceof IntCircuitIngredient c) return ((IIntCircuitIngredientAccessor) c).getConfiguration();
+        if (ingredient instanceof IntCircuitIngredient c) return ((IntCircuitIngredientAccessor) c).getConfiguration();
         else if (ingredient instanceof SizedIngredient s && s.getInner() instanceof IntCircuitIngredient)
-            return ((IIntCircuitIngredientAccessor) s.getInner()).getConfiguration();
+            return ((IntCircuitIngredientAccessor) s.getInner()).getConfiguration();
         return -1;
     }
 }

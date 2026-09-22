@@ -4,7 +4,7 @@
 # GTLAdditions
 </div>
 
-> [!TIP]
+> **[!TIP]**
 > GTLAdditions 是一个为《GregTech Leisure》整合包新增配方与机器的扩展模组
 > 
 > 你可以在带有**最新**的gtlcore的GTL中使用这个mod！
@@ -30,6 +30,11 @@
 最后将GTLAdditions添加到/mods文件夹中
 
 享受你的GTL之旅吧! ~~你可能在不玩GTL之后也能看到这些机器~~
+
+## 推荐 JVM 参数
+
+> -Xms4G -XX:+UseG1GC -XX:+ParallelRefProcEnabled -XX:+AlwaysPreTouch -XX:+PerfDisableSharedMem -XX:G1HeapWastePercent=8 -XX:G1MixedGCCountTarget=6 -XX:G1ReservePercent=10 \
+> -XX:+UseCompactObjectHeaders (如果使用Java25)
 
 ## 内容
 

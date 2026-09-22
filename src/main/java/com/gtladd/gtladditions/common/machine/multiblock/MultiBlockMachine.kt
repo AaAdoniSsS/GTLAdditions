@@ -8,6 +8,7 @@ import org.gtlcore.gtlcore.common.block.GTLFusionCasingBlock
 import org.gtlcore.gtlcore.common.data.GTLBlocks.*
 import org.gtlcore.gtlcore.common.data.GTLMachines
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
+import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.*
 
 import com.gregtechceu.gtceu.GTCEu
@@ -23,7 +24,6 @@ import com.gregtechceu.gtceu.api.pattern.Predicates.*
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.GTRecipeType
 import com.gregtechceu.gtceu.common.data.GCyMBlocks.*
-import com.gregtechceu.gtceu.common.data.GCyMBlocks.HEAT_VENT
 import com.gregtechceu.gtceu.common.data.GTBlocks.*
 import com.gregtechceu.gtceu.common.data.GTMachines
 import com.gregtechceu.gtceu.common.data.GTMaterials.*
@@ -68,7 +68,7 @@ object MultiBlockMachine {
     val LUCID_ETCHDREAMER: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "lucid_etchdreamer",
         Function {
-            return@Function object : GTLAddCoilWorkableElectricMultipleRecipesTypesMultiblockMachine(it) {
+            return@Function object : CoilMultipleRecipesTypesMachine(it) {
                 override val multiRecipeTypes: Array<GTRecipeType> = arrayOf(GTLAddRecipesTypes.LucidEtchdreamerType)
             }
         }
@@ -151,10 +151,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val ASTRAL_CONVERGENCE_NEXUS: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "astral_convergence_nexus",
-        ::AdvancedSpaceElevatorModuleMachine
-    )
+    val ASTRAL_CONVERGENCE_NEXUS: MultiblockMachineDefinition = REGISTRATE.multiblock("astral_convergence_nexus", ::AdvancedSpaceElevatorModuleMachine)
         .nonYAxisRotation()
         .tooltipTextMaxParallels("gtceu.multiblock.max_parallel.space_elevator_module".toComponent)
         .tooltipTextKey("gtceu.multiblock.reduce_time.space_elevator_module".toComponent)
@@ -187,10 +184,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val NEBULA_REAPER: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "nebula_reaper",
-        ::AdvancedSpaceElevatorModuleMachine
-    )
+    val NEBULA_REAPER: MultiblockMachineDefinition = REGISTRATE.multiblock("nebula_reaper", ::AdvancedSpaceElevatorModuleMachine)
         .nonYAxisRotation()
         .tooltipTextMaxParallels("gtceu.multiblock.max_parallel.space_elevator_module".toComponent)
         .tooltipTextKey("gtceu.multiblock.reduce_time.space_elevator_module".toComponent)
@@ -267,10 +261,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val ARCANE_CACHE_VAULT: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "arcane_cache_vault",
-        ::GTLAddCoilWorkableElectricMultipleRecipesMultiblockMachine
-    )
+    val ARCANE_CACHE_VAULT: MultiblockMachineDefinition = REGISTRATE.multiblock("arcane_cache_vault", ::CoilMultipleRecipesMachine)
         .allRotation()
         .tooltipTextCoilParallel()
         .tooltipTextLaser()
@@ -319,10 +310,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val DRACONIC_COLLAPSE_CORE: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "draconic_collapse_core",
-        ::DraconicCollapseCore
-    )
+    val DRACONIC_COLLAPSE_CORE: MultiblockMachineDefinition = REGISTRATE.multiblock("draconic_collapse_core", ::DraconicCollapseCore)
         .nonYAxisRotation()
         .tooltipTextKey(
             "gtceu.multiblock.draconic_collapse_core.tooltip.0".toComponent,
@@ -335,7 +323,6 @@ object MultiBlockMachine {
         .tooltipTextRecipeTypes(AGGREGATION_DEVICE_RECIPES)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
         .recipeType(AGGREGATION_DEVICE_RECIPES)
-        .recipeModifier(DraconicCollapseCore::recipeModify)
         .appearanceBlock(FUSION_CASING_MK5)
         .pattern {
             MultiBlockStructureA.DRACONIC_COLLAPSE_CORE_STRUCTURE
@@ -375,10 +362,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val TITAN_CRIP_EARTHBORE: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "titan_crip_earthbore",
-        ::WorkableElectricMultiblockMachine
-    )
+    val TITAN_CRIP_EARTHBORE: MultiblockMachineDefinition = REGISTRATE.multiblock("titan_crip_earthbore", ::WorkableElectricMultiblockMachine)
         .noneRotation()
         .tooltipTextKey(
             "gtceu.multiblock.titan_crip_earthbore.tooltip.0".toComponent,
@@ -438,10 +422,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val BIOLOGICAL_SIMULATION_LABORATORY: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "biological_simulation_laboratory",
-        ::BiologicalSimulationLaboratory
-    )
+    val BIOLOGICAL_SIMULATION_LABORATORY: MultiblockMachineDefinition = REGISTRATE.multiblock("biological_simulation_laboratory", ::BiologicalSimulationLaboratory)
         .allRotation()
         .tooltipTextKey(
             "gtceu.multiblock.biological_simulation_laboratory.tooltip.0".toComponent,
@@ -482,7 +463,7 @@ object MultiBlockMachine {
     val DIMENSIONALLY_TRANSCENDENT_CHEMICAL_PLANT: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "dimensionally_transcendent_chemical_plant",
         Function {
-            return@Function object : GTLAddCoilWorkableElectricMultipleRecipesMultiblockMachine(it) {
+            return@Function object : CoilMultipleRecipesMachine(it) {
                 override fun modifyRecipe(recipe: GTRecipe): FastRecipeModify.ReduceResult {
                     val coilMultiplier = 1 - getCoilTier() * 0.05
                     val multiplier = FastRecipeModify.ReduceResult(
@@ -541,7 +522,11 @@ object MultiBlockMachine {
     @JvmField
     val QUANTUM_SYPHON_MATRIX: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "quantum_syphon_matrix",
-        ::GTLAddWorkableElectricParallelHatchMultipleRecipesMachine
+        Function {
+            return@Function object : MultipleRecipesMachine(it) {
+                override fun getMaxParallel(): Int = GTLRecipeModifiers.getHatchParallel(this)
+            }
+        }
     )
         .noneRotation()
         .tooltipTextParallelHatch()
@@ -583,9 +568,10 @@ object MultiBlockMachine {
     val FUXI_BAGUA_HEAVEN_FORGING_FURNACE: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "fuxi_bagua_heaven_forging_furnace",
         Function {
-            return@Function object : GTLAddCoilWorkableElectricParallelHatchMultipleRecipesMachine(it) {
+            return@Function object : CoilMultipleRecipesMachine(it) {
+
                 override fun getMaxParallel(): Int {
-                    val parallel = super.getMaxParallel()
+                    val parallel = GTLRecipeModifiers.getHatchParallel(this)
                     return if (recipeType === ULTIMATE_MATERIAL_FORGE_RECIPES) parallel * 16 else parallel
                 }
 
@@ -650,7 +636,7 @@ object MultiBlockMachine {
                 .build()
         }
         .additionalDisplay { controller, components ->
-            (controller as GTLAddCoilWorkableElectricParallelHatchMultipleRecipesMachine).takeIf { it.isFormed }?.let {
+            (controller as CoilMultipleRecipesMachine).takeIf { it.isFormed }?.let {
                 components.add(
                     Component.translatable(
                         "gtceu.multiblock.blast_furnace.max_temperature",
@@ -666,10 +652,7 @@ object MultiBlockMachine {
         .register()
 
     @JvmField
-    val ANTIENTROPY_CONDENSATION_CENTER: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "antientropy_condensation_center",
-        ::AntientropyCondensationCenter
-    )
+    val ANTIENTROPY_CONDENSATION_CENTER: MultiblockMachineDefinition = REGISTRATE.multiblock("antientropy_condensation_center", ::AntientropyCondensationCenter)
         .allRotation()
         .tooltipTextKey(
             "gtceu.multiblock.antientropy_condensation_center.0".toComponent,
@@ -728,7 +711,6 @@ object MultiBlockMachine {
         )
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
         .recipeType(GTLAddRecipesTypes.CHAOS_WEAVE)
-        .recipeModifier(TaixuTurbidArray::recipeModifier)
         .appearanceBlock(MACHINE_CASING_UHV)
         .pattern {
             MultiBlockStructureA.TAIXU_TURBID_ARRAY_STRUCTURE
@@ -771,7 +753,7 @@ object MultiBlockMachine {
     val INFERNO_CLEFT_SMELTING_VAULT: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "inferno_cleft_smelting_vault",
         Function {
-            return@Function object : GTLAddCoilWorkableElectricMultipleRecipesTypesMultiblockMachine(it) {
+            return@Function object : CoilMultipleRecipesTypesMachine(it) {
                 override val multiRecipeTypes = arrayOf(GTLAddRecipesTypes.InfernoCleftSmeltingVaultType)
             }
         }
@@ -981,10 +963,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val CATALYTIC_CASCADE_ARRAY: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "catalytic_cascade_array",
-        ::CatalyticCascadeArray
-    )
+    val CATALYTIC_CASCADE_ARRAY: MultiblockMachineDefinition = REGISTRATE.multiblock("catalytic_cascade_array", ::CatalyticCascadeArray)
         .nonYAxisRotation()
         .tooltipTextKey("tooltip.gtladditions.recursive_reverse_forge_module_0".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
@@ -1010,10 +989,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val HYPERDIMENSIONAL_ENERGY_CONCETRATOR: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "hyperdimensional_energy_concentrator",
-        ::HyperdimensionalEnergyConcentrator
-    )
+    val HYPERDIMENSIONAL_ENERGY_CONCETRATOR: MultiblockMachineDefinition = REGISTRATE.multiblock("hyperdimensional_energy_concentrator", ::HyperdimensionalEnergyConcentrator)
         .nonYAxisRotation()
         .tooltipTextKey("tooltip.gtladditions.recursive_reverse_forge_module_0".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
@@ -1041,10 +1017,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val MAGNETORHEOLOGICAL_CONVERGENCE_CORE: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "magnetorheological_convergence_core",
-        ::MagnetorheologicalConvergenceCore
-    )
+    val MAGNETORHEOLOGICAL_CONVERGENCE_CORE: MultiblockMachineDefinition = REGISTRATE.multiblock("magnetorheological_convergence_core", ::MagnetorheologicalConvergenceCore)
         .nonYAxisRotation()
         .tooltipTextKey("tooltip.gtladditions.recursive_reverse_forge_module_0".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
@@ -1071,10 +1044,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val REVERSE_TIME_BOOSTING_ENGINE: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "reverse_time_boosting_engine",
-        ::ReverseTimeBoostingEngine
-    )
+    val REVERSE_TIME_BOOSTING_ENGINE: MultiblockMachineDefinition = REGISTRATE.multiblock("reverse_time_boosting_engine", ::ReverseTimeBoostingEngine)
         .nonYAxisRotation()
         .tooltipTextKey("tooltip.gtladditions.recursive_reverse_forge_module_0".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
@@ -1507,7 +1477,7 @@ object MultiBlockMachine {
     val PRIMORDIAL_EVOLUTION_NEXUS: MultiblockMachineDefinition = REGISTRATE.multiblock(
         "primordial_evolution_nexus",
         Function {
-            return@Function object : GTLAddCoilWorkableElectricMultipleRecipesTypesMultiblockMachine(it) {
+            return@Function object : CoilMultipleRecipesTypesMachine(it) {
                 override val multiRecipeTypes = arrayOf(GTLAddRecipesTypes.EvolutionOfPrimordial)
             }
         }
@@ -1573,10 +1543,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val BIOSPHERE_III: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "biosphere_iii",
-        ::BiosphereIIIController
-    )
+    val BIOSPHERE_III: MultiblockMachineDefinition = REGISTRATE.multiblock("biosphere_iii", ::BiosphereIIIController)
         .nonYAxisRotation()
         .tooltipTextKey("gtceu.machine.hold_g.tooltip.1".toComponent)
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
@@ -1713,10 +1680,7 @@ object MultiBlockMachine {
         )
         .register()
 
-    val SPACE_ELEVATOR_MKII: MultiblockMachineDefinition = REGISTRATE.multiblock(
-        "space_elevator_mkii",
-        ::SpaceElevatorMKII
-    )
+    val SPACE_ELEVATOR_MKII: MultiblockMachineDefinition = REGISTRATE.multiblock("space_elevator_mkii", ::SpaceElevatorMKII)
         .nonYAxisRotation()
         .allowExtendedFacing(false)
         .recipeType(SPACE_ELEVATOR_RECIPES)

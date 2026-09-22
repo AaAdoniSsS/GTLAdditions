@@ -125,7 +125,7 @@ class SuperDualHatchPartMachine(holder: IMachineBlockEntity) : HugeBusPartMachin
                 ++itemCount
             }
         }
-        for (i in 0..getTankInventorySize() - 1) {
+        for (i in 0..<getTankInventorySize()) {
             val fs = this.tank.getFluidInTank(i)
             if (!fs.isEmpty) {
                 textList.add(

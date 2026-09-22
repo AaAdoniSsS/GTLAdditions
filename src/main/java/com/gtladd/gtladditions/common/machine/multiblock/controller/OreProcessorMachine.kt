@@ -28,21 +28,36 @@ import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient
 import net.minecraft.nbt.CompoundTag
 import net.minecraft.network.chat.Component
 
+import com.gtladd.gtladditions.api.machine.IEnergyMachine
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.OverClockFactor
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.getNoPerfectOverclock
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.getPerfectOverclock
+import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.common.machine.hatch.OreProcessorHatch
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getFastMultipleRecipe
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getOverclockRecipe
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 
 @Suppress("CAST_NEVER_SUCCEEDS")
 class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: Boolean) :
-    WorkableElectricMultiblockMachine(holder), ParallelMachine {
+    WorkableElectricMultiblockMachine(holder), ParallelMachine, IRecipeSearchProvider {
+
+    private var searchCtx: RecipeSearchContext? = null
+
+    override fun getSearchContext(): RecipeSearchContext? = searchCtx
+
+    override fun setSearchContext(ctx: RecipeSearchContext?) {
+        searchCtx = ctx
+    }
 
     private var opHatch: OreProcessorHatch? = null
     private var muffler: IMufflerMachine? = null
@@ -61,6 +76,7 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
         super.onStructureInvalid()
         this.opHatch = null
         this.muffler = null
+        searchCtx = null
     }
 
     override fun createRecipeLogic(vararg args: Any): RecipeLogic = OreProcessorRecipeLogic(this)
@@ -101,23 +117,20 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
             this.lastRecipe = null
             this.lastOriginRecipe = null
             this.recipeStatus = null
-            handleGTRecipe()
+            opMachine.withSearchContext { handleGTRecipe() }
             this.recipeDirty = false
         }
 
         private fun handleGTRecipe(): Boolean {
+            val ctx = opMachine.getActiveSearchContext()
             if (opMachine.opHatch == null) {
                 if (opMachine.isAdvanced) {
-                    opMachine.getFastMultipleRecipe(
-                        ::findAndModifyRecipe,
-                        64,
-                        20
-                    )?.let { return handleRecipe(it) }
+                    opMachine.getFastMultipleRecipe(::findAndModifyRecipe, 64, 20, ctx)?.let { return handleRecipe(it) }
                 } else {
-                    (lastOriginRecipe ?: opMachine.recipeType.lookup.find(opMachine, this::checkRecipe))?.let { recipe ->
+                    (lastOriginRecipe ?: findOptimized())?.let { recipe ->
                         if (!opMachine.isAdvanced && !opMachine.muffler?.isFrontFaceFree!!) return false
                         FastRecipeModify.modify(opMachine, recipe, opMachine.maxParallel.toLong(), false, getNoPerfectOverclock()) { FastRecipeModify.ReduceResult(1.0, getMaintenanceModify) }?.let {
-                            if (checkRecipe(it)) {
+                            if (if (ctx != null) ctx.preCheckRecipe(it) >= 1.0 else checkRecipe(it)) {
                                 RecipeMultiplierTracker.captureReduction(opMachine, recipe, 1.0, 1.0)
                                 this.lastOriginRecipe = recipe
                                 setupRecipe(it)
@@ -128,13 +141,15 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
                 }
             } else {
                 if (getSub) {
-                    opMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = getMachineThread, minDuration = getRecipeDuration)?.let { return handleRecipe(it) }
+                    opMachine.getOverclockRecipe(::findAndModifyRecipe, maxThread = getMachineThread, minDuration = getRecipeDuration, ctx = ctx)?.let { return handleRecipe(it) }
                 } else {
-                    opMachine.getFastMultipleRecipe(::findAndModifyRecipe, getMachineThread, getRecipeDuration)?.let { return handleRecipe(it) }
+                    opMachine.getFastMultipleRecipe(::findAndModifyRecipe, getMachineThread, getRecipeDuration, ctx)?.let { return handleRecipe(it) }
                 }
             }
             return false
         }
+
+        private fun findOptimized(): GTRecipe? = OptimizedRecipeSearch.find(opMachine, OptimizedRecipeSearch.branchOf(opMachine.recipeType.lookup), ::checkConditionsOnly)
 
         private val getMaintenanceModify: Double get() = (opMachine as IRecipeCapabilityMachine).maintenanceMachine?.durationMultiplier?.toDouble() ?: 1.0
 
@@ -179,24 +194,19 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
         }
 
         private fun findAndModifyRecipe(parallel: Long): GTRecipe? {
-            takeIf { opMachine.isAdvanced || opMachine.muffler?.isFrontFaceFree!! }?.let {
-                opMachine.recipeType.lookup.find(opMachine, this::checkRecipe)?.let { recipe ->
-                    FastRecipeModify.copyModify(
-                        opMachine,
-                        recipe,
-                        parallel,
-                        getSub,
-                        getSub,
-                        getOverClock,
-                        ::modifyRecipe
-                    )?.let { if (checkRecipe(it)) return it }
+            if (opMachine.isAdvanced || opMachine.muffler?.isFrontFaceFree!!) {
+                val ctx = opMachine.getActiveSearchContext()
+                findOptimized()?.let { recipe ->
+                    FastRecipeModify.copyModify(opMachine, recipe, parallel, getSub, getSub, getOverClock, ::modifyRecipe)?.let {
+                        if (if (ctx != null) ctx.preCheckRecipe(it) >= 1.0 else checkRecipe(it)) return it
+                    }
                 }
             }
             return null
         }
 
         private fun modifyRecipe(recipe: GTRecipe): GTRecipe {
-            takeIf { opMachine.opHatch != null }?.let {
+            opMachine.opHatch?.let {
                 if (!opMachine.isAdvanced) {
                     RecipeMultiplierTracker.captureReduction(opMachine, recipe, 1.0, getRecipeReduceTime)
                     recipe.duration = 1 maxToInt (recipe.duration * getMaintenanceModify * getRecipeReduceTime).toInt()
@@ -216,15 +226,16 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
                 this.status = Status.WORKING
                 this.progress = 0
                 this.duration = recipe.duration
+                opMachine.getActiveSearchContext()?.deductRecipe(recipe)
             }
         }
 
         override fun handleRecipeWorking() {
             checkNotNull(this.lastRecipe)
 
-            if (eut > 0 && eut <= this.opMachine.energyContainer.energyStored) {
+            if (eut.matchEUt(opMachine as IEnergyMachine)) {
                 this.status = Status.WORKING
-                this.opMachine.energyContainer.changeEnergy(-eut)
+                eut.handleEUt(opMachine)
                 ++this.progress
                 ++this.totalContinuousRunningTime
             } else {
@@ -243,7 +254,7 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
                     this.status = Status.SUSPEND
                     ism.`gtlcore$setSuspendAfterFinish`(false)
                 } else {
-                    if (handleGTRecipe()) return
+                    if (opMachine.withSearchContext { handleGTRecipe() }) return
                     status = Status.IDLE
                 }
             }
@@ -266,7 +277,15 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
                 RecipeResult.of(opMachine, fail("gtceu.integrated_ore_processor.advanced".toComponent))
                 return false
             }
-            return matchRecipe(this.opMachine, recipe) && recipe.matchTickRecipe(opMachine).isSuccess
+            return matchRecipe(this.opMachine, recipe) && recipe.matchEUt(opMachine as IEnergyMachine)
+        }
+
+        private fun checkConditionsOnly(recipe: GTRecipe): Boolean {
+            if (recipe.data.contains("handle") && !opMachine.isAdvanced) {
+                RecipeResult.of(opMachine, fail("gtceu.integrated_ore_processor.advanced".toComponent))
+                return false
+            }
+            return recipe.matchEUt(opMachine as IEnergyMachine)
         }
     }
 }

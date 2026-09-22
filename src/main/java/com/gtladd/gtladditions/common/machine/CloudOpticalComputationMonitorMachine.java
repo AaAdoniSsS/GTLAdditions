@@ -70,12 +70,12 @@ import java.util.UUID;
 
 import static com.hepdd.gtmthings.utils.TeamUtil.getTeamUUID;
 
-public class CloudOpticalComputationMonitorMachine extends MetaMachine implements IFancyUIMachine, IMachineLife, IDataStickInteractable {
+public final class CloudOpticalComputationMonitorMachine extends MetaMachine implements IFancyUIMachine, IMachineLife, IDataStickInteractable {
 
     public static final Set<CloudOpticalComputationHatchMachine> CLOUD_TRANSMITTER_HATCH_SET = new ObjectOpenHashSet<>();
     public static final Set<CloudOpticalComputationHatchMachine> CLOUD_RECEIVER_HATCH_SET = new ObjectOpenHashSet<>();
 
-    private static final class TeamState {
+    static final class TeamState {
 
         final List<IOpticalComputationProvider> providers = new ArrayList<>();
         final List<MetaMachine> receiverControllers = new ArrayList<>();
@@ -86,15 +86,15 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         }
     }
 
-    private static final Map<UUID, TeamState> TEAM_STATES = new Object2ObjectOpenHashMap<>();
-    private static boolean cacheDirty = true;
+    static final Map<UUID, TeamState> TEAM_STATES = new Object2ObjectOpenHashMap<>();
+    static boolean cacheDirty = true;
 
     public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CloudOpticalComputationMonitorMachine.class, MetaMachine.MANAGED_FIELD_HOLDER);
 
     @Getter
     @Persisted
     @DescSynced
-    private UUID player;
+    UUID player;
 
     public CloudOpticalComputationMonitorMachine(IMachineBlockEntity holder) {
         super(holder);
@@ -105,7 +105,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         return MANAGED_FIELD_HOLDER;
     }
 
-    private void bindTeam(Player player) {
+    void bindTeam(Player player) {
         this.player = player.getUUID();
     }
 
@@ -139,7 +139,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         cacheDirty = true;
     }
 
-    private static void rebuildProviderCache() {
+    static void rebuildProviderCache() {
         TEAM_STATES.values().forEach(TeamState::clear);
         for (var h : CLOUD_TRANSMITTER_HATCH_SET) {
             var team = h.getPlayer();
@@ -154,7 +154,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         cacheDirty = false;
     }
 
-    private static TeamState getTeamState(UUID teamId) {
+    static TeamState getTeamState(UUID teamId) {
         if (cacheDirty) rebuildProviderCache();
         return TEAM_STATES.computeIfAbsent(getTeamUUID(teamId), k -> new TeamState());
     }
@@ -189,7 +189,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         return group;
     }
 
-    private void addDisplayText(List<Component> textList) {
+    void addDisplayText(List<Component> textList) {
         if (isRemote()) return;
         if (player == null) {
             textList.add(Component.translatable("gui.gtladditions.cloud.not_bound")
@@ -208,7 +208,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         if (player != null) tabs.attachSubTab(new CloudOverviewPage(this));
     }
 
-    private record CloudOverviewPage(CloudOpticalComputationMonitorMachine machine) implements IFancyUIProvider {
+    record CloudOverviewPage(CloudOpticalComputationMonitorMachine machine) implements IFancyUIProvider {
 
         public static final IGuiTexture ICON = new ResourceTexture("gtceu:textures/item/computer_monitor_cover.png");
 
@@ -233,7 +233,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         }
     }
 
-    private static class CloudOverviewWidget extends WidgetGroup {
+    static class CloudOverviewWidget extends WidgetGroup {
 
         CloudOverviewWidget(UUID uuid) {
             super(0, 0, 280, calcFittedHeight());
@@ -276,7 +276,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             addWidget(createSortButton(21 + scrollHeight, receiverScroll, receiverRows, false));
         }
 
-        private ButtonWidget createSortButton(int y, DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax) {
+        ButtonWidget createSortButton(int y, DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax) {
             boolean[] descending = { true };
             var button = new ButtonWidget(258, y, 18, 13,
                     new TextTexture(() -> descending[0] ? "数量▼" : "数量▲").setColor(16777045),
@@ -289,7 +289,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             return button;
         }
 
-        private void applySort(DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax, boolean descending) {
+        void applySort(DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax, boolean descending) {
             scroll.setScrollYOffset(0);
             rows.sort((a, b) -> {
                 if (a.machine == null || b.machine == null) return Boolean.compare(a.machine == null, b.machine == null);
@@ -299,13 +299,13 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             for (int j = 0; j < rows.size(); j++) rows.get(j).setSelfPositionY(j * 20 + 4);
         }
 
-        private static int calcFittedHeight() {
+        static int calcFittedHeight() {
             if (!LDLib.isRemote()) return 150;
             return Math.max(150, Minecraft.getInstance().getWindow().getGuiScaledHeight() - 126);
         }
     }
 
-    private static class RowWidgets extends WidgetGroup {
+    static class RowWidgets extends WidgetGroup {
 
         enum Kind {
             MACHINE,
@@ -405,8 +405,8 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                                 if (mc.screen != null) mc.setScreen(null);
                                 if (kind == Kind.UN_BIND) {
                                     sendLocationMessages(player, locations);
-                                } else if (!locations.isEmpty() && !locations.get(0).dim().isEmpty()) {
-                                    var loc = locations.get(0);
+                                } else if (!locations.isEmpty() && !locations.getFirst().dim().isEmpty()) {
+                                    var loc = locations.getFirst();
                                     if (loc.dim().equals(mc.level.dimension().location().toString())) {
                                         player.lookAt(EntityAnchorArgument.Anchor.EYES,
                                                 new Vec3(loc.pos().getX() + 0.5, loc.pos().getY() + 0.5, loc.pos().getZ() + 0.5));
@@ -424,7 +424,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             };
             button.setClientSideWidget();
             if (kind == Kind.MACHINE) {
-                var loc = locations.get(0);
+                var loc = locations.getFirst();
                 button.setHoverTooltips(
                         Component.translatable("gui.gtladditions.cloud_monitor.tooltip_dim", loc.dim()),
                         Component.translatable("gui.gtladditions.cloud_monitor.tooltip_pos",
@@ -447,7 +447,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
         }
 
         @OnlyIn(Dist.CLIENT)
-        private void sendLocationMessages(Player player, List<Location> locations) {
+        void sendLocationMessages(Player player, List<Location> locations) {
             boolean canTp = player.hasPermissions(2);
             for (Location loc : locations) {
                 var coords = Component.literal("[" + loc.pos().getX() + ", " + loc.pos().getY() + ", " + loc.pos().getZ() + "]");
@@ -463,7 +463,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
             }
         }
 
-        private void refreshValues() {
+        void refreshValues() {
             if (provider && machine instanceof IOpticalComputationProvider p) {
                 current = p.remainCWU();
                 max = p.getMaxCWU();
@@ -475,7 +475,7 @@ public class CloudOpticalComputationMonitorMachine extends MetaMachine implement
                         if (machine instanceof IOpticalComputationReceiver receiver) {
                             var p = receiver.getComputationProvider();
                             if (p instanceof CloudOpticalComputationContainer c) {
-                                cwu = Math.min(c.lastResearch, Math.max(0, recipe.duration - rm.getRecipeLogic().getProgress()));
+                                cwu = Math.clamp(recipe.duration - rm.getRecipeLogic().getProgress(), 0, c.lastResearch);
                             }
                         }
                     } else {

@@ -49,29 +49,29 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine, IDataStickInteractable {
+public final class CloudOpticalDataMachine extends TieredEnergyMachine implements IMachineLife, IFancyUIMachine, IDataStickInteractable {
 
-    public static final Set<CloudOpticalDataMachine> CLOUD_DATA_MACHINE_SET = new ObjectOpenHashSet<>();
+    static final Set<CloudOpticalDataMachine> CLOUD_DATA_MACHINE_SET = new ObjectOpenHashSet<>();
     public static final ManagedFieldHolder MANAGED_FIELD_HOLDER = new ManagedFieldHolder(CloudOpticalDataMachine.class, TieredEnergyMachine.MANAGED_FIELD_HOLDER);
 
-    private static final long ENERGY_PER_DATA = GTValues.V[GTValues.UV] * 3 / 4;
+    static final long ENERGY_PER_DATA = GTValues.V[GTValues.UV] * 3 / 4;
 
     @Getter
     @Persisted
     @DescSynced
-    private UUID player;
+    UUID player;
 
     @Persisted
-    protected final NotifiableItemStackHandler importItems;
+    final NotifiableItemStackHandler importItems;
     @Persisted
-    protected final NotifiableItemStackHandler createItem;
-    private final IntSet recipes = new IntOpenHashSet();
-    private boolean recipesDirty = true, amountDirty = true, hasPower = true;
+    final NotifiableItemStackHandler createItem;
+    final IntSet recipes = new IntOpenHashSet();
+    boolean recipesDirty = true, amountDirty = true, hasPower = true;
     @Persisted
-    private int dataAmount = 0;
+    int dataAmount = 0;
     @Persisted
-    private boolean isCreate = false;
-    private TickableSubscription energySubs;
+    boolean isCreate = false;
+    TickableSubscription energySubs;
 
     public CloudOpticalDataMachine(IMachineBlockEntity holder) {
         super(holder, GTValues.UIV);
@@ -161,13 +161,13 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         else return ENERGY_PER_DATA;
     }
 
-    private void updateEnergy() {
+    void updateEnergy() {
         long demand = getEnergyDemand();
         if (demand <= 0) {
             hasPower = true;
             return;
         }
-        hasPower = energyContainer.removeEnergy(demand) >= demand;
+        hasPower = energyContainer.getEnergyStored() >= demand && energyContainer.removeEnergy(demand) >= demand;
     }
 
     public void rebuildData() {
@@ -183,12 +183,12 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         }
     }
 
-    private void markRecipesDirty() {
+    void markRecipesDirty() {
         this.recipesDirty = true;
         this.amountDirty = true;
     }
 
-    private void refreshRecipesIfNeeded() {
+    void refreshRecipesIfNeeded() {
         if (!this.recipesDirty) return;
         if (getLevel() == null) return;
         rebuildData();
@@ -257,7 +257,7 @@ public class CloudOpticalDataMachine extends TieredEnergyMachine implements IMac
         return group;
     }
 
-    private void addDisplayText(List<Component> textList) {
+    void addDisplayText(List<Component> textList) {
         textList.add(self().getBlockState().getBlock().getName());
         if (player == null) {
             textList.add(Component.translatable("gui.gtladditions.cloud.not_bound"));

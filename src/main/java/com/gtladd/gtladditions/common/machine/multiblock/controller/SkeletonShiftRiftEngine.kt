@@ -13,14 +13,14 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipeTypeMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipeTypesMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.SkeletonShiftRiftEngineType
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
 
-class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) : GTLAddWorkableElectricMultipleRecipeTypeMachine(holder) {
+class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) : MultipleRecipeTypesMachine(holder) {
     private var casingTier = 0
     private var coilType: ICoilType = CoilBlock.CoilType.CUPRONICKEL
 

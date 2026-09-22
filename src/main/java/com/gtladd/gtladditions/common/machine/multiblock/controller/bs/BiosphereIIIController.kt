@@ -32,6 +32,8 @@ import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine
 import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.BiosphereIIIPosHelper.calculateModulePositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 
 import java.util.function.Consumer
@@ -55,6 +57,7 @@ class BiosphereIIIController(holder: IMachineBlockEntity) :
 
     override fun onStructureInvalid() {
         super.onStructureInvalid()
+        this.itemBus = null
         safeClearModules()
     }
 
@@ -103,8 +106,6 @@ class BiosphereIIIController(holder: IMachineBlockEntity) :
     override fun getModuleSet() = this.modulePos
 
     override fun getModuleScanPositions(): Array<out BlockPos> = calculateModulePositions(pos, frontFacing)
-
-    override fun isFormed() = this.isFormed
 
     override fun getMaxModuleCount() = 8
 
@@ -187,9 +188,8 @@ class BiosphereIIIController(holder: IMachineBlockEntity) :
         }
 
         override fun handleRecipeWorking() {
-            val ecList = (bsMachine as IEnergyMachine).energyContainerList
-            if (bsMachine.maxVoltage > 0 && bsMachine.maxVoltage <= ecList.energyStored) {
-                ecList.removeEnergy(bsMachine.maxVoltage)
+            if (bsMachine.maxVoltage.matchEUt(bsMachine as IEnergyMachine)) {
+                bsMachine.maxVoltage.handleEUt(bsMachine)
                 this.status = Status.WORKING
                 ++this.progress
             } else {

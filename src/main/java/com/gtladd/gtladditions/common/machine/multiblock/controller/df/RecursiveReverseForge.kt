@@ -23,7 +23,6 @@ import com.gregtechceu.gtceu.api.machine.feature.IMachineLife
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
-import com.gregtechceu.gtceu.api.recipe.lookup.GTRecipeLookup
 import com.gregtechceu.gtceu.utils.FormattingUtil
 
 import net.minecraft.ChatFormatting
@@ -36,9 +35,12 @@ import net.minecraft.network.chat.HoverEvent
 
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.IMultipleRecipeTypeMachine
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.IWirelessGTRecipe
+import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.CATALYTIC_CASCADE_ARRAY
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.FRACTAL_MANIPULATOR
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.HYPERDIMENSIONAL_ENERGY_CONCETRATOR
@@ -48,7 +50,10 @@ import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MathUtil.maxToLong
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 
@@ -59,7 +64,17 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
     WorkableElectricMultiblockMachine(holder),
     IModularMachineHost<RecursiveReverseForge>,
     IMultipleRecipeTypeMachine,
-    IMachineLife {
+    IMachineLife,
+    IRecipeSearchProvider {
+
+    private var searchCtx: RecipeSearchContext? = null
+
+    override fun getSearchContext(): RecipeSearchContext? = searchCtx
+
+    override fun setSearchContext(ctx: RecipeSearchContext?) {
+        searchCtx = ctx
+    }
+
     var ccaModule: CatalyticCascadeArray? = null
     var hecModule: HyperdimensionalEnergyConcentrator? = null
     var mccModule: MagnetorheologicalConvergenceCore? = null
@@ -146,6 +161,7 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
     override fun onStructureInvalid() {
         super.onStructureInvalid()
         safeClearModules()
+        searchCtx = null
     }
 
     override fun onMachineRemoved() = safeClearModules()
@@ -266,8 +282,23 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
             lastRecipe = null
             lastOriginRecipe = null
             recipeStatus = null
-            modifySearchingRecipes(lookup.find(rrfMachine, this::checkRecipe))
+            rrfMachine.withSearchContext {
+                modifySearchingRecipes(findRecipeOptimized())
+            }
         }
+
+        private fun findRecipeOptimized(): GTRecipe? {
+            val ctx = rrfMachine.getActiveSearchContext()
+            return if (ctx != null) {
+                OptimizedRecipeSearch.find(rrfMachine, OptimizedRecipeSearch.branchOf(GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.lookup), ::checkConditionsOnly)
+            } else {
+                null
+            }
+        }
+
+        private fun effectiveTier(): Int = if (rrfMachine.hecModule?.isWorkingEnabled == true && rrfMachine.hecModule?.hasDrone() == true) 14 else rrfMachine.tier
+
+        private fun checkConditionsOnly(recipe: GTRecipe): Boolean = IGTRecipe.of(recipe).euTier <= effectiveTier()
 
         override fun setupRecipe(recipe: GTRecipe) {
             if (this.handleRecipeIO(recipe, IO.IN)) {
@@ -278,22 +309,22 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
                 this.status = Status.WORKING
                 this.progress = 0
                 this.duration = recipe.duration
+                rrfMachine.getActiveSearchContext()?.deductRecipe(recipe)
             }
         }
 
         @Suppress("CAST_NEVER_SUCCEEDS")
         override fun handleRecipeWorking() {
             checkNotNull(this.lastRecipe)
-            val energyMachine = rrfMachine as IEnergyMachine
             if (rrfMachine.hecModule?.isWorkingEnabled == true &&
                 bigEUt.signum() > 0 && rrfMachine.hecModule!!.consumeWirelessEU(-bigEUt)
             ) {
                 this.status = Status.WORKING
                 ++this.progress
                 rrfMachine.rtbeModule?.safePlusTemperature(65)
-            } else if (eut > 0 && eut <= energyMachine.energyContainerList.energyStored) {
+            } else if (eut.matchEUt(rrfMachine as IEnergyMachine)) {
                 this.status = Status.WORKING
-                energyMachine.energyContainerList.changeEnergy(-eut)
+                eut.handleEUt(rrfMachine)
                 ++this.progress
                 rrfMachine.rtbeModule?.safePlusTemperature(65)
             } else {
@@ -310,7 +341,10 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
                     this.status = Status.SUSPEND
                     ism.`gtlcore$setSuspendAfterFinish`(false)
                 } else {
-                    lastOriginRecipe?.let { if (modifySearchingRecipes(it)) return }
+                    val continued = rrfMachine.withSearchContext {
+                        lastOriginRecipe != null && modifySearchingRecipes(lastOriginRecipe)
+                    }
+                    if (continued) return
                     status = Status.IDLE
                 }
             }
@@ -380,19 +414,7 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
         }
 
         private fun checkRecipe(recipe: GTRecipe): Boolean {
-            val effectiveTier = if (rrfMachine.hecModule?.isWorkingEnabled == true &&
-                rrfMachine.hecModule?.hasDrone() == true
-            ) {
-                14
-            } else {
-                rrfMachine.tier
-            }
-            return matchRecipe(this.machine, recipe) &&
-                IGTRecipe.of(recipe).euTier <= effectiveTier
+            return matchRecipe(this.machine, recipe) && IGTRecipe.of(recipe).euTier <= effectiveTier()
         }
-    }
-
-    companion object {
-        private val lookup: GTRecipeLookup by lazy { GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.lookup }
     }
 }

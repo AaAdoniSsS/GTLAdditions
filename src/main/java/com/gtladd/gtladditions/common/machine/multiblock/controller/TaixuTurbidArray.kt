@@ -14,7 +14,6 @@ import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper
 import com.gregtechceu.gtceu.api.gui.GuiTextures
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
-import com.gregtechceu.gtceu.api.machine.MetaMachine
 import com.gregtechceu.gtceu.api.machine.feature.IMachineModifyDrops
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableMultiblockMachine
 import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler
@@ -32,13 +31,13 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
 import net.minecraft.ChatFormatting
-import net.minecraft.MethodsReturnNonnullByDefault
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
 
-import com.gtladd.gtladditions.api.recipe.ContentList
+import com.gtladd.gtladditions.api.recipe.ParallelCalculate
+import com.gtladd.gtladditions.api.recipe.content.ContentList
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.GTRecipeUtils.copy
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
@@ -52,15 +51,12 @@ import com.hepdd.gtmthings.data.CreativeMachines
 import it.unimi.dsi.fastutil.ints.IntArrayList
 
 import java.text.DecimalFormat
-import javax.annotation.ParametersAreNonnullByDefault
 import kotlin.math.exp
 import kotlin.math.pow
 import kotlin.math.sqrt
 import kotlin.math.tanh
 import kotlin.streams.toList
 
-@ParametersAreNonnullByDefault
-@MethodsReturnNonnullByDefault
 open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(holder, "SCTier"), IMachineModifyDrops {
 
     @Persisted
@@ -106,6 +102,23 @@ open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(hol
         this.height = 0
         this.frameA = .0
         this.frameB = .0
+    }
+
+    override fun fullModifyRecipe(recipe: GTRecipe, params: OCParams, result: OCResult): GTRecipe? {
+        val maxParallel = ParallelCalculate.getMaxParallel(this, recipe, getMaxParallel().toLong())
+        if (maxParallel <= 0) return null
+        val fluidList = ContentList(2)
+        if (100.random() <= successRateA().toInt() && tier >= GTValues.UXV) {
+            fluidList.addMaxChanceContent(UuAmplifier.getFluid(baseOutputFluid1().toLong()))
+        }
+        if (100.random() <= successRateB().toInt() && tier >= GTValues.MAX) {
+            fluidList.addMaxChanceContent(GTMaterials.UUMatter.getFluid(baseOutputFluid2().toLong()))
+        }
+        if (!fluidList.isEmpty) recipe.outputs[FluidRecipeCapability.CAP] = fluidList
+        val minParallel = IParallelLogic.getMinParallel(this, recipe, maxParallel)
+        val copy = recipe.copy(this, (maxParallel minToLong minParallel), if (machineStorage.getStackInSlot(0).`is`(CREATE)) 20 else 100)
+        copy.setEU(524288L * GTValues.V[tier])
+        return copy
     }
 
     override fun beforeWorking(recipe: GTRecipe?): Boolean = true
@@ -179,23 +192,5 @@ open class TaixuTurbidArray(holder: IMachineBlockEntity) : TierCasingMachine(hol
         private val SpacetimeNano: Item by lazy { ChemicalHelper.get(nanoswarm, SpaceTime).item }
         private val EternityNano: Item by lazy { ChemicalHelper.get(nanoswarm, Eternity).item }
         private val CREATE: Item by lazy { CreativeMachines.CREATIVE_ENERGY_INPUT_HATCH.asStack().item }
-        fun recipeModifier(machine: MetaMachine, recipe: GTRecipe, params: OCParams, result: OCResult): GTRecipe? {
-            (machine as TaixuTurbidArray).let {
-                val maxParallel = IParallelLogic.getMaxParallel(it, recipe, it.getMaxParallel().toLong())
-                if (maxParallel <= 0) return null
-                val fluidList = ContentList(2)
-                if (100.random() <= it.successRateA().toInt() && it.tier >= GTValues.UXV) {
-                    fluidList.addMaxChanceContent(UuAmplifier.getFluid(it.baseOutputFluid1().toLong()))
-                }
-                if (100.random() <= it.successRateB().toInt() && it.tier >= GTValues.MAX) {
-                    fluidList.addMaxChanceContent(GTMaterials.UUMatter.getFluid(it.baseOutputFluid2().toLong()))
-                }
-                if (!fluidList.isEmpty) recipe.outputs[FluidRecipeCapability.CAP] = fluidList
-                val minParallel = IParallelLogic.getMinParallel(it, recipe, maxParallel)
-                val copy = recipe.copy(it, (maxParallel minToLong minParallel), if (it.machineStorage.getStackInSlot(0).`is`(CREATE)) 20 else 100)
-                copy.setEU(524288L * GTValues.V[it.tier])
-                return copy
-            }
-        }
     }
 }

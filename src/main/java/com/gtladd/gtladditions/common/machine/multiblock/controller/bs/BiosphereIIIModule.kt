@@ -12,20 +12,20 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 import net.minecraft.core.BlockPos
 import net.minecraft.network.chat.Component
 
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesMachine
-import com.gtladd.gtladditions.api.machine.GTLAddWorkableElectricMultipleRecipesTypesMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipesMachine
+import com.gtladd.gtladditions.api.machine.MultipleRecipesTypesMachine
 import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.BiosphereIIIPosHelper.calculatePossibleHostPositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
 
 abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
-    GTLAddWorkableElectricMultipleRecipesTypesMachine(holder),
+    MultipleRecipesTypesMachine(holder),
     IModularMachineModule<BiosphereIIIController, BiosphereIIIModule>,
     IMachineLife {
 
     companion object {
-        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(BiosphereIIIModule::class.java, GTLAddWorkableElectricMultipleRecipesMachine.MANAGED_FIELD_HOLDER)
+        val MANAGED_FIELD_HOLDER = ManagedFieldHolder(BiosphereIIIModule::class.java, MultipleRecipesMachine.MANAGED_FIELD_HOLDER)
     }
 
     override fun onStructureFormed() {

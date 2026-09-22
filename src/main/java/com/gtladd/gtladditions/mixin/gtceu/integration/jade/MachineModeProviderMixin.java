@@ -31,6 +31,7 @@ public class MachineModeProviderMixin {
      * @reason .
      */
     @Overwrite(remap = false)
+    @SuppressWarnings("all")
     public void appendTooltip(ITooltip iTooltip, BlockAccessor blockAccessor, IPluginConfig iPluginConfig) {
         CompoundTag serverData = blockAccessor.getServerData();
         if (serverData.contains("RecipeTypes") && serverData.contains("CurrentRecipeType")) {
@@ -45,12 +46,12 @@ public class MachineModeProviderMixin {
                     } else text = Component.literal("   ");
                     var tag = recipeTypesTagList.getString(i);
                     if (!tag.contains("&")) {
-                        var recipeType = new ResourceLocation(tag);
+                        var recipeType = ResourceLocation.tryParse(tag);
                         text.append(Component.translatable("%s.%s".formatted(recipeType.getNamespace(), recipeType.getPath())));
                     } else {
                         var split = tag.split("&");
                         for (int index = 0; index < split.length; index++) {
-                            var recipeType = new ResourceLocation(split[index]);
+                            var recipeType = ResourceLocation.tryParse(split[index]);
                             text.append(
                                     Component.translatable("%s.%s".formatted(recipeType.getNamespace(), recipeType.getPath())));
                             if (index + 1 < split.length) text.append(", ");
@@ -62,13 +63,13 @@ public class MachineModeProviderMixin {
                 var tag = recipeTypesTagList.getString(currentRecipeTypeIndex);
                 var component = Component.translatable("gtceu.top.machine_mode");
                 if (!tag.contains("&")) {
-                    var recipeType = new ResourceLocation(tag);
+                    var recipeType = ResourceLocation.tryParse(tag);
                     iTooltip.add(component.append(
                             Component.translatable("%s.%s".formatted(recipeType.getNamespace(), recipeType.getPath()))));
                 } else {
                     var split = tag.split("&");
                     for (int i = 0; i < split.length; i++) {
-                        var recipeType = new ResourceLocation(split[i]);
+                        var recipeType = ResourceLocation.tryParse(split[i]);
                         component.append(
                                 Component.translatable("%s.%s".formatted(recipeType.getNamespace(), recipeType.getPath())));
                         if (i + 1 < split.length) component.append(", ");

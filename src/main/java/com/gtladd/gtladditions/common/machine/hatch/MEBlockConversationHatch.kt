@@ -3,8 +3,12 @@ package com.gtladd.gtladditions.common.machine.hatch
 import org.gtlcore.gtlcore.api.machine.trait.MEStock.IMETransfer
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeResult.fail
+import org.gtlcore.gtlcore.integration.ae2.FastInfinityCell
 import org.gtlcore.gtlcore.integration.ae2.InfinityCell
+import org.gtlcore.gtlcore.integration.ae2.storage.FastInfinityCellHandler
+import org.gtlcore.gtlcore.integration.ae2.storage.FastInfinityCellInventory
 import org.gtlcore.gtlcore.integration.ae2.storage.InfinityCellHandler
+import org.gtlcore.gtlcore.integration.ae2.storage.InfinityCellInventory
 
 import com.gregtechceu.gtceu.api.capability.IControllable
 import com.gregtechceu.gtceu.api.capability.recipe.IO
@@ -96,15 +100,26 @@ class MEBlockConversationHatch(holder: IMachineBlockEntity) :
     private var inventorySubs: ISubscription? = null
     private val actionSource = IActionSource.ofMachine(nodeHolder.getMainNode()::getNode)
 
-    private fun filter(stack: ItemStack) = (stack.item is InfinityCell && (stack.item as InfinityCell).keyType == AEKeyType.items()) ||
+    private fun filter(stack: ItemStack) = stack.item is FastInfinityCell ||
+        (stack.item is InfinityCell && (stack.item as InfinityCell).keyType == AEKeyType.items()) ||
         (stack.item is BasicStorageCell && (stack.item as BasicStorageCell).keyType == AEKeyType.items())
 
     fun getCellInventory(): StorageCell? {
         val i = machineStorage.getStackInSlot(0)
         return when (i.item) {
+            is FastInfinityCell -> FastInfinityCellHandler.INSTANCE.getCellInventory(i, null)
             is InfinityCell -> InfinityCellHandler.INSTANCE.getCellInventory(i, null)
             is BasicStorageCell -> BasicCellHandler.INSTANCE.getCellInventory(i, null)
             else -> null
+        }
+    }
+
+    fun getAmount(): Long {
+        return when (val c = getCellInventory()) {
+            is FastInfinityCellInventory -> Long.MAX_VALUE
+            is InfinityCellInventory -> Long.MAX_VALUE
+            is BasicCellInventory -> c.remainingItemCount
+            else -> 0
         }
     }
 
