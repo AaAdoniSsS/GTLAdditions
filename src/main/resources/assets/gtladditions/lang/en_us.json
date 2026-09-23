@@ -160,5 +160,9 @@
   "tooltip.gtladditions.item.treasures_essence_bucket.1": "After 5 minutes of pouring, the fluid is consumed and has a 70% chance of being converted into Treasures Crystal",
   "tooltip.gtladditions.item.treasures_essence_bucket.2": "After pouring, it can be thrown into the Treasures Crystal, which consumes the fluid and has a 50% probability of double return",
   "tooltip.gtladditions.recursive_reverse_forge_module_0": "§7§oRecursive Reverse Forge Add-on Module",
-  "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§oRecursive Reverse Forge Add-on Production Module"
+  "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§oRecursive Reverse Forge Add-on Production Module",
+  "gui.gtladditions.sort_amount_desc": "Amount ▼",
+  "gui.gtladditions.sort_amount_asc": "Amount ▲",
+  "gui.gtladditions.min_temperature": "Min temperature\n(%s)",
+  "gui.gtladditions.max_temperature": "Max temperature\n(%s)"
 }

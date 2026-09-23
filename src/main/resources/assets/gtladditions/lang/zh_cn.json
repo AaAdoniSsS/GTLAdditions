@@ -160,5 +160,9 @@
   "tooltip.gtladditions.item.treasures_essence_bucket.1": "倒出经过五分钟后,消耗流体并有70%概率转换为奇珍结晶",
   "tooltip.gtladditions.item.treasures_essence_bucket.2": "倒出后可丢入奇珍结晶,消耗流体并有50%概率翻倍返还",
   "tooltip.gtladditions.recursive_reverse_forge_module_0": "§7§o递归反演锻炉附属加成模块",
-  "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§o递归反演锻炉附属制造模块"
+  "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§o递归反演锻炉附属制造模块",
+  "gui.gtladditions.sort_amount_desc": "数量▼",
+  "gui.gtladditions.sort_amount_asc": "数量▲",
+  "gui.gtladditions.min_temperature": "最小温度\n(%s)",
+  "gui.gtladditions.max_temperature": "最大温度\n(%s)"
 }
