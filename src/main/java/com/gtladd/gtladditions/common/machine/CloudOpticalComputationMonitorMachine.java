@@ -278,7 +278,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
 
         ButtonWidget createSortButton(int y, DraggableScrollableWidgetGroup scroll, List<RowWidgets> rows, boolean byMax) {
             boolean[] descending = { true };
-            var button = new ButtonWidget(258, y, 18, 13,
+            var button = new ButtonWidget(250, y, 18, 13,
                     new TextTexture(() -> descending[0] ? "gui.gtladditions.sort_amount_desc" : "gui.gtladditions.sort_amount_asc").setColor(16777045),
                     cd -> {
                         applySort(scroll, rows, byMax, descending[0]);
@@ -387,9 +387,9 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
                     case UN_BIND -> list.add(Component.translatable(provider ? "gui.gtladditions.cloud_monitor.un_bind_providers" : "gui.gtladditions.cloud_monitor.un_bind_receivers", unBind.size()).withStyle(ChatFormatting.YELLOW));
                     default -> {}
                 }
-            }).setMaxWidthLimit(172);
+            }).setMaxWidthLimit(182);
             this.label.setClientSideWidget();
-            this.button = new ButtonWidget(200, 2, 56, 14,
+            this.button = new ButtonWidget(210, 2, 56, 14,
                     new TextTexture(Component.translatable("gui.gtladditions.cloud_monitor.highlight").getString(), 16777045),
                     cd -> locations.forEach(l -> ClientCloudHighlighter.highlight(l.pos(), l.dim()))) {
 

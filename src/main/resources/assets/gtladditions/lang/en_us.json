@@ -164,6 +164,6 @@
   "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§oRecursive Reverse Forge Add-on Production Module",
   "gui.gtladditions.sort_amount_desc": "Amount ▼",
   "gui.gtladditions.sort_amount_asc": "Amount ▲",
-  "gui.gtladditions.min_temperature": "Min temperature\n(%s)",
-  "gui.gtladditions.max_temperature": "Max temperature\n(%s)"
+  "gui.gtladditions.min_temperature": "Min temperature(K)",
+  "gui.gtladditions.max_temperature": "Max temperature(K)"
 }

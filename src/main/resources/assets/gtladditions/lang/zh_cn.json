@@ -164,6 +164,6 @@
   "tooltip.gtladditions.recursive_reverse_forge_module_1": "§7§o递归反演锻炉附属制造模块",
   "gui.gtladditions.sort_amount_desc": "数量▼",
   "gui.gtladditions.sort_amount_asc": "数量▲",
-  "gui.gtladditions.min_temperature": "最小温度\n(%s)",
-  "gui.gtladditions.max_temperature": "最大温度\n(%s)"
+  "gui.gtladditions.min_temperature": "最小温度(K)",
+  "gui.gtladditions.max_temperature": "最大温度(K)"
 }

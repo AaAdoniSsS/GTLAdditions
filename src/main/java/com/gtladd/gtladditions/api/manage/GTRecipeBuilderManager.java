@@ -13,6 +13,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
+import net.minecraftforge.common.crafting.StrictNBTIngredient;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
@@ -42,7 +43,7 @@ public final class GTRecipeBuilderManager {
     }
 
     public static Ingredient getIngredient(ItemStack itemStack) {
-        var ingredient = ITEM_STACK_INGREDIENT_MAP.computeIfAbsent(itemStack, Ingredient::of);
+        var ingredient = ITEM_STACK_INGREDIENT_MAP.computeIfAbsent(itemStack, k -> k.hasTag() ? StrictNBTIngredient.of(k) : Ingredient.of(k));
         return LongIngredient.create(ingredient, (long) itemStack.getCount());
     }
 

@@ -43,13 +43,13 @@ class VientianeTranscriptionNode(holder: IMachineBlockEntity) : MultiblockPartMa
     override fun createUIWidget(): Widget {
         if (!controlMachine) return super.createUIWidget()
         val group = WidgetGroup(Position.ORIGIN, Size(176, 112))
-        group.addWidget(TextBoxWidget(8, 35, 65, listOf(LocalizationUtils.format("gui.gtladditions.min_temperature", "K"))))
-        group.addWidget(TextBoxWidget(8, 80, 65, listOf(LocalizationUtils.format("gui.gtladditions.max_temperature", "K"))))
+        group.addWidget(TextBoxWidget(8, 40, 85, listOf(LocalizationUtils.format("gui.gtladditions.min_temperature"))))
+        group.addWidget(TextBoxWidget(8, 85, 85, listOf(LocalizationUtils.format("gui.gtladditions.max_temperature"))))
         group.addWidget(
             TextFieldWidget(
-                80,
+                110,
                 35,
-                85,
+                45,
                 18,
                 { min.toString() },
                 { min = Mth.clamp(it.toInt(), 48000, 105000) }
@@ -57,9 +57,9 @@ class VientianeTranscriptionNode(holder: IMachineBlockEntity) : MultiblockPartMa
         )
         group.addWidget(
             TextFieldWidget(
+                110,
                 80,
-                80,
-                85,
+                45,
                 18,
                 { max.toString() },
                 { max = Mth.clamp(it.toInt(), 48000, 105000) }
