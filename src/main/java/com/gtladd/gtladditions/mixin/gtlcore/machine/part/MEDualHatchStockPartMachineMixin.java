@@ -12,6 +12,8 @@ import com.gtladd.gtladditions.api.ae2.MEStockSyncCache;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(MEDualHatchStockPartMachine.class)
 public abstract class MEDualHatchStockPartMachineMixin extends MEBusPartMachine {
@@ -20,6 +22,8 @@ public abstract class MEDualHatchStockPartMachineMixin extends MEBusPartMachine 
     public ExportOnlyAEItemList aeItemHandler;
     @Shadow(remap = false)
     public ExportOnlyAEFluidList aeFluidHandler;
+    @Shadow(remap = false)
+    private int autoPullMode;
 
     public MEDualHatchStockPartMachineMixin(IMachineBlockEntity holder, IO io, Object... args) {
         super(holder, io, args);
@@ -27,6 +31,14 @@ public abstract class MEDualHatchStockPartMachineMixin extends MEBusPartMachine 
 
     @Shadow(remap = false)
     private void markMEStockChanged() {}
+
+    @Redirect(method = "autoIO",
+              at = @At(value = "INVOKE",
+                       target = "Lorg/gtlcore/gtlcore/common/machine/multiblock/part/MEDualHatchStockPartMachine;updateMEStatus()Z"),
+              remap = false)
+    public boolean autoIO(MEDualHatchStockPartMachine instance) {
+        return instance.updateMEStatus() && autoPullMode == 0;
+    }
 
     /**
      * @author .

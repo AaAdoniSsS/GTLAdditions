@@ -16,7 +16,18 @@ public final class MEStockSyncCache {
 
     public static void syncStock(IStorageService service, ExportOnlyAESlot[] slots) {
         var amounts = collectAmounts(service, slots);
-        syncStock(amounts, slots);
+        for (var slot : slots) {
+            var config = slot.getConfig();
+            if (config != null) {
+                var key = config.what();
+                long extracted = amounts.getValue(key);
+                if (extracted > 0L) {
+                    slot.setStock(new GenericStack(key, extracted));
+                    continue;
+                }
+            }
+            slot.setStock(null);
+        }
     }
 
     public static boolean syncStock(IStorageService service, ExportOnlyAESlot[] itemSlots, ExportOnlyAESlot[] fluidSlots) {
@@ -59,7 +70,7 @@ public final class MEStockSyncCache {
     }
 
     private static Object2LongHashMap<AEKey> amountsFor(IStorageService service) {
-        return GridStockCache.getAmounts(service, KEYS, GridStockCache.DISPLAY_MAX_AGE_TICKS);
+        return GridStockCache.getAmounts(service, KEYS, 5);
     }
 
     private static void collectDualKeys(ExportOnlyAESlot[] itemSlots, ExportOnlyAESlot[] fluidSlots) {
@@ -68,21 +79,6 @@ public final class MEStockSyncCache {
             var config = itemSlots[i].getConfig();
             if (config == null) config = fluidSlots[i].getConfig();
             if (config != null) KEYS.add(config.what());
-        }
-    }
-
-    private static void syncStock(Object2LongHashMap<AEKey> amounts, ExportOnlyAESlot[] slots) {
-        for (var slot : slots) {
-            var config = slot.getConfig();
-            if (config != null) {
-                var key = config.what();
-                long extracted = amounts.getValue(key);
-                if (extracted > 0L) {
-                    slot.setStock(new GenericStack(key, extracted));
-                    continue;
-                }
-            }
-            slot.setStock(null);
         }
     }
 }

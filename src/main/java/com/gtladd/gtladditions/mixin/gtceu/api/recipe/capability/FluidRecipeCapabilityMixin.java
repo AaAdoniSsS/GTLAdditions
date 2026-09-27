@@ -9,6 +9,7 @@ import com.gregtechceu.gtceu.api.recipe.lookup.MapFluidTagIngredient;
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack;
 
 import com.gtladd.gtladditions.api.recipe.ingredient.MapIngredientVariantHolder;
+import com.gtladd.gtladditions.api.recipe.ingredient.MapIngredientVariants;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -25,14 +26,8 @@ public class FluidRecipeCapabilityMixin {
     @Overwrite(remap = false)
     public List<AbstractMapIngredient> convertToMapIngredient(Object obj) {
         List<AbstractMapIngredient> ingredients = new ObjectArrayList<>(1);
-        if (obj instanceof FluidIngredient ingredient) {
-            for (var value : ingredient.values) {
-                if (value instanceof FluidIngredient.TagValue tagValue)
-                    ingredients.add(new MapFluidTagIngredient(tagValue.getTag()));
-                else for (var fluid : value.getFluids())
-                    ingredients.add(new MapFluidIngredient(
-                            FluidStack.create(fluid, ingredient.getAmount(), ingredient.getNbt())));
-            }
+        if (obj instanceof FluidIngredient) {
+            return MapIngredientVariants.of(FluidRecipeCapability.CAP, obj);
         } else if (obj instanceof FluidStack stack) {
             List<AbstractMapIngredient> list = new ObjectArrayList<>();
             if (stack.getFluid() instanceof MapIngredientVariantHolder holder) {

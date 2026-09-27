@@ -40,17 +40,20 @@ open class MultipleRecipesLogic(private val gtlAddMachine: MultipleRecipesMachin
 
     private fun lookupRecipeIterator(ctx: RecipeSearchContext?): MutableSet<GTRecipe> {
         if (this.isLock) {
-            val recipe = when {
-                lockRecipe == null -> OptimizedRecipeSearch.find(gtlAddMachine, OptimizedRecipeSearch.branchOf(getLookup()), ::checkConditionsOnly)
-                checkRecipe(lockRecipe) -> lockRecipe
-                else -> return mutableSetOf<GTRecipe>()
-            } ?: return mutableSetOf<GTRecipe>()
-            return mutableSetOf(recipe)
+            val lock = lockRecipe
+            if (lock == null) {
+                val recipe = OptimizedRecipeSearch.find(gtlAddMachine, getLookup().lookup, ::checkConditionsOnly)
+                    ?: return mutableSetOf()
+                return mutableSetOf(recipe)
+            }
+            if (!checkRecipe(lock)) return mutableSetOf()
+            if (ctx == null) return mutableSetOf(lock)
+            val find = ctx.tryPlan(lock, 1)
+            return if (find != null) mutableSetOf(lock) else mutableSetOf()
         } else {
             val recipeSet = ObjectOpenHashSet<GTRecipe>()
-            val lookup = getLookup()
             if (ctx != null) {
-                recipeSet.addAll(OptimizedRecipeSearch.collectCandidates(gtlAddMachine, OptimizedRecipeSearch.branchOf(lookup), ::checkConditionsOnly))
+                recipeSet.addAll(OptimizedRecipeSearch.collectCandidates(gtlAddMachine, getLookup().lookup, ::checkConditionsOnly))
             }
             recipeSet.remove(null)
             return recipeSet
@@ -61,7 +64,7 @@ open class MultipleRecipesLogic(private val gtlAddMachine: MultipleRecipesMachin
         val ctx = gtlAddMachine.getActiveSearchContext()
         if (this.isLock) {
             val recipe = when {
-                lockRecipe == null -> OptimizedRecipeSearch.find(gtlAddMachine, OptimizedRecipeSearch.branchOf(getLookup()), ::checkConditionsOnly)
+                lockRecipe == null -> OptimizedRecipeSearch.find(gtlAddMachine, getLookup().lookup, ::checkConditionsOnly)
                 checkRecipe(lockRecipe) -> lockRecipe
                 else -> return null
             } ?: return null
@@ -74,7 +77,7 @@ open class MultipleRecipesLogic(private val gtlAddMachine: MultipleRecipesMachin
             )?.let { if (checkRecipe(it)) it else null }
         }
         val recipe = if (ctx != null) {
-            OptimizedRecipeSearch.find(gtlAddMachine, OptimizedRecipeSearch.branchOf(getLookup()), ::checkConditionsOnly)
+            OptimizedRecipeSearch.find(gtlAddMachine, getLookup().lookup, ::checkConditionsOnly)
         } else {
             null
         } ?: return null

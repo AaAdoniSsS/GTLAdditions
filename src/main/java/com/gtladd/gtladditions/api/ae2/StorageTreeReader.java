@@ -1,7 +1,6 @@
 package com.gtladd.gtladditions.api.ae2;
 
 import appeng.api.stacks.AEKey;
-import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
 import it.unimi.dsi.fastutil.objects.*;
 import org.agrona.collections.ObjLongConsumer;
@@ -10,28 +9,17 @@ import org.agrona.collections.ObjectHashSet;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.function.ToLongFunction;
 
 final class StorageTreeReader {
 
-    private record Pending(MEStorage storage, @Nullable IMEStorageFilter gate) {}
+    record Pending(MEStorage storage, @Nullable IMEStorageFilter gate) {}
 
-    private record CombinedGate(IMEStorageFilter outer, IMEStorageFilter inner) implements IMEStorageFilter {
-
-        @Override
-        public boolean canReport(AEKey key) {
-            return outer.canReport(key) && inner.canReport(key);
-        }
-    }
-
-    private final ArrayDeque<Pending> queue = new ArrayDeque<>();
-    private final List<MEStorage> children = new ObjectArrayList<>(4);
-    private final Set<MEStorage> seen = Collections.newSetFromMap(new IdentityHashMap<>());
-    private final ObjLongConsumer<AEKey> sink = new ObjLongConsumer<>() {
+    final ArrayDeque<Pending> queue = new ArrayDeque<>();
+    final List<MEStorage> children = new ObjectArrayList<>(4);
+    final Set<MEStorage> seen = new ReferenceOpenHashSet<>();
+    final ObjLongConsumer<AEKey> sink = new ObjLongConsumer<>() {
 
         @Override
         public void accept(AEKey key, long amount) {
@@ -42,9 +30,10 @@ final class StorageTreeReader {
         }
     };
 
-    private ObjectHashSet<AEKey> keys;
-    private Object2LongHashMap<AEKey> out;
-    private @Nullable IMEStorageFilter gate;
+    ObjectHashSet<AEKey> keys;
+    Object2LongHashMap<AEKey> out;
+    @Nullable
+    IMEStorageFilter gate;
 
     void read(MEStorage root, ObjectHashSet<AEKey> keys, Object2LongHashMap<AEKey> out) {
         if (keys.isEmpty()) return;
@@ -62,11 +51,19 @@ final class StorageTreeReader {
             if (!seen.add(storage)) continue;
             var gate = pending.gate();
             if (storage instanceof IMEStorageFilter filter) {
-                gate = gate == null ? filter : new CombinedGate(gate, filter);
+                gate = IMEStorageFilter.and(gate, filter);
             }
             this.gate = gate;
 
             if (storage instanceof IMEStorageNode node) {
+                var flatten = node.flattenCache();
+                if (flatten != null) {
+                    for (int i = 0, size = flatten.size(); i < size; i++) {
+                        var entry = flatten.get(i);
+                        queue.add(new Pending(entry.storage(), IMEStorageFilter.and(gate, entry.gate())));
+                    }
+                    continue;
+                }
                 children.clear();
                 node.collectChildStorages(children);
                 for (var child : children) {
@@ -74,53 +71,47 @@ final class StorageTreeReader {
                 }
                 continue;
             }
-            readLeaf(storage);
+            readLeaf(storage, gate);
         }
     }
 
-    private void readLeaf(MEStorage storage) {
+    void readLeaf(MEStorage storage, @Nullable IMEStorageFilter gate) {
         if (storage instanceof IMEStorage leaf) {
+            var big = leaf.getInfinityMap();
+            if (big != null) {
+                for (var key : keys) {
+                    if (gate != null && !gate.canReport(key)) continue;
+                    var value = big.get(key);
+                    if (value != null) accumulate(key, value.longValue());
+                }
+                return;
+            }
             var map = leaf.getStorageMap();
             if (map != null) {
-                readTable(map.size(), map::getLong, Object2LongMaps.fastIterable(map));
+                for (var key : keys) {
+                    if (gate != null && !gate.canReport(key)) continue;
+                    accumulate(key, map.getLong(key));
+                }
                 return;
             }
-            var counter = leaf.getAvailableCounter();
-            if (counter != null) {
-                readTable(counter.size(), counter::get, counter);
-                return;
-            }
+            this.gate = gate;
             leaf.forEachAvailableStack(sink);
             return;
         }
-        var counter = new KeyCounter();
-        storage.getAvailableStacks(counter);
-        var gate = this.gate;
+        var counter = storage.getAvailableStacks();
         for (var key : keys) {
             if (gate != null && !gate.canReport(key)) continue;
             accumulate(key, counter.get(key));
         }
     }
 
-    private void readTable(int entries, ToLongFunction<AEKey> lookup, Iterable<Object2LongMap.Entry<AEKey>> iterable) {
-        var gate = this.gate;
-        if (keys.size() <= entries) {
-            for (var key : keys) {
-                if (gate != null && !gate.canReport(key)) continue;
-                accumulate(key, lookup.applyAsLong(key));
-            }
-        } else {
-            for (var entry : iterable) {
-                sink.accept(entry.getKey(), entry.getLongValue());
-            }
-        }
-    }
-
-    private void accumulate(AEKey key, long amount) {
+    void accumulate(AEKey key, long amount) {
         if (amount <= 0) return;
         long current = out.getValue(key);
         if (current <= 0) {
             out.put(key, amount);
+            return;
+        } else if (current == Long.MAX_VALUE) {
             return;
         }
         long sum = current + amount;

@@ -19,12 +19,13 @@ import com.gregtechceu.gtceu.integration.ae2.machine.MEInputHatchPartMachine;
 import appeng.api.networking.IGrid;
 import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
-import com.gtladd.gtladditions.api.ae2.AE2KeyCounterCache;
 import com.gtladd.gtladditions.api.ae2.GridStockCache;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -34,6 +35,8 @@ final class LedgerSnapshot {
     final IRecipeCapabilityMachine rcm;
     final List<PartLedger> partLedgers = new ObjectArrayList<>();
     final List<SupplyPart> supplyParts = new ObjectArrayList<>();
+    final Reference2ObjectOpenHashMap<MEPatternRecipeHandlePart, Int2ObjectOpenHashMap<SupplyPart>> slotSupplies = new Reference2ObjectOpenHashMap<>();
+    final Reference2ObjectOpenHashMap<RecipeHandlePart, SupplyPart> handleSupplies = new Reference2ObjectOpenHashMap<>();
     final ObjectArrayList<SupplyPart> spareSupplies = new ObjectArrayList<>();
     int supplyCursor;
     @Nullable
@@ -72,10 +75,6 @@ final class LedgerSnapshot {
         gridsCache = null;
     }
 
-    List<SupplyPart> supplies() {
-        return supplyParts;
-    }
-
     void refresh() {
         if (snapshotBuilt) return;
         snapshotBuilt = true;
@@ -109,7 +108,7 @@ final class LedgerSnapshot {
         if (grid == null || pending == null || pending.isEmpty()) return;
         var keys = new ObjectOpenHashSet<AEKey>(pending.size());
         for (var e : pending) keys.add(e.aeKey);
-        var amounts = AE2KeyCounterCache.getAmounts(grid, keys);
+        var amounts = GridStockCache.getAmounts(grid.getStorageService(), keys, 20);
         long nowTick = GridStockCache.getSnapshotTick(grid.getStorageService());
         for (var e : pending) {
             e.amount = amounts.getValue(e.aeKey);
@@ -140,6 +139,8 @@ final class LedgerSnapshot {
         long version = ++snapshotVersion;
         if (searchDomains != null) searchDomains.clear();
         searchDomainsBuilt = false;
+        slotSupplies.clear();
+        handleSupplies.clear();
         sharedSupply = null;
         supplyCursor = 0;
         for (var mePart : rcm.getMEPatternRecipeHandleParts()) {
@@ -168,6 +169,7 @@ final class LedgerSnapshot {
             var existing = supplyParts.get(supplyCursor);
             if (existing.patternPart == null && existing.handlePart == part) {
                 supplyCursor++;
+                handleSupplies.put(part, existing);
                 return existing;
             }
             truncateSuppliesFromCursor();
@@ -178,25 +180,43 @@ final class LedgerSnapshot {
         supply.handlePart = part;
         supplyParts.add(supply);
         supplyCursor++;
+        handleSupplies.put(part, supply);
         return supply;
     }
 
     SupplyPart matchSlotSupply(MEPatternRecipeHandlePart part, int slot) {
+        SupplyPart supply = null;
         if (supplyCursor < supplyParts.size()) {
             var existing = supplyParts.get(supplyCursor);
             if (existing.patternPart == part && existing.slot == slot) {
                 supplyCursor++;
-                return existing;
+                supply = existing;
+            } else {
+                truncateSuppliesFromCursor();
             }
-            truncateSuppliesFromCursor();
         }
-        var supply = spareSupplies.isEmpty() ? new SupplyPart() : spareSupplies.pop();
-        supply.patternPart = part;
-        supply.slot = slot;
-        supply.handlePart = null;
-        supplyParts.add(supply);
-        supplyCursor++;
+        if (supply == null) {
+            supply = spareSupplies.isEmpty() ? new SupplyPart() : spareSupplies.pop();
+            supply.patternPart = part;
+            supply.slot = slot;
+            supply.handlePart = null;
+            supplyParts.add(supply);
+            supplyCursor++;
+        }
+        slotSupplies.computeIfAbsent(part, k -> new Int2ObjectOpenHashMap<>()).put(slot, supply);
         return supply;
+    }
+
+    @Nullable
+    SupplyPart slotSupply(MEPatternRecipeHandlePart part, int slot) {
+        var bySlot = slotSupplies.get(part);
+        return bySlot == null ? null : bySlot.get(slot);
+    }
+
+    @Nullable
+    SupplyPart supplyOf(@Nullable MEPatternRecipeHandlePart part, int slot, @Nullable RecipeHandlePart handle) {
+        if (part != null) return slotSupply(part, slot);
+        return handle == null ? null : handleSupplies.get(handle);
     }
 
     void truncateSuppliesFromCursor() {
@@ -272,6 +292,7 @@ final class LedgerSnapshot {
                 } else {
                     supply.ledgers.add(cur = new PartLedger(ledgerCacheBudget));
                 }
+                cur.owner = supply;
                 used++;
             }
             cur.addEntry(entry);

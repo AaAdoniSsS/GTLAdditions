@@ -290,7 +290,7 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
         private fun findRecipeOptimized(): GTRecipe? {
             val ctx = rrfMachine.getActiveSearchContext()
             return if (ctx != null) {
-                OptimizedRecipeSearch.find(rrfMachine, OptimizedRecipeSearch.branchOf(GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.lookup), ::checkConditionsOnly)
+                OptimizedRecipeSearch.find(rrfMachine, GTLAddRecipesTypes.RECURSIVE_REVERSE_FORGE.lookup.lookup, ::checkConditionsOnly)
             } else {
                 null
             }

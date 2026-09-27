@@ -276,11 +276,9 @@ object GTRecipeUtils {
     private fun copyMapContents(contents: MutableMap<RecipeCapability<*>, MutableList<Content>>, modifier: ContentModifier?): MutableMap<RecipeCapability<*>, MutableList<Content>> {
         val map = Reference2ObjectOpenHashMap<RecipeCapability<*>, MutableList<Content>>(contents.size)
         contents.entries.forEach { (c, l) ->
-            if (!l.isEmpty()) {
-                val cl = ContentList()
-                l.forEach { cl.add(it.copy(c, modifier)) }
-                map[c] = cl
-            }
+            val cl = ContentList()
+            l.forEach { cl.add(it.copy(c, modifier)) }
+            if (!cl.isEmpty) map[c] = cl
         }
         return map
     }

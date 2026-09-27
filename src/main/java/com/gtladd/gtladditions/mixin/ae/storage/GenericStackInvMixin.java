@@ -4,7 +4,6 @@ import appeng.api.stacks.AEKey;
 import appeng.api.stacks.GenericStack;
 import appeng.helpers.externalstorage.GenericStackInv;
 import com.gtladd.gtladditions.api.ae2.IMEStorage;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import org.agrona.collections.ObjLongConsumer;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -16,11 +15,6 @@ public abstract class GenericStackInvMixin implements IMEStorage {
     @Shadow(remap = false)
     @Final
     protected GenericStack[] stacks;
-
-    @Override
-    public Object2LongMap<AEKey> getStorageMap() {
-        return null;
-    }
 
     @Override
     public void forEachAvailableStack(ObjLongConsumer<AEKey> sink) {

@@ -104,6 +104,7 @@ final class HandleCache {
         }
     }
 
+    @SuppressWarnings("all")
     boolean refreshInPlace() {
         byte oldKind = subkind;
         var oldGrid = grid;

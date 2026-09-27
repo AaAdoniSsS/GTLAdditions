@@ -149,7 +149,7 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
             return false
         }
 
-        private fun findOptimized(): GTRecipe? = OptimizedRecipeSearch.find(opMachine, OptimizedRecipeSearch.branchOf(opMachine.recipeType.lookup), ::checkConditionsOnly)
+        private fun findOptimized(): GTRecipe? = OptimizedRecipeSearch.find(opMachine, opMachine.recipeType.lookup.lookup, ::checkConditionsOnly)
 
         private val getMaintenanceModify: Double get() = (opMachine as IRecipeCapabilityMachine).maintenanceMachine?.durationMultiplier?.toDouble() ?: 1.0
 

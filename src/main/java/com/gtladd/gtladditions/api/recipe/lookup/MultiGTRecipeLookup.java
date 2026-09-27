@@ -17,7 +17,7 @@ public class MultiGTRecipeLookup extends GTRecipeLookup {
         this.types = recipeTypes;
     }
 
-    public Branch getBranch() {
+    public Branch getLookup() {
         if (branch == null) branch = initRecipesBranch();
         return branch;
     }
@@ -38,5 +38,6 @@ public class MultiGTRecipeLookup extends GTRecipeLookup {
     @Override
     public void removeAllRecipes() {
         this.branch = null;
+        RecipeTreeGeneration.bump();
     }
 }

@@ -5,8 +5,12 @@ import appeng.api.storage.MEStorage;
 import appeng.me.storage.DelegatingMEInventory;
 import appeng.me.storage.MEInventoryHandler;
 import com.gtladd.gtladditions.api.ae2.IMEStorageFilter;
+import com.gtladd.gtladditions.api.ae2.StorageFlatten;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(MEInventoryHandler.class)
 public abstract class MEInventoryHandlerMixin extends DelegatingMEInventory implements IMEStorageFilter {
@@ -28,5 +32,10 @@ public abstract class MEInventoryHandlerMixin extends DelegatingMEInventory impl
         if (!this.filterAvailableContents) return true;
         if (!this.allowExtraction) return false;
         return canExtract(key);
+    }
+
+    @Inject(method = "setAllowExtraction", at = @At("HEAD"), remap = false)
+    private void dropFlattenOnAccessChange(boolean allowExtraction, CallbackInfo ci) {
+        if (this.allowExtraction != allowExtraction) StorageFlatten.invalidateTopology();
     }
 }

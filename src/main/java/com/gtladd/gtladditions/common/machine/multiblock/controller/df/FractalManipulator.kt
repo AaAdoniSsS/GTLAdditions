@@ -195,7 +195,7 @@ class FractalManipulator(holder: IMachineBlockEntity) :
                 (
                     lastOriginRecipe ?: (
                         if (ctx != null) {
-                            OptimizedRecipeSearch.find(fmMachine, OptimizedRecipeSearch.branchOf(fmMachine.recipeType.lookup)) {
+                            OptimizedRecipeSearch.find(fmMachine, fmMachine.recipeType.lookup.lookup) {
                                 it.euTier <= effectiveTier
                             }
                         } else {

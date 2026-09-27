@@ -5,7 +5,6 @@ import appeng.api.stacks.KeyCounter;
 import appeng.api.storage.MEStorage;
 import appeng.me.storage.ExternalStorageFacade;
 import com.gtladd.gtladditions.api.ae2.IMEStorage;
-import it.unimi.dsi.fastutil.objects.Object2LongMap;
 import org.agrona.collections.ObjLongConsumer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -15,11 +14,6 @@ public abstract class ExternalStorageFacadeMixin implements IMEStorage {
 
     @Shadow(remap = false)
     protected boolean extractableOnly;
-
-    @Override
-    public Object2LongMap<AEKey> getStorageMap() {
-        return null;
-    }
 
     @Override
     public void forEachAvailableStack(ObjLongConsumer<AEKey> sink) {

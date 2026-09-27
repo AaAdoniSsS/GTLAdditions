@@ -219,111 +219,43 @@ object GTLAddRecipesTypes {
             .setSound(GTSoundEntries.ARC)
 
     val InfernoCleftSmeltingVaultType =
-        registry(
-            id("inferno_cleft_smelting_vault_type"),
-            MULTIBLOCK,
-            PYROLYSE_RECIPES,
-            CRACKING_RECIPES
-        )
+        registry(id("inferno_cleft_smelting_vault_type"), MULTIBLOCK, PYROLYSE_RECIPES, CRACKING_RECIPES)
 
     val SkeletonShiftRiftEngineType =
-        registry(
-            id("skeleton_shift_rift_engine_type"),
-            MULTIBLOCK,
-            FUSION_RECIPES,
-            SUPER_PARTICLE_COLLIDER_RECIPES
-        )
+        registry(id("skeleton_shift_rift_engine_type"), MULTIBLOCK, FUSION_RECIPES, SUPER_PARTICLE_COLLIDER_RECIPES)
 
     val LucidEtchdreamerType =
-        registry(
-            id("lucid_etchdreamer_type"),
-            MULTIBLOCK,
-            PHOTON_MATRIX_ETCH,
-            LASER_ENGRAVER_RECIPES
-        )
+        registry(id("lucid_etchdreamer_type"), MULTIBLOCK, PHOTON_MATRIX_ETCH, LASER_ENGRAVER_RECIPES)
 
     val TimeSpaceDistorterType =
-        registry(
-            id("time_space_distorter_type"),
-            MULTIBLOCK,
-            QFT_RECIPES,
-            DISTORT_RECIPES
-        )
+        registry(id("time_space_distorter_type"), MULTIBLOCK, QFT_RECIPES, DISTORT_RECIPES)
 
     val RecursiveReverseForgeType =
-        registry(
-            id("recursive_reverse_forge_type"),
-            MULTIBLOCK,
-            DIMENSIONALLY_TRANSCENDENT_PLASMA_FORGE_RECIPES,
-            STELLAR_FORGE_RECIPES
-        )
+        registry(id("recursive_reverse_forge_type"), MULTIBLOCK, DIMENSIONALLY_TRANSCENDENT_PLASMA_FORGE_RECIPES, STELLAR_FORGE_RECIPES)
 
     val SuperFactoryMk1Type_1 =
-        registry(
-            id("super_factory_mk1_1_type"),
-            MULTIBLOCK,
-            EXTRUDER_RECIPES,
-            CUTTER_RECIPES,
-            MIXER_RECIPES,
-            FORMING_PRESS_RECIPES
-        )
+        registry(id("super_factory_mk1_1_type"), MULTIBLOCK, EXTRUDER_RECIPES, CUTTER_RECIPES, MIXER_RECIPES, FORMING_PRESS_RECIPES)
 
     val SuperFactoryMk2Type_1 =
-        registry(
-            id("super_factory_mk2_1_type"),
-            MULTIBLOCK,
-            CENTRIFUGE_RECIPES,
-            THERMAL_CENTRIFUGE_RECIPES
-        )
+        registry(id("super_factory_mk2_1_type"), MULTIBLOCK, CENTRIFUGE_RECIPES, THERMAL_CENTRIFUGE_RECIPES)
 
     val SuperFactoryMk2Type_2 =
-        registry(
-            id("super_factory_mk2_2_type"),
-            MULTIBLOCK,
-            ELECTROLYZER_RECIPES,
-            ELECTROMAGNETIC_SEPARATOR_RECIPES
-        )
+        registry(id("super_factory_mk2_2_type"), MULTIBLOCK, ELECTROLYZER_RECIPES, ELECTROMAGNETIC_SEPARATOR_RECIPES)
 
     val SuperFactoryMk2Type_3 =
-        registry(
-            id("super_factory_mk2_3_type"),
-            MULTIBLOCK,
-            SIFTER_RECIPES,
-            DEHYDRATOR_RECIPES
-        )
+        registry(id("super_factory_mk2_3_type"), MULTIBLOCK, SIFTER_RECIPES, DEHYDRATOR_RECIPES)
 
     val SuperFactoryMk3Type_1 =
-        registry(
-            id("super_factory_mk3_1_type"),
-            MULTIBLOCK,
-            FLUID_SOLIDFICATION_RECIPES,
-            EXTRACTOR_RECIPES
-        )
+        registry(id("super_factory_mk3_1_type"), MULTIBLOCK, FLUID_SOLIDFICATION_RECIPES, EXTRACTOR_RECIPES)
 
     val SuperFactoryMk4Type_1 =
-        registry(
-            id("super_factory_mk4_1_type"),
-            MULTIBLOCK,
-            PRECISION_ASSEMBLER_RECIPES,
-            CIRCUIT_ASSEMBLER_RECIPES
-        )
+        registry(id("super_factory_mk4_1_type"), MULTIBLOCK, PRECISION_ASSEMBLER_RECIPES, CIRCUIT_ASSEMBLER_RECIPES)
 
     val SuperFactoryMk4Type_2 =
-        registry(
-            id("super_factory_mk4_2_type"),
-            MULTIBLOCK,
-            ARC_FURNACE_RECIPES,
-            CANNER_RECIPES,
-            LIGHTNING_PROCESSOR_RECIPES
-        )
+        registry(id("super_factory_mk4_2_type"), MULTIBLOCK, ARC_FURNACE_RECIPES, CANNER_RECIPES, LIGHTNING_PROCESSOR_RECIPES)
 
     val BiosphereIIIType =
-        registry(
-            id("biosphere_iii_type"),
-            MULTIBLOCK,
-            GREENHOUSE_RECIPES,
-            FISHING_GROUND_RECIPES
-        )
+        registry(id("biosphere_iii_type"), MULTIBLOCK, GREENHOUSE_RECIPES, FISHING_GROUND_RECIPES)
 
     @JvmStatic
     fun init() {

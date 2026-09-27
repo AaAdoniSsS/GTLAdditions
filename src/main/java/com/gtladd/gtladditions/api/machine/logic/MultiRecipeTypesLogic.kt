@@ -42,7 +42,7 @@ class MultiRecipeTypesLogic(private val multiTypeMachine: MultipleRecipeTypesMac
         } else {
             multiTypeMachine.withSearchContext { ctx ->
                 if (ctx != null) {
-                    handleSearchingRecipes(OptimizedRecipeSearch.find(multiTypeMachine, OptimizedRecipeSearch.branchOf(multiTypeMachine.multiRecipeType.lookup), ::checkConditionsOnly))
+                    handleSearchingRecipes(OptimizedRecipeSearch.find(multiTypeMachine, multiTypeMachine.multiRecipeType.lookup.lookup, ::checkConditionsOnly))
                 }
             }
         }

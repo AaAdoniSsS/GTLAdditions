@@ -49,6 +49,7 @@
   "config.gtladditions.option.isMultiple": "GTLAdditions机器默认模式",
   "config.gtladditions.option.limitDuration": "GTLAdditions机器默认最低配方耗时",
   "config.gtladditions.option.isMultiple.comment": "均分模式（EQUALLY_DIVIDED_MODE）、极限模式（EXTREME_MODE）",
+  "config.gtladditions.option.spawnRefreshInterval": "生物生成刷新间隔",
   "gtladditions.guide_name": "GTLAdditions指南",
   "gui.gtladditions.add": "由GTLAdditions添加",
   "gui.gtladditions.biosphere_iii_module_connect": "已连接至生态圈3号",

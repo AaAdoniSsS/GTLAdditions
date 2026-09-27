@@ -77,7 +77,7 @@ final class SlotCache {
                         if (!(o instanceof ItemStack st) || st.isEmpty()) continue;
                         if (st.getCount() != Integer.MAX_VALUE) {
                             var key = AEItemKey.of(st);
-                            if (realKeys.contains(key) || key.equals(circuitKey)) continue; // 已入账：真实库存/电路
+                            if (realKeys.contains(key) || key.equals(circuitKey)) continue;
                         }
                         if (i >= entries.size()) return false;
                         var e = entries.get(i++);
@@ -98,7 +98,7 @@ final class SlotCache {
                 var e = entries.get(i++);
                 if (!e.scalesWithParallel || !AEFluidKey.of(fs.getFluid(), fs.getTag()).equals(e.identityKey)) return false;
                 e.amount = amount;
-                realKeys.add(AEFluidKey.of(fs.getFluid())); // 与旧实现一致：realKeys 过滤不掺 tag
+                realKeys.add(AEFluidKey.of(fs.getFluid()));
             }
             if (fluidLimits != null) {
                 Object contents = fluidLimits.get(slot);
@@ -149,7 +149,7 @@ final class SlotCache {
                         if (!(o instanceof ItemStack st) || st.isEmpty()) continue;
                         if (st.getCount() != Integer.MAX_VALUE) {
                             var key = AEItemKey.of(st);
-                            if (realKeys.contains(key) || key.equals(circuitKey)) continue; // 已入账：真实库存/电路
+                            if (realKeys.contains(key) || key.equals(circuitKey)) continue;
                         }
                         var e = HandleCache.itemEntry(1, st, null, null, false, false, null, null, true);
                         if (e != null) out.add(e);

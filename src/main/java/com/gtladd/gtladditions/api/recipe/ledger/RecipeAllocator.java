@@ -8,29 +8,28 @@ import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.content.Content;
+import com.gregtechceu.gtceu.api.recipe.lookup.AbstractMapIngredient;
 
 import com.gtladd.gtladditions.api.recipe.ingredient.MapIngredientVariants;
 import com.gtladd.gtladditions.utils.GTRecipeUtils;
 import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
 final class RecipeAllocator {
 
     final WorkableElectricMultiblockMachine machine;
-    final LedgerSnapshot snapshot;
 
     final ConsumePlan planScratch = new ConsumePlan();
     final Long2LongOpenHashMap takenScratch = new Long2LongOpenHashMap();
     long[] maskScratch = new long[0];
 
-    RecipeAllocator(WorkableElectricMultiblockMachine machine, LedgerSnapshot snapshot) {
+    RecipeAllocator(WorkableElectricMultiblockMachine machine) {
         this.machine = machine;
-        this.snapshot = snapshot;
     }
 
     record AllocationResult(@Nullable ConsumePlan plan, double ratio, @Nullable Content shortfall) {
@@ -48,17 +47,17 @@ final class RecipeAllocator {
         if (supply.patternPart != null) {
             AllocationResult best = null;
             for (int i = 0; i < supply.ledgers.size(); i++) {
-                var res = allocateOnLedgers(supply.ledgers, i, i + 1, recipe, parallel);
+                var res = allocateOnLedgers(supply.ledgers, i, i + 1, recipe, parallel, true);
                 if (res.ratio >= 1.0) return res;
                 if (best == null || res.ratio > best.ratio()) best = res;
             }
             return best != null ? best : AllocationResult.of(null, 0);
         }
-        return allocateOnLedgers(supply.ledgers, 0, supply.ledgers.size(), recipe, parallel);
+        return allocateOnLedgers(supply.ledgers, 0, supply.ledgers.size(), recipe, parallel, false);
     }
 
-    AllocationResult allocateOnLedgers(ObjectArrayList<PartLedger> ledgers, int from, int to,
-                                       GTRecipe recipe, long parallel) {
+    AllocationResult allocateOnLedgers(List<PartLedger> ledgers, int from, int to,
+                                       GTRecipe recipe, long parallel, boolean patternSlot) {
         int n = to - from;
         var plan = obtainPlan();
         takenScratch.clear();
@@ -70,11 +69,14 @@ final class RecipeAllocator {
         for (var entry : recipe.inputs.entrySet()) {
             var cap = entry.getKey();
             for (var c : entry.getValue()) {
-                if (c.chance <= 0) continue;
                 long need = GTRecipeUtils.INSTANCE.amount(c, cap);
                 if (need <= 0) continue;
-                hasInputs = true;
                 var variants = MapIngredientVariants.of(cap, c.content);
+                if (c.chance <= 0) {
+                    if (notConsumedSatisfied(ledgers, from, to, variants, need, patternSlot)) continue;
+                    return AllocationResult.fail(0.0, c);
+                }
+                hasInputs = true;
                 long demanded = NumberUtils.saturatedMultiply(need, parallel);
                 long pool = 0;
                 long available = 0;
@@ -111,12 +113,28 @@ final class RecipeAllocator {
         return new AllocationResult(plan, ratio, shortfall);
     }
 
+    static boolean notConsumedSatisfied(List<PartLedger> ledgers, int from, int to,
+                                        List<AbstractMapIngredient> variants, long need, boolean patternSlot) {
+        boolean anyClaim = false;
+        long pool = 0;
+        for (int i = from; i < to; i++) {
+            var ledger = ledgers.get(i);
+            long mask = ledger.ownerMask(variants);
+            if (mask == 0) continue;
+            anyClaim = true;
+            pool = NumberUtils.saturatedAdd(pool, ledger.pool(mask));
+            if (pool >= need || ledger.hasUsableExistenceEntry(mask) || ledger.hasNotConsumedSupplyEntry(mask)) {
+                return true;
+            }
+        }
+        return !anyClaim && patternSlot;
+    }
+
     static long denseIdx(int ledgerIdx, int bit) {
         return ((long) ledgerIdx << 6) | bit;
     }
 
-    static long availableOf(PartLedger ledger, long mask, int ledgerIdx,
-                            Long2LongOpenHashMap takenByBit) {
+    static long availableOf(PartLedger ledger, long mask, int ledgerIdx, Long2LongOpenHashMap takenByBit) {
         long avail = 0;
         long m = mask;
         while (m != 0) {
@@ -159,16 +177,9 @@ final class RecipeAllocator {
         return plan;
     }
 
-    long feasiblePoolCap(GTRecipe recipe) {
-        var caches = machine.getRecipeLogic().getChanceCaches();
-        int euTier = IGTRecipe.of(recipe).getEuTier();
-        int tier = machine.getTier();
-        long best = 0;
-        for (var supply : snapshot.supplies()) {
-            long cap = supplyCap(supply, recipe, caches, euTier, tier);
-            if (cap > best) best = cap;
-        }
-        return best;
+    long feasiblePoolCap(SupplyPart supply, GTRecipe recipe) {
+        return supplyCap(supply, recipe, machine.getRecipeLogic().getChanceCaches(),
+                IGTRecipe.of(recipe).getEuTier(), machine.getTier());
     }
 
     long supplyCap(SupplyPart supply, GTRecipe recipe,
@@ -255,33 +266,5 @@ final class RecipeAllocator {
                 k -> GTValues.RNG.nextInt(c.maxChance)) : GTValues.RNG.nextInt(c.maxChance);
         double maxP = ((pool / (double) need + 1.0) * c.maxChance - (1 + cached)) / c.chance;
         return maxP < 0 ? 0 : (long) maxP;
-    }
-
-    boolean notConsumedGate(GTRecipe recipe) {
-        for (var entry : recipe.inputs.entrySet()) {
-            var cap = entry.getKey();
-            for (var c : entry.getValue()) {
-                long need = GTRecipeUtils.INSTANCE.amount(c, cap);
-                if (need <= 0 || c.chance > 0) continue;
-                var variants = MapIngredientVariants.of(cap, c.content);
-                boolean anyClaim = false;
-                boolean satisfied = false;
-                boolean patternLenient = false;
-                for (var supply : snapshot.supplies()) {
-                    if (supply.patternPart != null && !supply.ledgers.isEmpty()) patternLenient = true;
-                    var pr = supply.probe(variants);
-                    if (!pr.anyClaim) continue;
-                    anyClaim = true;
-                    if (pr.pool >= need || pr.existence || pr.notConsumedSupply) {
-                        satisfied = true;
-                        break;
-                    }
-                }
-                if (!satisfied && (anyClaim || !patternLenient)) {
-                    return false;
-                }
-            }
-        }
-        return true;
     }
 }

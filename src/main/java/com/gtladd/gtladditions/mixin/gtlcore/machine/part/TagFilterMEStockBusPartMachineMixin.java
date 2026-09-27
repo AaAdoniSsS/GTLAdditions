@@ -8,7 +8,6 @@ import com.gregtechceu.gtceu.integration.ae2.machine.MEInputBusPartMachine;
 import appeng.api.stacks.AEKey;
 import appeng.util.prioritylist.IPartitionList;
 import com.glodblock.github.extendedae.common.me.taglist.TagPriorityList;
-import com.gtladd.gtladditions.api.ae2.MEStockSyncCache;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +22,9 @@ public abstract class TagFilterMEStockBusPartMachineMixin extends MEInputBusPart
     protected String tagWhite;
     @Shadow(remap = false)
     protected String tagBlack;
+
+    @Shadow(remap = false)
+    protected abstract void refreshList();
 
     @Unique
     private TagPriorityList filter;
@@ -40,18 +42,16 @@ public abstract class TagFilterMEStockBusPartMachineMixin extends MEInputBusPart
      * @reason .
      */
     @Overwrite(remap = false)
-    protected void syncME() {
-        var grid = this.getMainNode().getGrid();
-        if (grid != null) {
-            MEStockSyncCache.syncStock(grid.getStorageService(), this.aeItemHandler.getInventory());
-        }
+    public void autoIO() {
+        super.autoIO();
+        if (this.getOffsetTimer() % 50L == 0L) this.refreshList();
     }
 
     @Redirect(method = "refreshList",
               at = @At(value = "INVOKE",
                        target = "Lappeng/util/prioritylist/IPartitionList;isListed(Lappeng/api/stacks/AEKey;)Z"),
               remap = false)
-    private boolean refreshList(IPartitionList instance, AEKey aeKey) {
+    private boolean isFilter(IPartitionList instance, AEKey aeKey) {
         if (!lastTagWhite.equals(tagWhite) || !lastTagBlack.equals(tagBlack)) {
             filter = null;
             lastTagWhite = tagWhite;

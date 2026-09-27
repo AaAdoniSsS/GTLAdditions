@@ -26,4 +26,7 @@ public class ConfigHolder {
     @Configurable
     @Configurable.Range(min = 5, max = 200)
     public int limitDuration = 20;
+    @Configurable
+    @Configurable.Range(min = 1, max = 1200)
+    public int spawnRefreshInterval = 200;
 }

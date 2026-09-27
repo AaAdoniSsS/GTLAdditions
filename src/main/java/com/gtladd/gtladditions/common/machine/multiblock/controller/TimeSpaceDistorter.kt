@@ -174,11 +174,11 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             IGTRecipe.of(recipe).euTier <= tsdMachine.tier && recipe.checkConditions(this).isSuccess
 
         private fun findAndSetupSingle(ctx: RecipeSearchContext?, reuseLast: Boolean): Boolean {
-            val recipe = (
+            var recipe = (
                 if (reuseLast) {
                     lastOriginRecipe
                 } else if (ctx != null) {
-                    OptimizedRecipeSearch.find(tsdMachine, OptimizedRecipeSearch.branchOf(lookup), ::checkConditionsOnly)
+                    findBoundRecipe()
                 } else {
                     null
                 }
@@ -186,6 +186,10 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             var p = tsdMachine.maxParallel.toLong()
             if (ctx != null) {
                 p = ctx.getMaxParallel(recipe, p)
+                if (p < 1 && reuseLast) {
+                    recipe = findBoundRecipe() ?: return false
+                    p = ctx.getMaxParallel(recipe, tsdMachine.maxParallel.toLong())
+                }
                 if (p < 1) return false
             }
             val modified = this.modifyRecipe(recipe, p) ?: return false
@@ -195,12 +199,14 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             return true
         }
 
+        private fun findBoundRecipe(): GTRecipe? = OptimizedRecipeSearch.find(tsdMachine, lookup.lookup, ::checkConditionsOnly)
+
         private fun findAndModifyRecipe(parallel: Long): GTRecipe? {
             val ctx = tsdMachine.getActiveSearchContext()
             val found = if (ctx != null) {
-                OptimizedRecipeSearch.find(tsdMachine, OptimizedRecipeSearch.branchOf(lookup), ::checkConditionsOnly)
+                OptimizedRecipeSearch.find(tsdMachine, lookup.lookup, ::checkConditionsOnly)
             } else {
-                lookup.find(machine, ::checkRecipe)
+                null
             }
             found?.let { recipe ->
                 this.modifyRecipe(recipe, parallel)?.let {
@@ -280,10 +286,6 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
             super.loadCustomPersistedData(tag)
             this.eut = tag.getLong("eut")
         }
-
-        private fun checkRecipe(recipe: GTRecipe): Boolean = !this.recipeList.contains(recipe.id.hashCode()) &&
-            RecipeRunnerHelper.matchRecipe(machine, recipe) &&
-            IGTRecipe.of(recipe).euTier <= tsdMachine.tier && recipe.checkConditions(this).isSuccess
 
         private fun modifyRecipe(recipe: GTRecipe, parallel: Long): GTRecipe? {
             if (!RecipeRunnerHelper.matchRecipeInput(tsdMachine, recipe)) return null

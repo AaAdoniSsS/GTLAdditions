@@ -23,6 +23,8 @@ public final class PartLedger {
 
     final List<ContentEntry> entries = new ObjectArrayList<>();
     final Object2LongHashMap<AbstractMapIngredient> variantOwners = new Object2LongHashMap<>(0);
+    @Nullable
+    SupplyPart owner;
 
     final LedgerCacheBudget cacheBudget;
     @Nullable

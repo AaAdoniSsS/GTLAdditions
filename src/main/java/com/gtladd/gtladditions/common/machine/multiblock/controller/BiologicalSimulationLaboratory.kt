@@ -156,7 +156,7 @@ class BiologicalSimulationLaboratory(holder: IMachineBlockEntity) :
         val oneRecipe: GTRecipe?
             get() {
                 if (!bslMachine.hasProxies()) return null
-                (OptimizedRecipeSearch.find(bslMachine, OptimizedRecipeSearch.branchOf(bslMachine.recipeType.lookup), this::checkConditionsOnly))?.let {
+                (OptimizedRecipeSearch.find(bslMachine, bslMachine.recipeType.lookup.lookup, this::checkConditionsOnly))?.let {
                     return FastRecipeModify.modify(
                         bslMachine,
                         it,

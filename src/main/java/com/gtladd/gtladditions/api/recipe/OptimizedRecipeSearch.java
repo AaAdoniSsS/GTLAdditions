@@ -6,13 +6,13 @@ import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMa
 import com.gregtechceu.gtceu.api.recipe.GTRecipe;
 import com.gregtechceu.gtceu.api.recipe.lookup.AbstractMapIngredient;
 import com.gregtechceu.gtceu.api.recipe.lookup.Branch;
-import com.gregtechceu.gtceu.api.recipe.lookup.GTRecipeLookup;
 
 import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider;
 import com.gtladd.gtladditions.api.recipe.ledger.PartLedger;
 import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext;
 import com.gtladd.gtladditions.api.recipe.lookup.IBranchAddition;
-import com.gtladd.gtladditions.api.recipe.lookup.MultiGTRecipeLookup;
+import com.gtladd.gtladditions.mixin.gtlcore.machine.part.InternalSlotAccessor;
+import com.gtladd.gtladditions.mixin.gtlcore.machine.part.MEPatternBufferPartMachineBaseInvoker;
 import com.mojang.datafixers.util.Either;
 import it.unimi.dsi.fastutil.objects.*;
 import org.jetbrains.annotations.Nullable;
@@ -24,31 +24,32 @@ import java.util.function.Predicate;
 
 public final class OptimizedRecipeSearch {
 
-    public static Branch branchOf(GTRecipeLookup lookup) {
-        if (lookup instanceof MultiGTRecipeLookup multi) return multi.getBranch();
-        return lookup.getLookup();
-    }
-
     @Nullable
     public static GTRecipe find(WorkableElectricMultiblockMachine holder, Branch branch, Predicate<GTRecipe> canHandle) {
         if (!(holder instanceof IRecipeCapabilityMachine rcm)) return null;
         var ctx = activeContext(holder);
         for (var part : rcm.getMEPatternRecipeHandleParts()) {
-            for (var recipe : part.getCachedGTRecipe()) {
-                if (canHandle.test(recipe) && ctx.tryPlan(recipe, 1) != null) {
-                    accept(ctx, recipe);
-                    return recipe;
+            var machine = ctx.getPatternMachine(part);
+            if (machine == null) continue;
+            var cacheRecipe = machine.getMETrait().getSlot2RecipesCache();
+            for (var slot : ((MEPatternBufferPartMachineBaseInvoker) machine).getActiveSlots()) {
+                var index = ((InternalSlotAccessor) slot).getSlotIndex();
+                var recipes = cacheRecipe.get(index);
+                if (recipes == null) continue;
+                for (var recipe : recipes) {
+                    if (canHandle.test(recipe) && ctx.tryPlan(recipe, 1, part, index) != null) {
+                        accept(ctx, recipe);
+                        return recipe;
+                    }
                 }
             }
         }
-        var hit = ctx.getSearchHit();
-        if (hit != null && canHandle.test(hit) && ctx.tryPlan(hit, 1) != null) {
+        var hit = ctx.pickSearchHit(canHandle);
+        if (hit != null) {
             accept(ctx, hit);
             return hit;
         }
-        var found = searchNoCache(holder, branch, canHandle);
-        ctx.setSearchHit(found);
-        return found;
+        return searchNoCache(holder, branch, canHandle);
     }
 
     @Nullable
@@ -56,8 +57,8 @@ public final class OptimizedRecipeSearch {
         if (!(holder instanceof IRecipeCapabilityMachine)) return null;
         var ctx = activeContext(holder);
         ctx.buildSnapshot();
-        var filter = leafFilter(ctx, canHandle);
         for (var domain : ctx.getSearchDomains()) {
+            var filter = leafFilter(ctx, canHandle, domain);
             var r = dfs(domain, branch, recipe -> {
                 if (filter.test(recipe)) {
                     accept(ctx, recipe);
@@ -65,7 +66,10 @@ public final class OptimizedRecipeSearch {
                 }
                 return null;
             });
-            if (r != null) return r;
+            if (r != null) {
+                ctx.recordSearchHit(r, domain);
+                return r;
+            }
         }
         return null;
     }
@@ -76,17 +80,26 @@ public final class OptimizedRecipeSearch {
         if (!(holder instanceof IRecipeCapabilityMachine rcm)) return result;
         var ctx = activeContext(holder);
         ctx.buildSnapshot();
-        var filter = leafFilter(ctx, canHandle);
         var seen = new ObjectOpenHashSet<GTRecipe>();
         for (var part : rcm.getMEPatternRecipeHandleParts()) {
-            for (var r : part.getCachedGTRecipe()) {
-                if (seen.add(r) && canHandle.test(r) && ctx.tryPlan(r, 1) != null) {
-                    accept(ctx, r);
-                    result.add(r);
+            var machine = ctx.getPatternMachine(part);
+            if (machine == null) continue;
+            var cacheRecipe = machine.getMETrait().getSlot2RecipesCache();
+            for (var slot : ((MEPatternBufferPartMachineBaseInvoker) machine).getActiveSlots()) {
+                var index = ((InternalSlotAccessor) slot).getSlotIndex();
+                var recipes = cacheRecipe.get(index);
+                if (recipes == null) continue;
+                for (var recipe : recipes) {
+                    if (canHandle.test(recipe) && ctx.tryPlan(recipe, 1, part, index) != null) {
+                        accept(ctx, recipe);
+                        result.add(recipe);
+                        seen.add(recipe);
+                    }
                 }
             }
         }
         for (var domain : ctx.getSearchDomains()) {
+            var filter = leafFilter(ctx, canHandle, domain);
             dfs(domain, branch, recipe -> {
                 if (seen.add(recipe) && filter.test(recipe)) {
                     accept(ctx, recipe);
@@ -103,13 +116,12 @@ public final class OptimizedRecipeSearch {
         return ctx != null ? ctx : new RecipeSearchContext(machine);
     }
 
-    static Predicate<GTRecipe> leafFilter(RecipeSearchContext ctx, Predicate<GTRecipe> canHandle) {
-        return recipe -> canHandle.test(recipe) && ctx.tryPlan(recipe, 1) != null;
+    static Predicate<GTRecipe> leafFilter(RecipeSearchContext ctx, Predicate<GTRecipe> canHandle, List<PartLedger> domain) {
+        return recipe -> canHandle.test(recipe) && ctx.tryPlan(recipe, 1, domain) != null;
     }
 
     static void accept(RecipeSearchContext ctx, GTRecipe recipe) {
         ctx.setOriginRecipe(recipe);
-        ctx.noteMatchedParallel(recipe);
     }
 
     interface LeafVisitor {
@@ -118,34 +130,75 @@ public final class OptimizedRecipeSearch {
         GTRecipe test(GTRecipe recipe);
     }
 
-    static final ObjectArrayList<Reference2ObjectOpenHashMap<Branch, long[]>> childMaskPool = new ObjectArrayList<>();
-    static long[] usedScratch = new long[0];
+    static final class SearchScratch {
+
+        final ObjectArrayList<Reference2ObjectOpenHashMap<Branch, long[]>> layers = new ObjectArrayList<>();
+
+        long[] used = new long[0];
+        long[] per = new long[0];
+        boolean busy;
+
+        Reference2ObjectOpenHashMap<Branch, long[]> masks(int depth) {
+            while (layers.size() <= depth) layers.add(new Reference2ObjectOpenHashMap<>());
+            var map = layers.get(depth);
+            map.clear();
+            return map;
+        }
+
+        long[] usedFor(int n) {
+            if (used.length < n) used = new long[Math.max(n, used.length << 1)];
+            Arrays.fill(used, 0, n, 0L);
+            return used;
+        }
+
+        long[] perFor(int n) {
+            if (per.length != n) per = new long[n];
+            return per;
+        }
+
+        void release() {
+            for (int i = 0, size = layers.size(); i < size; i++) layers.get(i).clear();
+        }
+    }
+
+    static final ThreadLocal<SearchScratch> searchScratch = ThreadLocal.withInitial(SearchScratch::new);
 
     @Nullable
-    static GTRecipe dfs(List<PartLedger> ledgers, Branch node,
-                        LeafVisitor visitor) {
+    static GTRecipe dfs(List<PartLedger> ledgers, Branch node, LeafVisitor visitor) {
+        var scratch = searchScratch.get();
+        if (scratch.busy) return runSearch(new SearchScratch(), ledgers, node, visitor);
+        scratch.busy = true;
+        try {
+            return runSearch(scratch, ledgers, node, visitor);
+        } finally {
+            scratch.release();
+            scratch.busy = false;
+        }
+    }
+
+    @Nullable
+    static GTRecipe runSearch(SearchScratch scratch, List<PartLedger> ledgers, Branch node, LeafVisitor visitor) {
         int n = ledgers.size();
-        if (usedScratch.length < n) usedScratch = new long[Math.max(n, usedScratch.length << 1)];
-        Arrays.fill(usedScratch, 0, n, 0L);
-        return dfs0(ledgers, node, usedScratch, n, 0, visitor);
+        return dfs0(ledgers, node, scratch.usedFor(n), n, 0, scratch, visitor);
     }
 
     @Nullable
     static GTRecipe dfs0(List<PartLedger> ledgers, Branch node, long[] used,
-                         int n, int depth, LeafVisitor visitor) {
+                         int n, int depth, SearchScratch scratch, LeafVisitor visitor) {
         int free = freeOf(ledgers, used, n);
         if (free == 0) return null;
         if (free < minDepth(node)) return null;
 
         var nodes = node.getNodes();
         var special = node.getSpecialNodes();
-        var childMasks = obtainChildMasks(depth);
+        var childMasks = scratch.masks(depth);
+        var perScratch = scratch.perFor(n);
         GTRecipe hit;
         if (nodes.size() + special.size() <= free) {
-            hit = probeTreeSide(ledgers, nodes, used, childMasks, visitor, n);
-            if (hit == null) hit = probeTreeSide(ledgers, special, used, childMasks, visitor, n);
+            hit = probeTreeSide(ledgers, nodes, used, perScratch, childMasks, visitor, n);
+            if (hit == null) hit = probeTreeSide(ledgers, special, used, perScratch, childMasks, visitor, n);
         } else {
-            hit = probeMachineSide(ledgers, used, childMasks, visitor, nodes, special, n);
+            hit = probeMachineSide(ledgers, used, perScratch, childMasks, visitor, nodes, special, n);
         }
         if (hit != null) return hit;
         for (var it = childMasks.reference2ObjectEntrySet().fastIterator(); it.hasNext();) {
@@ -158,20 +211,13 @@ public final class OptimizedRecipeSearch {
                     int bit = Long.numberOfTrailingZeros(m);
                     m &= m - 1;
                     used[i] |= 1L << bit;
-                    var r = dfs0(ledgers, child, used, n, depth + 1, visitor);
+                    var r = dfs0(ledgers, child, used, n, depth + 1, scratch, visitor);
                     used[i] &= ~(1L << bit);
                     if (r != null) return r;
                 }
             }
         }
         return null;
-    }
-
-    static Reference2ObjectOpenHashMap<Branch, long[]> obtainChildMasks(int depth) {
-        while (childMaskPool.size() <= depth) childMaskPool.add(new Reference2ObjectOpenHashMap<>());
-        var map = childMaskPool.get(depth);
-        map.clear();
-        return map;
     }
 
     static int freeOf(List<PartLedger> ledgers, long[] used, int n) {
@@ -198,10 +244,10 @@ public final class OptimizedRecipeSearch {
     @Nullable
     static GTRecipe probeTreeSide(List<PartLedger> ledgers,
                                   Map<AbstractMapIngredient, Either<GTRecipe, Branch>> map,
-                                  long[] used, Reference2ObjectOpenHashMap<Branch, long[]> childMasks,
+                                  long[] used, long[] perScratch,
+                                  Reference2ObjectOpenHashMap<Branch, long[]> childMasks,
                                   LeafVisitor visitor, int n) {
         if (map.isEmpty()) return null;
-        var perScratch = new long[n];
         for (var e : fastEntries(map)) {
             var key = e.getKey();
             var either = e.getValue();
@@ -231,13 +277,13 @@ public final class OptimizedRecipeSearch {
     }
 
     @Nullable
-    static GTRecipe probeMachineSide(List<PartLedger> ledgers, long[] used,
+    static GTRecipe probeMachineSide(List<PartLedger> ledgers, long[] used, long[] per,
                                      Reference2ObjectOpenHashMap<Branch, long[]> childMasks,
                                      LeafVisitor visitor,
                                      Map<AbstractMapIngredient, Either<GTRecipe, Branch>> nodes,
                                      Map<AbstractMapIngredient, Either<GTRecipe, Branch>> special,
                                      int n) {
-        long[] per = new long[n];
+        Arrays.fill(per, 0, n, 0L);
         for (int i = 0; i < n; i++) {
             var ledger = ledgers.get(i);
             long free = ledger.ownerCount() >= 64 ? ~used[i] : ~used[i] & ((1L << ledger.ownerCount()) - 1);

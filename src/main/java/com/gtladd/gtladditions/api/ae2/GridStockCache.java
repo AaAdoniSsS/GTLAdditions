@@ -11,10 +11,73 @@ import java.util.WeakHashMap;
 
 public final class GridStockCache {
 
-    public static final int DISPLAY_MAX_AGE_TICKS = 5;
-    public static final int LEDGER_MAX_AGE_TICKS = 20;
+    static final Object2LongHashMap<AEKey> EMPTY_O2LMAP = new Object2LongHashMap<>(0) {
 
-    public static final EmptyO2LHashMap<AEKey> EMPTY_O2LMAP = new EmptyO2LHashMap<>();
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean containsKey(Object key) {
+            return false;
+        }
+
+        @Override
+        public boolean containsValue(Object value) {
+            return false;
+        }
+
+        @Override
+        public boolean containsValue(long value) {
+            return false;
+        }
+
+        @Override
+        public long getOrDefault(Object key, long defaultValue) {
+            return defaultValue;
+        }
+
+        @Override
+        public Long get(Object key) {
+            return 0L;
+        }
+
+        @Override
+        public long getValue(AEKey key) {
+            return 0;
+        }
+
+        @Override
+        public Long put(AEKey key, Long value) {
+            return value;
+        }
+
+        @Override
+        public long put(AEKey key, long value) {
+            return value;
+        }
+
+        @Override
+        public boolean remove(Object key, Object value) {
+            return false;
+        }
+
+        @Override
+        public boolean remove(Object key, long value) {
+            return false;
+        }
+
+        @Override
+        public Long remove(Object key) {
+            return 0L;
+        }
+
+        @Override
+        public long removeKey(AEKey key) {
+            return 0;
+        }
+    };
 
     static final class CacheEntry {
 
@@ -61,78 +124,6 @@ public final class GridStockCache {
         synchronized (CACHE) {
             var entry = CACHE.get(service);
             return entry == null || !entry.valid ? Long.MAX_VALUE : entry.tick;
-        }
-    }
-
-    public static class EmptyO2LHashMap<K> extends Object2LongHashMap<K> {
-
-        public EmptyO2LHashMap() {
-            super(0);
-        }
-
-        @Override
-        public boolean isEmpty() {
-            return true;
-        }
-
-        @Override
-        public boolean containsKey(Object key) {
-            return false;
-        }
-
-        @Override
-        public boolean containsValue(Object value) {
-            return false;
-        }
-
-        @Override
-        public boolean containsValue(long value) {
-            return false;
-        }
-
-        @Override
-        public long getOrDefault(Object key, long defaultValue) {
-            return defaultValue;
-        }
-
-        @Override
-        public Long get(Object key) {
-            return 0L;
-        }
-
-        @Override
-        public long getValue(K key) {
-            return 0;
-        }
-
-        @Override
-        public Long put(K key, Long value) {
-            return value;
-        }
-
-        @Override
-        public long put(K key, long value) {
-            return value;
-        }
-
-        @Override
-        public boolean remove(Object key, Object value) {
-            return false;
-        }
-
-        @Override
-        public boolean remove(Object key, long value) {
-            return false;
-        }
-
-        @Override
-        public Long remove(Object key) {
-            return 0L;
-        }
-
-        @Override
-        public long removeKey(K key) {
-            return 0;
         }
     }
 }
