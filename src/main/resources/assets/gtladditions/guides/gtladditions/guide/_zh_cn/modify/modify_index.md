@@ -13,3 +13,4 @@ navigation:
 * [无线光学(算力)仓修改](computation_data_hatch.md)
 * [可配置自动维护仓修改](auto_configuration_maintenance_hatch.md)
 * [有源变压器修改](active_transformer.md)
+* [裂变反应堆修改](fission_reactor.md)

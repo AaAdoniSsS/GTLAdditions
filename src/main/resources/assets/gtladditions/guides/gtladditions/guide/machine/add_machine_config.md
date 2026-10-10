@@ -12,7 +12,7 @@ The default number of threads for most GTLAdditions machines is 128 (where appli
 ## **Equally Divided Mode**
 
 > In Equally Divided Mode, the machine will process all possible recipes, with parallel recipes distributed as evenly as possible \
-> If the total recipe time after equal distribution exceeds 1,000 seconds, the number of recipes run in parallel will not be distributed equally; instead, only one recipe that can be processed will be run \
+> If the total recipe time after equal distribution exceeds 500 seconds, the number of recipes run in parallel will not be distributed equally; instead, only one recipe that can be processed will be run \
 > In this mode, the total parallel number is: thread count × machine parallel count
 > This mode does not support batch processing
 

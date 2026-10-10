@@ -18,20 +18,41 @@ import net.minecraftforge.common.crafting.StrictNBTIngredient;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.WeakHashMap;
 
 public final class MapIngredientVariants {
+
+    private static final Set<MapIngredientVariantHolder> HOLDERS = Collections.synchronizedSet(
+            Collections.newSetFromMap(new WeakHashMap<>()));
+
+    private MapIngredientVariants() {}
 
     public static List<AbstractMapIngredient> of(RecipeCapability<?> cap, Object content) {
         var key = variantKey(content);
         if (key instanceof MapIngredientVariantHolder holder) {
             var cached = holder.variants(cap);
             if (cached != null) return cached;
-            var computed = convertToMapIngredient(content);
-            holder.setVariants(computed);
-            return computed;
+            return store(holder, convertToMapIngredient(content));
         }
         return convertToMapIngredient(content);
+    }
+
+    public static List<AbstractMapIngredient> store(MapIngredientVariantHolder holder, List<AbstractMapIngredient> variants) {
+        holder.setVariants(variants);
+        HOLDERS.add(holder);
+        return variants;
+    }
+
+    public static void invalidateAll() {
+        synchronized (HOLDERS) {
+            for (var holder : HOLDERS) {
+                holder.setVariants(null);
+            }
+            HOLDERS.clear();
+        }
     }
 
     static Object variantKey(Object content) {

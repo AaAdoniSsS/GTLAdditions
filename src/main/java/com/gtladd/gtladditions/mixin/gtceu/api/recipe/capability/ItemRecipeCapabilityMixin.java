@@ -6,6 +6,7 @@ import com.gregtechceu.gtceu.api.recipe.lookup.*;
 import com.gregtechceu.gtceu.common.data.GTItems;
 import com.gregtechceu.gtceu.common.item.IntCircuitBehaviour;
 
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraftforge.common.crafting.StrictNBTIngredient;
@@ -31,17 +32,21 @@ public class ItemRecipeCapabilityMixin {
         if (obj instanceof Ingredient) {
             return MapIngredientVariants.of(ItemRecipeCapability.CAP, obj);
         } else if (obj instanceof ItemStack stack) {
+            if (stack.isEmpty()) return List.of();
             List<AbstractMapIngredient> list = new ObjectArrayList<>();
-            if (stack.getItem() instanceof MapIngredientVariantHolder holder) {
-                var l = holder.variants(ItemRecipeCapability.CAP);
-                if (l == null) {
-                    var c = new ObjectArrayList<AbstractMapIngredient>(4);
-                    c.add(new MapItemStackIngredient(stack));
-                    stack.getTags().forEach(tag -> c.add(new MapItemTagIngredient(tag)));
-                    holder.setVariants(c);
-                    l = c;
+            Item item = stack.getItem();
+            if (item instanceof MapIngredientVariantHolder holder) {
+                var cached = holder.variants(ItemRecipeCapability.CAP);
+                if (cached == null) {
+                    ItemStack representative = new ItemStack(item, 1);
+                    var built = new ObjectArrayList<AbstractMapIngredient>(4);
+                    built.add(new MapItemStackIngredient(representative));
+                    representative.getTags().forEach(tag -> built.add(new MapItemTagIngredient(tag)));
+                    cached = MapIngredientVariants.store(holder, List.copyOf(built));
                 }
-                list.addAll(l);
+                list.addAll(cached);
+            } else {
+                list.add(new MapItemStackIngredient(stack));
             }
             if (stack.hasTag()) {
                 if (GTItems.INTEGRATED_CIRCUIT.isIn(stack)) {

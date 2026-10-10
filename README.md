@@ -17,7 +17,7 @@ This mod is developed based on the `GregTech Leisure`. On the basis of this Modp
 
 ## Requirement
 
-- GTLCore  `Version >= 1.2.3.2-fix2`
+- GTLCore  `Version >= 1.2.3.2-fix4`
 - Kotlin For Forge `Version >= 4.11.0`
 - Java `Version >= 21`
 

@@ -24,6 +24,8 @@ class MultiGTRecipeType : GTRecipeType {
 
     fun getTypeList(): Array<GTRecipeType> = this.typeList
 
+    fun getRecipeTypes(): Array<GTRecipeType> = this.typeList
+
     companion object {
         fun registry(registryName: ResourceLocation, group: String, vararg types: GTRecipeType): GTRecipeType {
             val type = MultiGTRecipeType(Array(types.size) { types[it] }, registryName, group)

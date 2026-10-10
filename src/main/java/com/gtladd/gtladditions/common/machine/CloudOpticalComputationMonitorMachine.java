@@ -2,8 +2,6 @@ package com.gtladd.gtladditions.common.machine;
 
 import org.gtlcore.gtlcore.api.gui.ExtendLabelWidget;
 
-import com.gregtechceu.gtceu.api.capability.IOpticalComputationReceiver;
-import com.gregtechceu.gtceu.api.capability.recipe.CWURecipeCapability;
 import com.gregtechceu.gtceu.api.gui.GuiTextures;
 import com.gregtechceu.gtceu.api.gui.fancy.FancyMachineUIWidget;
 import com.gregtechceu.gtceu.api.gui.fancy.IFancyUIProvider;
@@ -14,7 +12,6 @@ import com.gregtechceu.gtceu.api.machine.feature.IDataStickInteractable;
 import com.gregtechceu.gtceu.api.machine.feature.IFancyUIMachine;
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife;
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine;
-import com.gregtechceu.gtceu.api.recipe.content.Content;
 import com.gregtechceu.gtceu.utils.FormattingUtil;
 
 import com.lowdragmc.lowdraglib.LDLib;
@@ -50,11 +47,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
-import com.gtladd.gtladditions.api.machine.trait.CloudOpticalComputationContainer;
 import com.gtladd.gtladditions.api.machine.trait.IOpticalComputationProvider;
 import com.gtladd.gtladditions.client.renderer.ClientCloudHighlighter;
 import com.gtladd.gtladditions.common.machine.hatch.CloudOpticalComputationHatchMachine;
-import com.gtladd.gtladditions.utils.MathUtil;
 import com.hepdd.gtmthings.utils.TeamUtil;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
@@ -137,6 +132,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
 
     public static void markCacheDirty() {
         cacheDirty = true;
+        org.gtlcore.gtlcore.api.machine.computation.ComputationNetwork.invalidate();
     }
 
     static void rebuildProviderCache() {
@@ -159,14 +155,28 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
         return TEAM_STATES.computeIfAbsent(getTeamUUID(teamId), k -> new TeamState());
     }
 
+    public static List<com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider> computationLinks(UUID teamId) {
+        List<com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider> links = new ArrayList<>();
+        for (var provider : getTeamState(teamId).providers) {
+            if (provider instanceof com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider link) links.add(link);
+        }
+        return List.copyOf(links);
+    }
+
     public static long getMaxCWU(UUID teamId) {
-        var state = getTeamState(teamId);
-        return MathUtil.INSTANCE.getSafeToLong(state.providers.stream().mapToDouble(IOpticalComputationProvider::getMaxCWU).sum());
+        long total = 0;
+        for (var p : getTeamState(teamId).providers) {
+            total = org.gtlcore.gtlcore.api.machine.computation.ComputationMath.add(total, Math.max(0, p.getMaxCWU()));
+        }
+        return total;
     }
 
     public static long getRemainingCWU(UUID teamId) {
-        var state = getTeamState(teamId);
-        return MathUtil.INSTANCE.getSafeToLong(state.providers.stream().mapToDouble(IOpticalComputationProvider::remainCWU).sum());
+        long total = 0;
+        for (var p : getTeamState(teamId).providers) {
+            total = org.gtlcore.gtlcore.api.machine.computation.ComputationMath.add(total, Math.max(0, p.remainCWU()));
+        }
+        return total;
     }
 
     public static long requestCWU(UUID teamId, long cwu, boolean simulate) {
@@ -293,7 +303,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
             scroll.setScrollYOffset(0);
             rows.sort((a, b) -> {
                 if (a.machine == null || b.machine == null) return Boolean.compare(a.machine == null, b.machine == null);
-                int c = byMax ? Long.compare(a.max, b.max) : Integer.compare(a.cwu, b.cwu);
+                int c = byMax ? Long.compare(a.max, b.max) : Long.compare(a.cwu, b.cwu);
                 return descending ? -c : c;
             });
             for (int j = 0; j < rows.size(); j++) rows.get(j).setSelfPositionY(j * 20 + 4);
@@ -350,11 +360,11 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
         List<Location> locations;
         long current;
         long max;
-        int cwu;
+        long cwu;
 
         long lastCurrent;
         long lastMax;
-        int lastCwu;
+        long lastCwu;
 
         int tick = 0;
 
@@ -468,20 +478,9 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
                 current = p.remainCWU();
                 max = p.getMaxCWU();
             } else if (machine instanceof IRecipeLogicMachine rm) {
-                var recipe = rm.getRecipeLogic().getLastRecipe();
-                cwu = 0;
-                if (recipe != null && rm.getRecipeLogic().isWorking()) {
-                    if (recipe.data.getBoolean("duration_is_total_cwu")) {
-                        if (machine instanceof IOpticalComputationReceiver receiver) {
-                            var p = receiver.getComputationProvider();
-                            if (p instanceof CloudOpticalComputationContainer c) {
-                                cwu = Math.clamp(recipe.duration - rm.getRecipeLogic().getProgress(), 0, c.lastResearch);
-                            }
-                        }
-                    } else {
-                        cwu = recipe.tickInputs.get(CWURecipeCapability.CAP).stream().map(Content::getContent).mapToInt(CWURecipeCapability.CAP::of).sum();
-                    }
-                }
+                var logic = rm.getRecipeLogic();
+                cwu = logic.isWorking() && logic instanceof org.gtlcore.gtlcore.api.machine.computation.ComputationUsage usage ?
+                        usage.gtlcore$usedComputation() : 0L;
             }
         }
 
@@ -492,7 +491,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
             locations.forEach(l -> l.write(buffer));
             buffer.writeLong(current);
             buffer.writeLong(max);
-            buffer.writeInt(cwu);
+            buffer.writeLong(cwu);
             lastCurrent = current;
             lastMax = max;
             lastCwu = cwu;
@@ -506,7 +505,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
             locations = list;
             current = buffer.readLong();
             max = buffer.readLong();
-            cwu = buffer.readInt();
+            cwu = buffer.readLong();
         }
 
         @Override
@@ -520,7 +519,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
                 writeUpdateInfo(31, buffer -> {
                     buffer.writeLong(current);
                     buffer.writeLong(max);
-                    buffer.writeInt(cwu);
+                    buffer.writeLong(cwu);
                 });
             }
         }
@@ -530,7 +529,7 @@ public final class CloudOpticalComputationMonitorMachine extends MetaMachine imp
             if (id == 31) {
                 current = buffer.readLong();
                 max = buffer.readLong();
-                cwu = buffer.readInt();
+                cwu = buffer.readLong();
             } else {
                 super.readUpdateInfo(id, buffer);
             }

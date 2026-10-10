@@ -29,21 +29,26 @@ public class FluidRecipeCapabilityMixin {
         if (obj instanceof FluidIngredient) {
             return MapIngredientVariants.of(FluidRecipeCapability.CAP, obj);
         } else if (obj instanceof FluidStack stack) {
+            if (stack.getFluid() == null || stack.getAmount() <= 0L) return List.of();
             List<AbstractMapIngredient> list = new ObjectArrayList<>();
             if (stack.getFluid() instanceof MapIngredientVariantHolder holder) {
-                var l = holder.variants(FluidRecipeCapability.CAP);
-                if (l == null) {
-                    var c = new ObjectArrayList<AbstractMapIngredient>(4);
-                    c.add(new MapFluidIngredient(stack));
-                    stack.getFluid().builtInRegistryHolder().tags().forEach(tag -> c.add(new MapFluidTagIngredient(tag)));
-                    holder.setVariants(c);
-                    l = c;
+                var cached = holder.variants(FluidRecipeCapability.CAP);
+                if (cached == null) {
+                    FluidStack representative = FluidStack.create(stack.getFluid(), 1);
+                    var built = new ObjectArrayList<AbstractMapIngredient>(4);
+                    built.add(new MapFluidIngredient(representative));
+                    stack.getFluid().builtInRegistryHolder().tags().forEach(tag -> built.add(new MapFluidTagIngredient(tag)));
+                    cached = MapIngredientVariants.store(holder, List.copyOf(built));
                 }
-                list = l;
+                list.addAll(cached);
+            } else {
+                list.add(new MapFluidIngredient(stack));
+            }
+            if (stack.getTag() != null) {
+                list.add(new MapFluidIngredient(stack));
             }
             ingredients = list;
         }
-
         return ingredients;
     }
 }

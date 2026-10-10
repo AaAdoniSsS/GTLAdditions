@@ -155,5 +155,6 @@ public class CloudOpticalComputationHatchMachine extends MultiblockPartMachine i
     @Override
     public void setUUID(UUID uuid) {
         this.player = uuid;
+        CloudOpticalComputationMonitorMachine.markCacheDirty();
     }
 }

@@ -30,6 +30,6 @@ public class TooltipsModify {
     }
 
     private static boolean isCharge(String path) {
-        return path.contains("naquadria_charge") || path.contains("leptonic_charge") || path.contains("quantum_chromodynamic_charge");
+        return path.contains("naquadria_charge") || path.contains("leptonic_charge") || path.contains("quantum_chromodynamic_charge") || path.contains("fission_reactor");
     }
 }

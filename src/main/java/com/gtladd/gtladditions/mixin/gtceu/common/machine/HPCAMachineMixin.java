@@ -1,14 +1,18 @@
 package com.gtladd.gtladditions.mixin.gtceu.common.machine;
 
+import org.gtlcore.gtlcore.api.machine.computation.ComputationNetwork;
+import org.gtlcore.gtlcore.api.machine.computation.ComputationSource;
+
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.HPCAMachine;
 
 import com.gtladd.gtladditions.api.machine.trait.IOpticalComputationProvider;
-import com.gtladd.gtladditions.utils.MathUtil;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import java.util.List;
 
 @Mixin(HPCAMachine.class)
 public abstract class HPCAMachineMixin extends WorkableElectricMultiblockMachine implements IOpticalComputationProvider {
@@ -16,8 +20,6 @@ public abstract class HPCAMachineMixin extends WorkableElectricMultiblockMachine
     @Shadow(remap = false)
     @Final
     private HPCAMachine.HPCAGridHandler hpcaHandler;
-    @Shadow(remap = false)
-    private boolean hasNotEnoughEnergy;
 
     public HPCAMachineMixin(IMachineBlockEntity holder, Object... args) {
         super(holder, args);
@@ -25,17 +27,17 @@ public abstract class HPCAMachineMixin extends WorkableElectricMultiblockMachine
 
     @Override
     public long requestCWU(long cwu, boolean simulate) {
-        return this.isActive() && this.isWorkingEnabled() && !this.hasNotEnoughEnergy ? this.hpcaHandler.allocateCWUt(MathUtil.INSTANCE.getSafeToInt(cwu), simulate) : 0;
+        return ComputationNetwork.request(List.of((com.gregtechceu.gtceu.api.capability.IOpticalComputationProvider) this), cwu, simulate);
     }
 
     @Override
     public long remainCWU() {
-        return this.isActive() && this.isWorkingEnabled() ? this.hpcaHandler.getMaxCWUt() - this.hpcaHandler.getAllocatedCWUt() : 0;
+        return ((ComputationSource) (Object) this).gtlcore$availableComputation();
     }
 
     @Override
     public long getMaxCWU() {
-        return this.isActive() && this.isWorkingEnabled() ? this.hpcaHandler.getMaxCWUt() : 0;
+        return ((ComputationSource) (Object) this).gtlcore$computationCapacity();
     }
 
     @Override

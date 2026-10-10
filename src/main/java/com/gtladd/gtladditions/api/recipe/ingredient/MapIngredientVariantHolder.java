@@ -13,5 +13,5 @@ public interface MapIngredientVariantHolder {
     @Nullable
     List<AbstractMapIngredient> variants(@NotNull RecipeCapability<?> cap);
 
-    void setVariants(@NotNull List<AbstractMapIngredient> variants);
+    void setVariants(@Nullable List<AbstractMapIngredient> variants);
 }

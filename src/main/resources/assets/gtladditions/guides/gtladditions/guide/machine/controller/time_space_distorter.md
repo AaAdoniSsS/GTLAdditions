@@ -14,6 +14,7 @@ item_ids:
 
 > Energy consumption ratio: 0.1 \
 > Contains[Multi Recipe Types](../multi_type.md): Quantum Manipulator, Deep Chemical Distortion \
+> Unable to install the ME Recipe Type Integrated Pattern Buffer \
 > When running the**Deep Chemical Distortion Recipe**, the parallel number calculation recipe is: Machine parallel number / recipe requirement temperature^0.8 \
 > The chance input of the recipe's chance becomes one-tenth of the original. The Tier Chance of the recipe chance input all become 0. If the chance-consuming item is **NanoSwarm**, it becomes **No Consumption** \
 > After the machine is formed, the GUI can be opened to adjust the rate of amplification times \

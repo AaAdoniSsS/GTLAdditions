@@ -23,6 +23,7 @@ item_ids:
 * Prefect overclocking, and the number of overclocking is unlimited
 * Only the laser chamber can be used
 * Modules can be installed to obtain additional bonuses
+* Unable to install the ME Recipe Type Integrated Pattern Buffer
 
 ### Reverse Time Boosting Engine
 
@@ -101,6 +102,7 @@ item_ids:
 > Maximum parallel number: 2,147,483,647 \
 > Prefect overclocking, and the number of overclocking is unlimited \
 > Only the laser chamber can be used \
+> Unable to install the ME Recipe Type Integrated Pattern Buffer \
 > It can share the Catalytic Cascade Array and the Hyperdimensional Energy Concentrator with the Recursive Reverse Forge \
 > This module works **if and only if** the Reverse Time Boosting Engine module running perfectly \
 > Each run requires the consumption of one accelerant, does not participate in parallel computing, and returns after the recipe is finished

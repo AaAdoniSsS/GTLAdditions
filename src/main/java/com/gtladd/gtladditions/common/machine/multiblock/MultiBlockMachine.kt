@@ -7,6 +7,7 @@ import org.gtlcore.gtlcore.common.block.BlockMap
 import org.gtlcore.gtlcore.common.block.GTLFusionCasingBlock
 import org.gtlcore.gtlcore.common.data.GTLBlocks.*
 import org.gtlcore.gtlcore.common.data.GTLMachines
+import org.gtlcore.gtlcore.common.data.GTLMachines.GTAEMachines.*
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.*
@@ -876,7 +877,11 @@ object MultiBlockMachine {
                 .where(
                     "B",
                     blocks(DIMENSION_INJECTION_CASING.get())
-                        .or(autoAbilities(*it.recipeTypes))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_ITEMS))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_ITEMS))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_FLUIDS))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_FLUIDS))
+                        .or(abilities(INPUT_ENERGY))
                         .or(abilities(MAINTENANCE).setExactLimit(1))
                         .or(abilities(INPUT_LASER).setMaxGlobalLimited(1))
                         .or(abilities(PARALLEL_HATCH).setMaxGlobalLimited(1))
@@ -929,10 +934,10 @@ object MultiBlockMachine {
                 .where(
                     "B",
                     blocks(DIMENSION_INJECTION_CASING.get())
-                        .or(abilities(EXPORT_ITEMS).setMaxGlobalLimited(2))
-                        .or(abilities(IMPORT_ITEMS).setMaxGlobalLimited(4))
-                        .or(abilities(EXPORT_FLUIDS).setMaxGlobalLimited(2))
-                        .or(abilities(IMPORT_FLUIDS).setMaxGlobalLimited(4))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_ITEMS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_ITEMS).setMaxGlobalLimited(4))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_FLUIDS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_FLUIDS).setMaxGlobalLimited(4))
                         .or(abilities(INPUT_LASER).setMaxGlobalLimited(1))
                 )
                 .where("D", blocks(DIMENSION_INJECTION_CASING.get()))
@@ -1085,10 +1090,10 @@ object MultiBlockMachine {
                 .where(
                     "C",
                     blocks(DIMENSION_INJECTION_CASING.get())
-                        .or(abilities(EXPORT_ITEMS).setMaxGlobalLimited(2))
-                        .or(abilities(IMPORT_ITEMS).setMaxGlobalLimited(2))
-                        .or(abilities(EXPORT_FLUIDS).setMaxGlobalLimited(2))
-                        .or(abilities(IMPORT_FLUIDS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_ITEMS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_ITEMS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), EXPORT_FLUIDS).setMaxGlobalLimited(2))
+                        .or(abilitiesExcept(ME_RECIPE_PATTERN_BUFFER.get(), IMPORT_FLUIDS).setMaxGlobalLimited(2))
                         .or(abilities(INPUT_LASER).setMaxGlobalLimited(1))
                 )
                 .where("F", blocks("kubejs:dimension_creation_casing".getBlock))
@@ -1605,7 +1610,11 @@ object MultiBlockMachine {
                 .where("N", blocks("minecraft:mangrove_roots".getBlock))
                 .where("-", blocks("minecraft:sponge".getBlock))
                 .where("e", blocks("kubejs:gelid_cryotheum".getBlock))
-                .where("Q", blocks("minecraft:grass_block".getBlock))
+                .where(
+                    "Q",
+                    blocks("minecraft:grass_block".getBlock)
+                        .or(blocks("minecraft:dirt".getBlock))
+                )
                 .where("D", blocks("gtceu:fusion_glass".getBlock))
                 .where("V", blocks("kubejs:hollow_casing".getBlock))
                 .where("C", blocks("kubejs:high_strength_concrete".getBlock))
