@@ -118,7 +118,7 @@ object FractalReconstruction {
             .addData("accelerant", ModItems.ICE_SHARD.id.toString())
             .EUt(VA[UV].toLong()).duration(1000)
             .save(provider)
-        if (ConfigHolder.INSTANCE.enableSkyBlokeMode) {
+        if (ConfigHolder.INSTANCE.content.enableSkyBlokeMode) {
             FRACTAL_RECONSTRUCTION.recipeBuilder(id("mining_crystal"))
                 .inputItems(TagPrefix.nugget, Magmatter, 9)
                 .inputItems(GTLTagPrefix.nanoswarm, TranscendentMetal, 48)
@@ -126,7 +126,7 @@ object FractalReconstruction {
                 .notConsumableFluid(GTLAddMaterial.MINING_ESSENCE.getFluid(64000))
                 .inputFluids(MiracleAdhesive.getFluid(2880))
                 .inputFluids(ExcitedDtsc.getFluid(9423))
-                .outputItems(GTLItems.MINING_CRYSTAL.asStack(8))
+                .outputItems(GTLItems.MINING_CRYSTAL.asStack(512))
                 .addData("accelerant", GTLItems.SUPER_GLUE.asItem().`kjs$getId`())
                 .EUt(16L * VA[MAX]).duration(500)
                 .save(provider)
@@ -137,7 +137,7 @@ object FractalReconstruction {
                 .notConsumableFluid(GTLAddMaterial.TREASURES_ESSENCE.getFluid(64000))
                 .inputFluids(MiracleAdhesive.getFluid(2880))
                 .inputFluids(PrimordialMatter.getFluid(9423))
-                .outputItems(GTLItems.TREASURES_CRYSTAL.asStack(8))
+                .outputItems(GTLItems.TREASURES_CRYSTAL.asStack(512))
                 .addData("accelerant", GTLItems.SUPER_GLUE.asItem().`kjs$getId`())
                 .EUt(16L * VA[MAX]).duration(500)
                 .save(provider)

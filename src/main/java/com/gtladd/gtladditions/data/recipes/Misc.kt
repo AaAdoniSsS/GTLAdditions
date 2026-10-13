@@ -85,7 +85,7 @@ object Misc {
             .dimension(KubeJS.id("barnarda"))
             .save(provider)
 
-        if (ConfigHolder.INSTANCE.enableSkyBlokeMode) {
+        if (ConfigHolder.INSTANCE.content.enableSkyBlokeMode) {
             WORLD_DATA_SCANNER_RECIPES.recipeBuilder(id("barnarda_data_sky"))
                 .notConsumable(WORLD_FRAGMENTS_BARNARDA.asStack(1))
                 .inputItems(TOOL_DATA_STICK.asStack(8))

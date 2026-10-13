@@ -50,8 +50,8 @@ object FastRecipeModify {
             }
         }
 
-        if (mr.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
-            val tp = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / mr.duration) minToInt (pr.maxParallel / stResult.parallel)
+        if (mr.duration <= (ConfigHolder.INSTANCE.machines.batchProcessingTimeLimitTicks / 2)) {
+            val tp = (ConfigHolder.INSTANCE.machines.batchProcessingTimeLimitTicks / mr.duration) minToInt (pr.maxParallel / stResult.parallel)
             mr.modifyNotTick(machine, stResult.parallel * (tp maxToLong 1))
             if (tp > 1) {
                 mr.duration *= tp
@@ -134,8 +134,8 @@ object FastRecipeModify {
             recipe.tickOutputs[EURecipeCapability.CAP] = getEUtList(-eut)
         }
 
-        if (recipe.duration <= (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / 2)) {
-            val t = (ConfigHolder.INSTANCE.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / (stResult.parallel maxToLong 1)) maxToInt 1
+        if (recipe.duration <= (ConfigHolder.INSTANCE.machines.batchProcessingTimeLimitTicks / 2)) {
+            val t = (ConfigHolder.INSTANCE.machines.batchProcessingTimeLimitTicks / recipe.duration) minToInt (pResult.maxParallel / (stResult.parallel maxToLong 1)) maxToInt 1
             recipe.modifyNotTick(machine, stResult.parallel * t)
             if (t > 1) {
                 recipe.duration *= t

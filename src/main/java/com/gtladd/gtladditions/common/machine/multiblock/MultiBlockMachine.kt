@@ -237,7 +237,7 @@ object MultiBlockMachine {
             )
         )
         .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
-        .appearanceBlock(CREATE_CASING)
+        .appearanceBlock(HIGH_POWER_CASING)
         .pattern {
             MultiBlockStructureA.EYE_OF_HARMONY_STRUCTURE
                 .where('~', controller(blocks(it.get())))

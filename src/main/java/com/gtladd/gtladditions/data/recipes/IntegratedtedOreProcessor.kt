@@ -15,7 +15,7 @@ import com.gtladd.gtladditions.GTLAdditions.id
 import java.util.function.Consumer
 
 object IntegratedtedOreProcessor {
-    val oreNumber: Int = ConfigHolder.INSTANCE.oreMultiplier
+    val oreNumber: Int = ConfigHolder.INSTANCE.content.oreMultiplier
     val oreFluid: Int = 100 * oreNumber
 
     @JvmStatic

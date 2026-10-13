@@ -48,7 +48,7 @@ public class TransformLogicMixin {
 
     @Inject(method = "canTransformInAnyFluid", at = @At("HEAD"), remap = false)
     private static void canTransformInAnyFluid(ItemEntity entity, CallbackInfoReturnable<Boolean> cir) {
-        if (!ConfigHolder.INSTANCE.enableSkyBlokeMode) return;
+        if (!ConfigHolder.INSTANCE.content.enableSkyBlokeMode) return;
         var level = entity.level();
         var item = entity.getItem().getItem();
         if (!gTLAdditions$transformItem.contains(item)) return;
