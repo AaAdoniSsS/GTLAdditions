@@ -7,6 +7,8 @@
     "gtlcore.client.ModClientEventListenerMixin"
   ],
   "mixins": [
+    "gtceu.common.machine.ObjectHolderHandlerMixin",
+    "gtceu.common.machine.ObjectHolderTransferMixin",
     "ae.api.UnorderedVariantMapMixin",
     "ae.api.VariantCounterMixin",
     "ae.recipe.TransformLogicMixin",
