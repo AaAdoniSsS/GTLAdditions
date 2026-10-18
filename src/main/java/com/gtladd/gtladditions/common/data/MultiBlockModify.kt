@@ -15,7 +15,9 @@ import com.gregtechceu.gtceu.api.machine.multiblock.PartAbility
 import com.gregtechceu.gtceu.api.pattern.FactoryBlockPattern
 import com.gregtechceu.gtceu.api.pattern.Predicates
 import com.gregtechceu.gtceu.api.pattern.Predicates.abilities
+import com.gregtechceu.gtceu.api.pattern.Predicates.any
 import com.gregtechceu.gtceu.api.pattern.Predicates.blocks
+import com.gregtechceu.gtceu.api.pattern.Predicates.controller
 import com.gregtechceu.gtceu.common.data.GTBlocks
 import com.gregtechceu.gtceu.common.data.GTMachines
 import com.gregtechceu.gtceu.common.data.GTMaterials
@@ -23,10 +25,13 @@ import com.gregtechceu.gtceu.common.data.machines.GTResearchMachines
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.ActiveTransformerMachine
 import com.gregtechceu.gtceu.utils.SupplierMemoizer
 
+import net.minecraft.world.level.block.Blocks
+
 import com.gtladd.gtladditions.common.machine.GTLAddMachines
 import com.gtladd.gtladditions.common.machine.multiblock.controller.CreateAggregationMachine
 import com.gtladd.gtladditions.common.machine.multiblock.controller.CreateDoorMachine
 import com.gtladd.gtladditions.common.machine.multiblock.controller.OreProcessorMachine
+import com.gtladd.gtladditions.common.machine.multiblock.controller.WeatherControlMachine
 import com.gtladd.gtladditions.utils.Registries.getBlock
 
 import java.util.function.Function
@@ -35,6 +40,7 @@ object MultiBlockModify {
 
     @JvmStatic
     fun init() {
+        AdvancedMultiBlockMachineB.WEATHER_CONTROL.setMachineSupplier(::WeatherControlMachine)
         AdvancedMultiBlockMachineA.DOOR_OF_CREATE.setMachineSupplier(::CreateDoorMachine)
         AdvancedMultiBlockMachineA.DOOR_OF_CREATE.patternFactory = SupplierMemoizer.memoize {
             (
@@ -356,6 +362,29 @@ object MultiBlockModify {
                         .build()
                 }
                 ).apply(AdvancedMultiBlockMachineB.ADVANCED_INFINITE_DRILLER)
+        }
+
+        AdvancedMultiBlockMachineB.WEATHER_CONTROL.patternFactory = SupplierMemoizer.memoize {
+            (
+                Function { _: MultiblockMachineDefinition ->
+                    FactoryBlockPattern.start()
+                        .aisle("AAA", " A ", " A ", "   ", "   ", "   ", "   ")
+                        .aisle("AAA", "ABA", "ABA", " B ", " B ", " B ", " C ")
+                        .aisle("A~A", " A ", " A ", "   ", "   ", "   ", "   ")
+                        .where(
+                            "A",
+                            blocks(GTBlocks.STEEL_HULL.get())
+                                .or(abilities(PartAbility.IMPORT_ITEMS).setMaxGlobalLimited(1))
+                                .or(abilities(PartAbility.IMPORT_FLUIDS).setMaxGlobalLimited(1))
+                                .or(abilities(PartAbility.INPUT_ENERGY).setMaxGlobalLimited(1)),
+                        )
+                        .where("B", blocks(Blocks.IRON_BLOCK))
+                        .where("C", blocks(Blocks.IRON_BARS))
+                        .where("~", controller(blocks(AdvancedMultiBlockMachineB.WEATHER_CONTROL.get())))
+                        .where(" ", any())
+                        .build()
+                }
+                ).apply(AdvancedMultiBlockMachineB.WEATHER_CONTROL)
         }
     }
 }

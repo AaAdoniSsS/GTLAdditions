@@ -52,5 +52,6 @@ class GTLAdditionsGTAddon : IGTAddon {
         RuriditExtend.init(provider)
         Ontokinetic.init(provider)
         EvolutionOfPrimordial.init(provider)
+        WeatherControlRecipes.init(provider)
     }
 }
