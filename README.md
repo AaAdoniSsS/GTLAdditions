@@ -88,6 +88,9 @@ In addition, there are also some defiled Part
 
 - `WirelessOpticalDataHatch` *and* `WirelessOpticalComputationHatch` allow Multiblock Machine **sharing**
 - `AutoConfigurationMaintenanceHatch` series also allow Multiblock Machine **sharing** *And* There is a slot where different items can be stuffed to obtain different bonuses
+- `Weather Control` now features a new operating mode that can summon lightning
+- The minimum number of High Energy Mechanical Block required for `Active Transformer` has been removed
+- `Fission Reactor` now have greater explosive power
 
 ### Recipe
 
