@@ -108,7 +108,7 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
         return false
     }
 
-    open fun beforeWork(): Boolean = bcHatch!!.getAmount() >= (parallel safeMultiply if (cardId == 3) 8 else 1)
+    open fun beforeWork(): Boolean = bcHatch!!?.getAmount()!! >= (parallel safeMultiply if (cardId == 3) 8 else 1)
 
     override fun onStructureFormed() {
         super.onStructureFormed()

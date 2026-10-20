@@ -127,7 +127,7 @@ object MultiBlockMachine {
                 .where(
                     "d",
                     blocks(LAFIUM_MECHANICAL_CASING.get())
-                        .or(blocks(GTLAddMachines.ME_BLOCK_CONVERSATION.get()).setMaxGlobalLimited(1))
+                        .or(blocks(GTLAddMachines.ME_BLOCK_CONVERSATION.get()).setExactLimit(1))
                         .or(abilities(INPUT_ENERGY).setMaxGlobalLimited(1))
                 )
                 .where("E", blocks(DRAGON_STRENGTH_TRITANIUM_CASING.get()))
