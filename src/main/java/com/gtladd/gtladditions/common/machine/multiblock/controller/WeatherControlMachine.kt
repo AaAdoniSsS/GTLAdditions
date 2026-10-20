@@ -1,40 +1,24 @@
 package com.gtladd.gtladditions.common.machine.multiblock.controller
 
-import org.gtlcore.gtlcore.utils.MachineIO
+import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
 
-import com.gregtechceu.gtceu.api.capability.recipe.IO
-import com.gregtechceu.gtceu.api.gui.GuiTextures
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.machine.TickableSubscription
-import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine
-import com.gregtechceu.gtceu.api.machine.trait.NotifiableItemStackHandler
 import com.gregtechceu.gtceu.common.data.GTItems
 import com.gregtechceu.gtceu.common.data.GTMaterials
 
-import com.lowdragmc.lowdraglib.gui.widget.SlotWidget
-import com.lowdragmc.lowdraglib.gui.widget.Widget
-import com.lowdragmc.lowdraglib.gui.widget.WidgetGroup
-import com.lowdragmc.lowdraglib.misc.ItemStackTransfer
-import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
-
 import net.minecraft.core.BlockPos
-import net.minecraft.nbt.CompoundTag
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.entity.EntityType
 import net.minecraft.world.entity.MobSpawnType
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.LightningRodBlock
 
-open class WeatherControlMachine(holder: IMachineBlockEntity, vararg args: Any) :
-    WorkableElectricMultiblockMachine(holder, *args) {
+import com.gtladd.gtladditions.utils.MachineUtil.getCircuit
+import com.gtladd.gtladditions.utils.MachineUtil.inputFluidStack
 
-    @Persisted
-    protected val fieldGeneratorSlot: NotifiableItemStackHandler =
-        NotifiableItemStackHandler(this, 1, IO.NONE, IO.BOTH) { _ ->
-            object : ItemStackTransfer(1) {
-                override fun getSlotLimit(slot: Int): Int = 1
-            }
-        }
+open class WeatherControlMachine(holder: IMachineBlockEntity) :
+    StorageMachine(holder, 1) {
 
     private var tickSubs: TickableSubscription? = null
 
@@ -52,43 +36,18 @@ open class WeatherControlMachine(holder: IMachineBlockEntity, vararg args: Any) 
         tickSubs = null
     }
 
-    override fun createUIWidget(): Widget {
-        val group = super.createUIWidget() as WidgetGroup
-        val slot = SlotWidget(
-            fieldGeneratorSlot,
-            0,
-            group.sizeWidth - 30,
-            group.sizeHeight - 30,
-            true,
-            true,
-        )
-        slot.setBackground(GuiTextures.SLOT)
-        group.addWidget(slot)
-        return group
+    override fun filter(itemStack: ItemStack): Boolean = when {
+        itemStack.`is`(GTItems.FIELD_GENERATOR_LuV.asItem()) -> true
+        itemStack.`is`(GTItems.FIELD_GENERATOR_IV.asItem()) -> true
+        itemStack.`is`(GTItems.FIELD_GENERATOR_EV.asItem()) -> true
+        else -> false
     }
 
-    override fun saveCustomPersistedData(tag: CompoundTag, forDrop: Boolean) {
-        super.saveCustomPersistedData(tag, forDrop)
-        val stack = fieldGeneratorSlot.getStackInSlot(0)
-        if (!stack.isEmpty) tag.put("FieldGenerator", stack.save(CompoundTag()))
-    }
-
-    override fun loadCustomPersistedData(tag: CompoundTag) {
-        super.loadCustomPersistedData(tag)
-        if (tag.contains("FieldGenerator")) {
-            fieldGeneratorSlot.setStackInSlot(0, ItemStack.of(tag.getCompound("FieldGenerator")))
-        }
-    }
-
-    private fun fieldGeneratorCount(): Int {
-        val stack: ItemStack = fieldGeneratorSlot.getStackInSlot(0)
-        if (stack.isEmpty) return 0
-        return when {
-            stack.`is`(GTItems.FIELD_GENERATOR_LuV.asItem()) -> 16
-            stack.`is`(GTItems.FIELD_GENERATOR_IV.asItem()) -> 8
-            stack.`is`(GTItems.FIELD_GENERATOR_EV.asItem()) -> 4
-            else -> 0
-        }
+    private fun fieldGeneratorCount(): Int = when {
+        machineStorageItem.`is`(GTItems.FIELD_GENERATOR_LuV.asItem()) -> 16
+        machineStorageItem.`is`(GTItems.FIELD_GENERATOR_IV.asItem()) -> 8
+        machineStorageItem.`is`(GTItems.FIELD_GENERATOR_EV.asItem()) -> 4
+        else -> 0
     }
 
     private fun isStructureBlock(p: BlockPos): Boolean {
@@ -102,7 +61,7 @@ open class WeatherControlMachine(holder: IMachineBlockEntity, vararg args: Any) 
     private fun onTick() {
         if (isRemote) return
         val level = self().level as? ServerLevel ?: return
-        if (!MachineIO.notConsumableCircuit(this, 4)) return
+        if (getCircuit() != 4) return
 
         if (offsetTimer % 20L == 0L) {
             level.setWeatherParameters(0, 200, true, true)
@@ -118,7 +77,7 @@ open class WeatherControlMachine(holder: IMachineBlockEntity, vararg args: Any) 
             8 -> 2000L
             else -> 1000L
         }
-        if (!MachineIO.inputFluid(this, GTMaterials.Radon.getFluid(radonPerTick))) return
+        if (!inputFluidStack(GTMaterials.Radon.getFluid(radonPerTick))) return
 
         val interval = when (count) {
             16 -> 10L
