@@ -165,5 +165,7 @@
   "gui.gtladditions.sort_amount_desc": "数量▼",
   "gui.gtladditions.sort_amount_asc": "数量▲",
   "gui.gtladditions.min_temperature": "最小温度(K)",
-  "gui.gtladditions.max_temperature": "最大温度(K)"
+  "gui.gtladditions.max_temperature": "最大温度(K)",
+  "gtladditions.machine.super_input_dual_hatch.item_capacity": "§6物品容量：§r%s §7个物品槽，每个§r %s 个物品",
+  "gtladditions.machine.super_input_dual_hatch.fluid_capacity": "§9流体容量：§r%s §7个流体槽，每个§r %s mB"
 }

@@ -13,14 +13,25 @@ import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Style
 
+import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
 import com.gtladd.gtladditions.api.machine.MultipleRecipeTypesMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
+import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.SkeletonShiftRiftEngineType
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
 
-class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) : MultipleRecipeTypesMachine(holder) {
+class SkeletonShiftRiftEngine(holder: IMachineBlockEntity) :
+    MultipleRecipeTypesMachine(holder),
+    IRecipeSearchProvider {
+    private var searchCtx: RecipeSearchContext? = null
+
+    override fun getSearchContext(): RecipeSearchContext? = searchCtx
+
+    override fun setSearchContext(ctx: RecipeSearchContext?) {
+        searchCtx = ctx
+    }
     private var casingTier = 0
     private var coilType: ICoilType = CoilBlock.CoilType.CUPRONICKEL
 

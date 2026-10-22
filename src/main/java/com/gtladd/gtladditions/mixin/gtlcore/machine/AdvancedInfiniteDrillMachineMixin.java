@@ -74,7 +74,16 @@ public abstract class AdvancedInfiniteDrillMachineMixin {
     @Inject(method = "heatUpdate", at = @At("HEAD"), cancellable = true, remap = false)
     private void gtladditions$perfectTuning(CallbackInfo ci) {
         OreProcessorHatch hatch = gtladditions$hatch();
-        if (hatch == null) return;
+        if (hatch == null) {
+            var self = (AdvancedInfiniteDrillMachine) (Object) this;
+            if (self.isRemote()) return;
+            AdvancedInfiniteDrillLogic logic = self.getRecipeLogic();
+            if (logic.getRange() != 5) {
+                logic.setRange(5);
+                logic.getVeinFluids().clear();
+            }
+            return;
+        }
         gtladditions$syncRange(hatch);
         if (!hatch.getMatchAll() || maxHeat < 0) return;
         currentHeat = maxHeat;
