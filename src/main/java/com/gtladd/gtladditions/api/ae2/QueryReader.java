@@ -9,13 +9,13 @@ import appeng.api.networking.security.IActionSource;
 import appeng.api.stacks.AEKey;
 import appeng.api.storage.MEStorage;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.agrona.collections.Object2ObjectHashMap;
 import org.agrona.collections.ObjectHashSet;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigInteger;
 import java.util.ArrayDeque;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -23,74 +23,78 @@ public final class QueryReader {
 
     public static final QueryReader INSTANCE = new QueryReader();
 
-    record Pending(MEStorage storage, @Nullable IMEStorageFilter gate) {}
+    record Pending(MEStorage storage, ObjectHashSet<AEKey> keys) {}
 
     final ArrayDeque<Pending> queue = new ArrayDeque<>();
     final ObjectArrayList<MEStorage> children = new ObjectArrayList<>(4);
-    final ObjectHashSet<MEStorage> seen = new ObjectHashSet<>();
+    final Reference2ObjectOpenHashMap<MEStorage, ObjectHashSet<AEKey>> seenByKey = new Reference2ObjectOpenHashMap<>();
     final Object2ObjectHashMap<AEKey, BigInteger> exact = new Object2ObjectHashMap<>();
     final Object2ObjectHashMap<AEKey, BigInteger> fallback = new Object2ObjectHashMap<>();
 
-    Collection<? extends AEKey> keys = List.of();
     @Nullable
     IActionSource source;
 
     public Map<AEKey, BigInteger> query(MEStorage root, List<AEKey> keys, @Nullable IActionSource source) {
         if (root == null || keys == null || keys.isEmpty()) return Map.of();
-        this.keys = keys;
         this.source = source;
         this.exact.clear();
         this.fallback.clear();
         this.queue.clear();
-        this.seen.clear();
-        this.queue.add(new Pending(root, null));
+        this.seenByKey.clear();
+        var rootKeys = new ObjectHashSet<AEKey>();
+        for (var key : keys) rootKeys.add(key);
+        this.queue.add(new Pending(root, rootKeys));
 
         while (!this.queue.isEmpty()) {
             var pending = this.queue.poll();
             var storage = pending.storage();
-            if (!this.seen.add(storage)) continue;
-            var gate = pending.gate();
-            if (storage instanceof IMEStorageFilter filter) {
-                gate = IMEStorageFilter.and(gate, filter);
-            }
+            var delta = this.takeUnseen(storage, pending.keys());
+            if (delta.isEmpty()) continue;
 
             if (storage instanceof PreciseStorageAmount precise) {
-                this.readPrecise(precise, storage, gate);
+                this.readPrecise(precise, storage, delta);
                 continue;
             }
 
             if (storage instanceof IMEStorageNode node) {
                 var flatten = node.flattenCache();
                 if (flatten != null) {
-                    var hideFiltered = this.source != null;
                     for (int i = 0, size = flatten.size(); i < size; i++) {
-                        var entry = flatten.get(i);
-                        if (hideFiltered && entry.hidden()) continue;
-                        this.queue.add(new Pending(entry.storage(), IMEStorageFilter.and(gate, entry.gate())));
+                        this.queue.add(new Pending(flatten.get(i).storage(), delta));
                     }
                     continue;
-                }
-                if (storage instanceof MEInventoryHandlerDisplayAccessor filter) {
-                    if (this.source != null) {
-                        if (!filter.gtlcore$allowsDisplayExtraction()) continue;
-                        if (filter.gtlcore$filtersDisplayExtraction() && !gateAllows(gate)) continue;
-                    }
                 }
                 this.children.clear();
                 node.collectChildStorages(this.children);
                 for (var child : this.children) {
-                    if (child != null) this.queue.add(new Pending(child, gate));
+                    if (child != null) this.queue.add(new Pending(child, delta));
                 }
                 continue;
             }
-            this.readLeaf(storage, gate);
+            this.readLeaf(storage, delta);
         }
         return this.resolve();
     }
 
-    void readPrecise(PreciseStorageAmount precise, MEStorage storage, @Nullable IMEStorageFilter gate) {
-        for (var key : this.keys) {
-            if (gate != null && !gate.canReport(key)) continue;
+    ObjectHashSet<AEKey> takeUnseen(MEStorage storage, ObjectHashSet<AEKey> incoming) {
+        var delta = new ObjectHashSet<AEKey>();
+        var processed = this.seenByKey.computeIfAbsent(storage, ignored -> new ObjectHashSet<>());
+        var filter = storage instanceof IMEStorageFilter f ? f : null;
+        MEInventoryHandlerDisplayAccessor display = null;
+        if (this.source != null && storage instanceof MEInventoryHandlerDisplayAccessor accessor) {
+            if (!accessor.gtlcore$allowsDisplayExtraction()) return delta;
+            if (accessor.gtlcore$filtersDisplayExtraction()) display = accessor;
+        }
+        for (var key : incoming) {
+            if (filter != null && !filter.canReport(key)) continue;
+            if (display != null && !display.gtlcore$canDisplay(key)) continue;
+            if (processed.add(key)) delta.add(key);
+        }
+        return delta;
+    }
+
+    void readPrecise(PreciseStorageAmount precise, MEStorage storage, ObjectHashSet<AEKey> keys) {
+        for (var key : keys) {
             var amount = precise.getExactStoredAmount(key);
             if (amount == null || amount.signum() <= 0) continue;
             if (this.source != null) {
@@ -104,20 +108,18 @@ public final class QueryReader {
         }
     }
 
-    void readLeaf(MEStorage storage, @Nullable IMEStorageFilter gate) {
+    void readLeaf(MEStorage storage, ObjectHashSet<AEKey> keys) {
         if (storage instanceof IMEStorage table) {
             var map = table.getStorageMap();
             if (map != null) {
-                for (var key : this.keys) {
-                    if (gate != null && !gate.canReport(key)) continue;
+                for (var key : keys) {
                     this.accept(key, map.getLong(key));
                 }
                 return;
             }
         }
         var counter = storage.getAvailableStacks();
-        for (var key : this.keys) {
-            if (gate != null && !gate.canReport(key)) continue;
+        for (var key : keys) {
             this.accept(key, counter.get(key));
         }
     }
@@ -132,11 +134,5 @@ public final class QueryReader {
         if (!this.exact.isEmpty()) this.fallback.putAll(this.exact);
         this.fallback.values().removeIf(v -> v.compareTo(NumberUtils.BIG_INTEGER_MAX_LONG) <= 0);
         return new Object2ObjectHashMap<>(this.fallback);
-    }
-
-    boolean gateAllows(@Nullable IMEStorageFilter gate) {
-        if (gate == null) return true;
-        for (var key : this.keys) if (gate.canReport(key)) return true;
-        return false;
     }
 }

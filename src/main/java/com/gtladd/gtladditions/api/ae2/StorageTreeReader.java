@@ -2,7 +2,8 @@ package com.gtladd.gtladditions.api.ae2;
 
 import appeng.api.stacks.AEKey;
 import appeng.api.storage.MEStorage;
-import it.unimi.dsi.fastutil.objects.*;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 import org.agrona.collections.ObjLongConsumer;
 import org.agrona.collections.Object2LongHashMap;
 import org.agrona.collections.ObjectHashSet;
@@ -10,77 +11,73 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayDeque;
 import java.util.List;
-import java.util.Set;
 
 final class StorageTreeReader {
 
-    record Pending(MEStorage storage, @Nullable IMEStorageFilter gate) {}
+    record Pending(MEStorage storage, ObjectHashSet<AEKey> keys) {}
 
     final ArrayDeque<Pending> queue = new ArrayDeque<>();
     final List<MEStorage> children = new ObjectArrayList<>(4);
-    final Set<MEStorage> seen = new ReferenceOpenHashSet<>();
-    final ObjLongConsumer<AEKey> sink = new ObjLongConsumer<>() {
-
-        @Override
-        public void accept(AEKey key, long amount) {
-            if (amount <= 0 || !keys.contains(key)) return;
-            var gate = StorageTreeReader.this.gate;
-            if (gate != null && !gate.canReport(key)) return;
-            accumulate(key, amount);
-        }
-    };
-
-    ObjectHashSet<AEKey> keys;
-    Object2LongHashMap<AEKey> out;
+    final Reference2ObjectOpenHashMap<MEStorage, ObjectHashSet<AEKey>> seenByKey = new Reference2ObjectOpenHashMap<>();
     @Nullable
-    IMEStorageFilter gate;
+    ObjectHashSet<AEKey> activeLeafKeys;
+    Object2LongHashMap<AEKey> out;
+
+    final ObjLongConsumer<AEKey> sink = (key, amount) -> {
+        if (amount <= 0 || activeLeafKeys == null || !activeLeafKeys.contains(key)) return;
+        accumulate(key, amount);
+    };
 
     void read(MEStorage root, ObjectHashSet<AEKey> keys, Object2LongHashMap<AEKey> out) {
         if (keys.isEmpty()) return;
-        this.keys = keys;
         this.out = out;
         for (var key : keys) out.put(key, 0L);
-        this.gate = null;
         queue.clear();
-        seen.clear();
-        queue.add(new Pending(root, null));
+        seenByKey.clear();
+        activeLeafKeys = null;
+        queue.add(new Pending(root, keys));
 
         while (!queue.isEmpty()) {
             var pending = queue.poll();
             var storage = pending.storage();
-            if (!seen.add(storage)) continue;
-            var gate = pending.gate();
-            if (storage instanceof IMEStorageFilter filter) {
-                gate = IMEStorageFilter.and(gate, filter);
-            }
-            this.gate = gate;
+            var delta = takeUnseen(storage, pending.keys());
+            if (delta.isEmpty()) continue;
 
             if (storage instanceof IMEStorageNode node) {
                 var flatten = node.flattenCache();
                 if (flatten != null) {
                     for (int i = 0, size = flatten.size(); i < size; i++) {
-                        var entry = flatten.get(i);
-                        queue.add(new Pending(entry.storage(), IMEStorageFilter.and(gate, entry.gate())));
+                        queue.add(new Pending(flatten.get(i).storage(), delta));
                     }
                     continue;
                 }
                 children.clear();
                 node.collectChildStorages(children);
                 for (var child : children) {
-                    if (child != null) queue.add(new Pending(child, gate));
+                    if (child != null) queue.add(new Pending(child, delta));
                 }
                 continue;
             }
-            readLeaf(storage, gate);
+            readLeaf(storage, delta);
         }
     }
 
-    void readLeaf(MEStorage storage, @Nullable IMEStorageFilter gate) {
+    ObjectHashSet<AEKey> takeUnseen(MEStorage storage, ObjectHashSet<AEKey> incoming) {
+        var delta = new ObjectHashSet<AEKey>();
+        var processed = seenByKey.computeIfAbsent(storage, ignored -> new ObjectHashSet<>());
+        var filter = storage instanceof IMEStorageFilter f ? f : null;
+        for (var key : incoming) {
+            if (filter != null && !filter.canReport(key)) continue;
+            if (processed.add(key)) delta.add(key);
+        }
+        return delta;
+    }
+
+    void readLeaf(MEStorage storage, ObjectHashSet<AEKey> keys) {
         if (storage instanceof IMEStorage leaf) {
             var big = leaf.getInfinityMap();
             if (big != null) {
                 for (var key : keys) {
-                    if (gate != null && !gate.canReport(key)) continue;
                     var value = big.get(key);
                     if (value != null) accumulate(key, value.longValue());
                 }
@@ -88,21 +85,16 @@ final class StorageTreeReader {
             }
             var map = leaf.getStorageMap();
             if (map != null) {
-                for (var key : keys) {
-                    if (gate != null && !gate.canReport(key)) continue;
-                    accumulate(key, map.getLong(key));
-                }
+                for (var key : keys) accumulate(key, map.getLong(key));
                 return;
             }
-            this.gate = gate;
+            activeLeafKeys = keys;
             leaf.forEachAvailableStack(sink);
+            activeLeafKeys = null;
             return;
         }
         var counter = storage.getAvailableStacks();
-        for (var key : keys) {
-            if (gate != null && !gate.canReport(key)) continue;
-            accumulate(key, counter.get(key));
-        }
+        for (var key : keys) accumulate(key, counter.get(key));
     }
 
     void accumulate(AEKey key, long amount) {
