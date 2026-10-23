@@ -2,6 +2,7 @@ package com.gtladd.gtladditions.utils
 
 import org.gtlcore.gtlcore.api.machine.multiblock.ParallelMachine
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
+import org.gtlcore.gtlcore.api.recipe.IAdvancedContentModifier
 import org.gtlcore.gtlcore.api.recipe.IGTRecipe
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeInput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipeInput
@@ -39,6 +40,7 @@ import com.gtladd.gtladditions.mixin.gtceu.api.FluidValueAccessor
 import com.gtladd.gtladditions.utils.MachineUtil.maintenance
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 import com.gtladd.gtladditions.utils.MathUtil.minToLong
+import com.gtladd.gtladditions.utils.MathUtil.safeMultiply
 import com.gtladd.gtladditions.utils.MathUtil.safePlus
 import it.unimi.dsi.fastutil.objects.Object2IntMap
 import it.unimi.dsi.fastutil.objects.ObjectArrayFIFOQueue
@@ -242,7 +244,7 @@ object GTRecipeUtils {
     }
 
     fun GTRecipe.copy(holder: IRecipeLogicMachine, parallel: Long, reductionDuration: Double, reductionEUt: Double): GTRecipe {
-        val modifier = multiplier(parallel.toDouble())
+        val modifier = IAdvancedContentModifier.preciseMultiplier(parallel)
         val modifierTick = multiplier(parallel.toDouble() * reductionEUt)
         val copy = GTRecipe(
             this.recipeType, this.id,
@@ -259,7 +261,7 @@ object GTRecipeUtils {
     }
 
     fun GTRecipe.copy(holder: IRecipeLogicMachine, parallel: Long, duration: Int): GTRecipe {
-        val modifier = multiplier(parallel.toDouble())
+        val modifier = IAdvancedContentModifier.preciseMultiplier(parallel)
         val copy = GTRecipe(
             this.recipeType, this.id,
             copyMapContents(this.inputs, modifier), copyContentChances(holder, this, parallel),
@@ -288,7 +290,7 @@ object GTRecipeUtils {
     }
 
     private fun copyContentChances(holder: IRecipeLogicMachine, recipe: GTRecipe, parallel: Long): MutableMap<RecipeCapability<*>, MutableList<Content>> {
-        val mdf = multiplier(parallel.toDouble())
+        val mdf = IAdvancedContentModifier.preciseMultiplier(parallel)
         val rc = Reference2ObjectOpenHashMap<RecipeCapability<*>, MutableList<Content>>(recipe.outputs.size)
         for ((cap, list) in recipe.outputs) {
             val cl = rc.computeIfAbsent(cap) { ObjectArrayList() }
@@ -321,7 +323,7 @@ object GTRecipeUtils {
         }
         LongChanceLogic.updateCachedChance(content.content, cache, new / 2 + cached)
         if (re <= 0) return null
-        return content.copy(cap, multiplier(re.toDouble()))
+        return content.copy(cap, IAdvancedContentModifier.preciseMultiplier(re))
     }
 
     private fun MutableMap<RecipeCapability<*>, MutableList<Content>>.contentModify(parallel: Long) {
@@ -347,11 +349,11 @@ object GTRecipeUtils {
         }
     }
 
-    fun Content.modify(cap: RecipeCapability<*>, modifier: Number) {
+    fun Content.modify(cap: RecipeCapability<*>, modifier: Long) {
         when (cap) {
-            ItemRecipeCapability.CAP -> (content as? LongIngredient)?.let { it.actualAmount *= modifier.toLong() }
-            FluidRecipeCapability.CAP -> (content as FluidIngredient).let { it.amount *= modifier.toLong() }
-            EURecipeCapability.CAP -> (content as Long).let { content = it * modifier.toLong() }
+            ItemRecipeCapability.CAP -> (content as? LongIngredient)?.let { it.actualAmount = it.actualAmount safeMultiply modifier }
+            FluidRecipeCapability.CAP -> (content as FluidIngredient).let { it.amount = it.amount safeMultiply modifier }
+            EURecipeCapability.CAP -> (content as Long).let { content = it safeMultiply modifier }
         }
     }
 

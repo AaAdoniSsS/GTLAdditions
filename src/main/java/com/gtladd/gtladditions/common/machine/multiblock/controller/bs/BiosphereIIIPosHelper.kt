@@ -22,10 +22,10 @@ object BiosphereIIIPosHelper {
 
     private val offsetsByDirection by lazy {
         mapOf(
-            Direction.EAST to BASE_OFFSETS,
-            Direction.SOUTH to rotateOffsets(BASE_OFFSETS, 1),
-            Direction.WEST to rotateOffsets(BASE_OFFSETS, 2),
-            Direction.NORTH to rotateOffsets(BASE_OFFSETS, 3)
+            Direction.NORTH to BASE_OFFSETS,
+            Direction.EAST to rotateOffsets(BASE_OFFSETS, 1),
+            Direction.SOUTH to rotateOffsets(BASE_OFFSETS, 2),
+            Direction.WEST to rotateOffsets(BASE_OFFSETS, 3)
         )
     }
 

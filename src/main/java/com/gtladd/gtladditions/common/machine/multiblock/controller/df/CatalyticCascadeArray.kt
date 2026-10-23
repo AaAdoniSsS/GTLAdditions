@@ -42,7 +42,7 @@ class CatalyticCascadeArray(holder: IMachineBlockEntity) : RRFModuleMachine(hold
 
     fun modifyRecipe(recipe: GTRecipe): GTRecipe {
         if (isWorking) {
-            if (isModify) recipe.outputs.forEach { (c, l) -> l.forEach { if (!("c" == it.slotName || "i" == it.slotName)) it.modify(c, 2) } }
+            if (isModify) recipe.outputs.forEach { (c, l) -> l.forEach { if (!("c" == it.slotName || "i" == it.slotName)) it.modify(c, 2L) } }
             if (isEnergy) recipe.tickInputs[EURecipeCapability.CAP]?.let { it[0].modify(EURecipeCapability.CAP, modify) }
         }
         return recipe

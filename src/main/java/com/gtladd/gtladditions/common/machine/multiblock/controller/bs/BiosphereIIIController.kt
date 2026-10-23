@@ -110,70 +110,14 @@ class BiosphereIIIController(holder: IMachineBlockEntity) :
     override fun getMaxModuleCount() = 8
 
     override fun getModulesForRendering() = listOf(
-        ModuleRenderInfo(
-            BlockPos(-6, 7, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.NORTH,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(6, 7, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.NORTH,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(8, 9, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.EAST,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(-8, 9, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.WEST,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(8, 15, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.WEST,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(-8, 15, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.EAST,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(6, 17, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.SOUTH,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
-        ModuleRenderInfo(
-            BlockPos(6, 17, 0),
-            Direction.UP,
-            Direction.NORTH,
-            Direction.SOUTH,
-            Direction.UP,
-            MultiBlockMachine.BIOSPHERE_III_MODULE
-        ),
+        ModuleRenderInfo(BlockPos(6, 0, -7), Direction.NORTH, Direction.UP, Direction.NORTH, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(-6, 0, -7), Direction.NORTH, Direction.UP, Direction.NORTH, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(6, 0, -17), Direction.NORTH, Direction.UP, Direction.SOUTH, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(-6, 0, -17), Direction.NORTH, Direction.UP, Direction.SOUTH, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(-8, 0, -9), Direction.NORTH, Direction.UP, Direction.EAST, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(-8, 0, -15), Direction.NORTH, Direction.UP, Direction.EAST, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(8, 0, -9), Direction.NORTH, Direction.UP, Direction.WEST, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE),
+        ModuleRenderInfo(BlockPos(8, 0, -15), Direction.NORTH, Direction.UP, Direction.WEST, Direction.UP, MultiBlockMachine.BIOSPHERE_III_MODULE)
     )
 
     class BSRecipeLogic(val bsMachine: BiosphereIIIController) : RecipeLogic(bsMachine) {
