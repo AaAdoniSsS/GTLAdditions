@@ -136,7 +136,11 @@ class CreateDoorMachine(holder: IMachineBlockEntity) : ConversationMachine(holde
 
     override fun beforeWork(): Boolean {
         val c = getCircuit()
-        return (c == 1 || c == 24) && super.beforeWork()
+        return when {
+            c == 1 -> true
+            c == 24 -> super.beforeWork()
+            else -> false
+        }
     }
 
     @Suppress("CAST_NEVER_SUCCEEDS")
