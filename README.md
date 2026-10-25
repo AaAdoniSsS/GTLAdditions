@@ -4,7 +4,7 @@
 # GTLAdditions
 </div>
 
-> **[!TIP]**
+> [!TIP]
 > GTLAdditions is a mod which adds some new recipes and macthines to `GregTech Leisure`
 > 
 > You can load it in your GTL with **Newest** core!
