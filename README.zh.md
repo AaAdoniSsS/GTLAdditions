@@ -4,7 +4,7 @@
 # GTLAdditions
 </div>
 
-> **[!TIP]**
+> [!TIP]
 > GTLAdditions 是一个为《GregTech Leisure》整合包新增配方与机器的扩展模组
 > 
 > 你可以在带有**最新**的gtlcore的GTL中使用这个mod！
@@ -17,7 +17,7 @@
 
 ## 前置需求
 
-- GTLCore  `版本 >= 1.2.3.2-fix5`
+- GTLCore  `版本 >= 1.2.3.3`
 - Kotlin For Forge `版本 >= 4.11.0`
 - Java `版本 >= 21`
 
