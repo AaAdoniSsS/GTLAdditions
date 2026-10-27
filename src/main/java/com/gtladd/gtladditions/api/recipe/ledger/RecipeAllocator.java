@@ -16,9 +16,9 @@ import it.unimi.dsi.fastutil.longs.Long2LongOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import org.jetbrains.annotations.Nullable;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Predicate;
 
 final class RecipeAllocator {
 
@@ -38,8 +38,8 @@ final class RecipeAllocator {
             return new AllocationResult(plan, ratio, null);
         }
 
-        static AllocationResult fail(double ratio, Content content) {
-            return new AllocationResult(null, ratio, content);
+        static AllocationResult fail(Content content) {
+            return new AllocationResult(null, 0.0, content);
         }
     }
 
@@ -74,8 +74,9 @@ final class RecipeAllocator {
                 var variants = MapIngredientVariants.of(cap, c.content);
                 if (c.chance <= 0) {
                     if (notConsumedSatisfied(ledgers, from, to, variants, need, patternSlot)) continue;
-                    return AllocationResult.fail(0.0, c);
+                    return AllocationResult.fail(c);
                 }
+                if (probabilistic(recipe, c)) continue;
                 hasInputs = true;
                 long demanded = NumberUtils.saturatedMultiply(need, parallel);
                 long pool = 0;
@@ -90,7 +91,7 @@ final class RecipeAllocator {
                 }
                 if (pool == 0) {
                     if (existence) continue;
-                    return AllocationResult.fail(0.0, c);
+                    return AllocationResult.fail(c);
                 }
                 if (available < demanded) {
                     double r = available <= 0 ? 0.0 : (double) available / demanded;
@@ -253,7 +254,13 @@ final class RecipeAllocator {
         return supplyOk ? (hasInputs ? supplyCap : Long.MAX_VALUE) : 0;
     }
 
-    @SuppressWarnings("unchecked")
+    boolean probabilistic(GTRecipe recipe, Content content) {
+        if (content.chance <= 0 || content.chance >= content.maxChance) return false;
+        int boosted = recipe.recipeType.getChanceFunction()
+                .getBoostedChance(content, IGTRecipe.of(recipe).getEuTier(), machine.getChanceTier());
+        return boosted < content.maxChance;
+    }
+
     long inputCap(GTRecipe recipe, RecipeCapability<?> cap, Content c,
                   long need, long pool, Map<RecipeCapability<?>, Object2IntMap<?>> caches,
                   int euTier, int tier) {
@@ -261,10 +268,16 @@ final class RecipeAllocator {
         if (c.chance >= c.maxChance || boost >= c.maxChance) {
             return pool / need;
         }
-        var cacheMap = (Object2IntMap<Predicate<Object>>) caches.get(cap);
-        int cached = cacheMap != null ? cacheMap.computeIfAbsent((Predicate<Object>) c.content,
-                k -> GTValues.RNG.nextInt(c.maxChance)) : GTValues.RNG.nextInt(c.maxChance);
-        double maxP = ((pool / (double) need + 1.0) * c.maxChance - (1 + cached)) / c.chance;
-        return maxP < 0 ? 0 : (long) maxP;
+        if (boost <= 0) return Long.MAX_VALUE;
+        var cacheMap = caches.get(cap);
+        int cached = cacheMap != null && cacheMap.containsKey(c.content) ?
+                cacheMap.getInt(c.content) : GTValues.RNG.nextInt(c.maxChance);
+        var fullShares = BigInteger.valueOf(pool).divide(BigInteger.valueOf(need));
+        var maxP = fullShares.add(BigInteger.ONE)
+                .multiply(BigInteger.valueOf(c.maxChance))
+                .subtract(BigInteger.ONE)
+                .subtract(BigInteger.valueOf(cached))
+                .divide(BigInteger.valueOf(boost));
+        return maxP.signum() <= 0 ? 0 : NumberUtils.getLongValue(maxP);
     }
 }

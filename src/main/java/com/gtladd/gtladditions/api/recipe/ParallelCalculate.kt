@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.trait.IRecipeCapabilityMachine
 import org.gtlcore.gtlcore.api.machine.trait.MEPatternRecipeHandlePart
 import org.gtlcore.gtlcore.api.machine.trait.RecipeHandlePart
 import org.gtlcore.gtlcore.api.recipe.IParallelLogic
+import org.gtlcore.gtlcore.utils.NumberUtils
 
 import com.gregtechceu.gtceu.api.GTValues
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability
@@ -33,6 +34,7 @@ import it.unimi.dsi.fastutil.objects.Object2LongMap
 import it.unimi.dsi.fastutil.objects.Object2LongMaps
 import it.unimi.dsi.fastutil.objects.Object2LongMaps.fastIterable
 
+import java.math.BigInteger
 import java.util.function.Predicate
 
 @Suppress("UNCHECKED_CAST")
@@ -144,11 +146,17 @@ object ParallelCalculate {
             val bChance = recipe.recipeType.chanceFunction.getBoostedChance(k, recipe.euTier, machine.tier)
             if (k.chance >= k.maxChance || bChance >= k.maxChance) {
                 parallelLimit = parallelLimit minToLong (available / v)
-            } else {
-                val cache = cacheMap?.computeIfAbsent(k.content as I) { GTValues.RNG.nextInt(k.maxChance) } ?: GTValues.RNG.nextInt(k.maxChance)
-                val maxParallel = ((available / v + 1.0) * k.maxChance - (1 + cache)) / k.chance
-                if (maxParallel < 0) return 0
-                parallelLimit = parallelLimit minToLong maxParallel
+            } else if (bChance > 0) {
+                val cache = cacheMap?.getOrDefault(k.content as I, GTValues.RNG.nextInt(k.maxChance))
+                    ?: GTValues.RNG.nextInt(k.maxChance)
+                val fullShares = BigInteger.valueOf(available).divide(BigInteger.valueOf(v))
+                val maxParallel = fullShares.add(BigInteger.ONE)
+                    .multiply(BigInteger.valueOf(k.maxChance.toLong()))
+                    .subtract(BigInteger.ONE)
+                    .subtract(BigInteger.valueOf(cache.toLong()))
+                    .divide(BigInteger.valueOf(bChance.toLong()))
+                val capped = if (maxParallel.signum() <= 0) 0 else NumberUtils.getLongValue(maxParallel)
+                parallelLimit = parallelLimit minToLong capped
             }
         }
         return parallelLimit

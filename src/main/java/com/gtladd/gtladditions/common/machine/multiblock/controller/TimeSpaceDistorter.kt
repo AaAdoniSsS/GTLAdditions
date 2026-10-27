@@ -48,6 +48,8 @@ import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.TimeSpaceDistorterType
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.copy
+import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getOverclockRecipe
 import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
@@ -193,10 +195,28 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                 if (p < 1) return false
             }
             val modified = this.modifyRecipe(recipe, p) ?: return false
-            if (!RecipeRunnerHelper.matchRecipe(tsdMachine, modified)) return false
+            if (!matchChanceAware(modified)) return false
             lastOriginRecipe = recipe
             setupRecipe(modified)
             return true
+        }
+
+        private fun matchChanceAware(recipe: GTRecipe): Boolean {
+            val check = recipe.copy
+            check.inputs.values.forEach { contents ->
+                contents.removeIf { content ->
+                    content.chance > 0 && content.chance < content.maxChance &&
+                        recipe.recipeType.chanceFunction.getBoostedChance(
+                            content,
+                            recipe.euTier,
+                            tsdMachine.chanceTier
+                        ) < content.maxChance
+                }
+            }
+            val emptyCaps = check.inputs.entries.filter { it.value.isEmpty() }.map { it.key }
+            emptyCaps.forEach { check.inputs.remove(it) }
+            return RecipeRunnerHelper.matchRecipeInput(tsdMachine, check) &&
+                RecipeRunnerHelper.matchRecipeOutput(tsdMachine, recipe)
         }
 
         private fun findBoundRecipe(): GTRecipe? = OptimizedRecipeSearch.find(tsdMachine, lookup.lookup, ::checkConditionsOnly)
