@@ -14,6 +14,7 @@ import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.SPACE
 import org.gtlcore.gtlcore.common.data.machines.GeneratorMachine.DYSON_SPHERE
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineB.WOOD_DISTILLATION
+import org.gtlcore.gtlcore.utils.Registries.getItem
 
 import com.gregtechceu.gtceu.api.GTValues.*
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper
@@ -31,7 +32,9 @@ import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 
+import net.minecraft.commands.arguments.item.ItemArgument.getItem
 import net.minecraft.data.recipes.FinishedRecipe
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.Blocks
 
 import com.gtladd.gtladditions.GTLAdditions.id
@@ -104,7 +107,7 @@ object NewMachineRecipe2 {
             )
             .inputItems(plateDouble, MagnetohydrodynamicallyConstrainedStarMatter, 64)
             .inputItems(plateDouble, MagnetohydrodynamicallyConstrainedStarMatter, 64)
-            .inputItems("avaritia:singularity".getItemStack(64))
+            .inputItems(ItemStack(getItem("avaritia:singularity")).apply { orCreateTag.putString("Id", "avaritia:spacetime") }, 64)
             .inputFluids(
                 Miracle.getFluid(100000),
                 RawStarMatter.getFluid(PLASMA, 16384000),
@@ -187,8 +190,11 @@ object NewMachineRecipe2 {
             )
             .inputItems(DIMENSIONALLY_TRANSCENDENT_MIXER, 64)
             .inputItems(
-                "kubejs:create_aggregatione_core".getItemStack(48),
-                "avaritia:singularity".getItemStack(64)
+                "kubejs:create_aggregatione_core".getItemStack(48)
+            )
+            .inputItems(
+                ItemStack(getItem("avaritia:singularity")).apply { orCreateTag.putString("Id", "avaritia:spacetime") },
+                64
             )
             .inputItems(plateDouble, MagnetohydrodynamicallyConstrainedStarMatter, 48)
             .inputItems(

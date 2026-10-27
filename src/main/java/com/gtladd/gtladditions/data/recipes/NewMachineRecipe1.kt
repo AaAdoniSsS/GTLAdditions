@@ -12,6 +12,7 @@ import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.*
 import org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.SLAUGHTERHOUSE
 import org.gtlcore.gtlcore.common.data.machines.GCyMMachines.*
 import org.gtlcore.gtlcore.common.data.machines.MultiBlockMachineA.*
+import org.gtlcore.gtlcore.utils.Registries.getItem
 
 import com.gregtechceu.gtceu.api.GTValues.*
 import com.gregtechceu.gtceu.api.data.tag.TagPrefix.*
@@ -26,7 +27,9 @@ import com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLER_RECIPES
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLY_LINE_RECIPES
 import com.gregtechceu.gtceu.data.recipe.CustomTags
 
+import net.minecraft.commands.arguments.item.ItemArgument.getItem
 import net.minecraft.data.recipes.FinishedRecipe
+import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.Items
 
 import appeng.core.definitions.AEBlocks
@@ -206,7 +209,7 @@ object NewMachineRecipe1 {
             .inputItems("kubejs:create_ultimate_battery".getItemStack(16))
             .inputItems("kubejs:suprachronal_mainframe_complex".getItemStack(64))
             .inputItems("kubejs:suprachronal_mainframe_complex".getItemStack(64))
-            .inputItems("avaritia:singularity".getItemStack(64))
+            .inputItems(ItemStack(getItem("avaritia:singularity")).apply { orCreateTag.putString("Id", "avaritia:spacetime") }, 64)
             .inputItems("avaritia:ultimate_stew".getItemStack(64))
             .inputItems("avaritia:cosmic_meatballs".getItemStack(64))
             .inputItems("kubejs:quantum_anomaly".getItemStack(64))
