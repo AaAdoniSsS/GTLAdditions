@@ -214,6 +214,7 @@ public final class CloudOpticalDataMachine extends TieredEnergyMachine implement
             for (int i = 0; i < machine.importItems.getSlots(); i++) {
                 if (machine.importItems.getStackInSlot(i).isEmpty()) {
                     machine.importItems.setStackInSlot(i, dataStick);
+                    machine.markRecipesDirty();
                     return true;
                 }
             }

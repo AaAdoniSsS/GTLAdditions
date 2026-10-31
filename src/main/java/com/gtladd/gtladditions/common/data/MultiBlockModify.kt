@@ -305,6 +305,37 @@ object MultiBlockModify {
                 ).apply(GTResearchMachines.RESEARCH_STATION as MultiblockMachineDefinition)
         }
 
+        (GTResearchMachines.DATA_BANK as MultiblockMachineDefinition).patternFactory = SupplierMemoizer.memoize {
+            (
+                Function { _: MultiblockMachineDefinition ->
+                    FactoryBlockPattern.start()
+                        .aisle("XDDDX", "XDDDX", "XDDDX")
+                        .aisle("XDDDX", "XAAAX", "XDDDX")
+                        .aisle("XCCCX", "XCSCX", "XCCCX")
+                        .where('S', Predicates.controller(blocks(GTResearchMachines.DATA_BANK.block)))
+                        .where('X', blocks(GTBlocks.COMPUTER_HEAT_VENT.get()))
+                        .where(
+                            'D',
+                            blocks(GTBlocks.COMPUTER_CASING.get())
+                                .setMinGlobalLimited(3)
+                                .or(abilities(PartAbility.DATA_ACCESS).setPreviewCount(3))
+                                .or(abilities(PartAbility.OPTICAL_DATA_TRANSMISSION).setMinGlobalLimited(1, 1))
+                                .or(blocks(*PartAbility.OPTICAL_DATA_RECEPTION.allBlocks.stream().filter { it != GTLAddMachines.CLOUD_DATA_HATCH.block }.toList().toTypedArray()).setPreviewCount(1))
+                        )
+                        .where('A', blocks(GTBlocks.COMPUTER_CASING.get()))
+                        .where(
+                            'C',
+                            blocks(GTBlocks.HIGH_POWER_CASING.get())
+                                .setMinGlobalLimited(4)
+                                .or(Predicates.autoAbilities())
+                                .or(Predicates.autoAbilities(true, false, false))
+                                .or(abilities(PartAbility.INPUT_ENERGY).setMinGlobalLimited(1).setMaxGlobalLimited(2).setPreviewCount(1))
+                        )
+                        .build()
+                }
+                ).apply(GTResearchMachines.DATA_BANK as MultiblockMachineDefinition)
+        }
+
         AdvancedMultiBlockMachineB.ADVANCED_INFINITE_DRILLER.patternFactory = SupplierMemoizer.memoize {
             (
                 Function { _: MultiblockMachineDefinition ->

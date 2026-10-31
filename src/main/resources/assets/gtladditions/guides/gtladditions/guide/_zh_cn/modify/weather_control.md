@@ -15,9 +15,9 @@ item_ids:
 <BlockImage id = "gtceu:weather_control" scale = "4" /> 
 
 * 在主机放入力场发生器并使用4号电路的同时输入气态氡后可在9x9x9的范围内持续召唤闪电击中<ItemLink id="minecraft:lightning_rod" />
-> | 力场发生器                                  | 闪电数量 | 召唤间隔  | 气态氡消耗量 |
-> |----------------------------------------|------|-------|--------|
-> | <Color color="#AA00AA">**EV**</Color>  | 4    | 1s    | 1B/t   |
-> | <Color color="#5555FF">**IV**</Color>  | 8    | 0.75s | 2B/t   |
-> | <Color color="#FF55FF">**LuV**</Color> | 16   | 0.5s  | 4B/t   |
+> | 力场发生器                                  | 闪电数量 | 召唤间隔  | 气态氡消耗量  |
+> |----------------------------------------|------|-------|---------|
+> | <Color color="#AA00AA">**EV**</Color>  | 4    | 1s    | 400mB/t |
+> | <Color color="#5555FF">**IV**</Color>  | 8    | 0.75s | 1.2B/t  |
+> | <Color color="#FF55FF">**LuV**</Color> | 16   | 0.5s  | 2.4B/t  |
 * 结构内原有的避雷针被替换为<ItemLink id="minecraft:iron_bars" />

@@ -17,7 +17,7 @@ item_ids:
 * If you put a field generator in the host and use Circuit 4 whilst introducing gaseous radon, you can continuously summon lightning strikes <ItemLink id="minecraft:lightning_rod" /> within a 7x7x7 area
 > | Field Generator                        | Number of lightning strikes | Summoning interval | Gaseous radon consumption |
 > |----------------------------------------|-----------------------------|--------------------|---------------------------|
-> | <Color color="#AA00AA">**EV**</Color>  | 4                           | 1s                 | 1B/t                      |
-> | <Color color="#5555FF">**IV**</Color>  | 8                           | 0.75s              | 2B/t                      |
-> | <Color color="#FF55FF">**LuV**</Color> | 16                          | 0.5s               | 4B/t                      |
+> | <Color color="#AA00AA">**EV**</Color>  | 4                           | 1s                 | 400mB/t                   |
+> | <Color color="#5555FF">**IV**</Color>  | 8                           | 0.75s              | 1.2B/t                    |
+> | <Color color="#FF55FF">**LuV**</Color> | 16                          | 0.5s               | 2.4B/t                    |
 * The original lightning rod inside the structure has been replaced with <ItemLink id="minecraft:iron_bars" />

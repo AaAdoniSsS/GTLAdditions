@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLSoundEntries
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
+import org.gtlcore.gtlcore.integration.voxelregion.GtlRegionExplosionFacade
 
 import com.gregtechceu.gtceu.api.block.ICoilType
 import com.gregtechceu.gtceu.api.data.chemical.material.Material
@@ -35,6 +36,7 @@ import net.minecraft.world.entity.LivingEntity
 import net.minecraft.world.entity.player.Player
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.Level
+import net.minecraft.world.level.block.Block
 import net.minecraft.world.level.block.Blocks
 import net.minecraft.world.level.block.state.BlockState
 import net.minecraft.world.phys.BlockHitResult
@@ -42,8 +44,6 @@ import net.minecraftforge.api.distmarker.Dist
 import net.minecraftforge.api.distmarker.OnlyIn
 
 import appeng.client.render.effects.ParticleTypes
-import com.gtladd.gtladditions.api.async.StagedBlastManager
-import com.gtladd.gtladditions.api.async.StagedSphereExplosion
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.Cryotheum
@@ -236,13 +236,13 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
             }
         }
 
-        serverLevel.setBlock(machine.pos, Blocks.AIR.defaultBlockState(), StagedSphereExplosion.FLAG_QUIET)
+        serverLevel.setBlock(machine.pos, Blocks.AIR.defaultBlockState(), Block.UPDATE_CLIENTS or Block.UPDATE_KNOWN_SHAPE)
 
         storageEUt = 0L
         startCycle = false
         isWorkingEnabled = false
 
-        StagedBlastManager.spawn(serverLevel, pos, radius)
+        GtlRegionExplosionFacade.submitSphere(serverLevel, uuid ?: UUID(0, 0), pos, radius)
     }
 
     class PICTRecipeLogic(val pictMachine: PlanetaryIonisationConvergenceTower) : RecipeLogic(pictMachine), IRecipeStatus {

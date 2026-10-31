@@ -73,9 +73,9 @@ open class WeatherControlMachine(holder: IMachineBlockEntity) :
         if (count <= 0) return
 
         val radonPerTick = when (count) {
-            16 -> 4000L
-            8 -> 2000L
-            else -> 1000L
+            16 -> 2400L
+            8 -> 1200L
+            else -> 400L
         }
         if (!inputFluidStack(GTMaterials.Radon.getFluid(radonPerTick))) return
 

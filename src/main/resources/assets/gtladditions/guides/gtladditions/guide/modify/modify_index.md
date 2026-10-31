@@ -13,5 +13,4 @@ navigation:
 * [About Wireless Data(Computation) Hatch Modify](computation_data_hatch.md)
 * [About Auto Configuration Maintenance Modify](auto_configuration_maintenance_hatch.md)
 * [Active Transformer Modify](active_transformer.md)
-* [Fission Reactor Modify](fission_reactor.md)
 * [Weather Control Modify](weather_control.md)

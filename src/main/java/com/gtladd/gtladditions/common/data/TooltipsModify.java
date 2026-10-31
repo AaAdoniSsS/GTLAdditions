@@ -4,12 +4,8 @@ import com.gregtechceu.gtceu.api.machine.MachineDefinition;
 import com.gregtechceu.gtceu.client.util.TooltipHelper;
 
 import net.minecraft.network.chat.Component;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.event.entity.player.ItemTooltipEvent;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 
 import static com.gregtechceu.gtceu.common.data.machines.GTResearchMachines.RESEARCH_STATION;
-import static org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.FISSION_REACTOR;
 import static org.gtlcore.gtlcore.common.data.machines.AdvancedMultiBlockMachineB.WEATHER_CONTROL;
 
 public class TooltipsModify {
@@ -25,24 +21,5 @@ public class TooltipsModify {
         weatherControl.setTooltipBuilder(weatherControl.getTooltipBuilder().andThen((itemStack, components) -> {
             components.add(Component.translatable("gui.gtladditions.modify").withStyle(style -> style.withColor(TooltipHelper.RAINBOW.getCurrent())));
         }));
-
-        MachineDefinition fissionReactor = FISSION_REACTOR;
-        fissionReactor.setTooltipBuilder(fissionReactor.getTooltipBuilder().andThen((itemStack, components) -> {
-            components.add(Component.translatable("gui.gtladditions.modify").withStyle(style -> style.withColor(TooltipHelper.RAINBOW.getCurrent())));
-        }));
-    }
-
-    public static void onItemTooltip(ItemTooltipEvent event) {
-        if (FMLEnvironment.dist != Dist.CLIENT) return;
-
-        var id = event.getItemStack().getItem().getDescriptionId();
-        if (!isCharge(id)) return;
-
-        event.getToolTip().add(Component.translatable("gui.gtladditions.modify")
-                .withStyle(style -> style.withColor(TooltipHelper.RAINBOW.getCurrent())));
-    }
-
-    private static boolean isCharge(String path) {
-        return path.contains("naquadria_charge") || path.contains("leptonic_charge") || path.contains("quantum_chromodynamic_charge");
     }
 }
