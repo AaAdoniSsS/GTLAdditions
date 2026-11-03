@@ -40,8 +40,11 @@ public abstract class ResearchStationRecipeLogicMixin extends RecipeLogic {
         }
 
         var teamId = ((CloudOpticalDataMachine.ICloudTeamBindable) machine).getTeamId();
-        if (teamId == null) holder.setDataItem(outputItem);
-        else if (CloudOpticalDataMachine.uploadDataStickToCloud(outputItem, teamId)) holder.setDataItem(ItemStack.EMPTY);
+        if (teamId != null && CloudOpticalDataMachine.uploadDataStickToCloud(outputItem, teamId)) {
+            holder.setDataItem(ItemStack.EMPTY);
+        } else {
+            holder.setDataItem(outputItem);
+        }
 
         holder.setLocked(false);
     }

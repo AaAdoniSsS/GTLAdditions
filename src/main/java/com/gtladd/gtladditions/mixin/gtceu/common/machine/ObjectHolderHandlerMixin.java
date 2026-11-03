@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.mixin.gtceu.common.machine;
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.electric.research.ResearchStationMachine;
 import com.gregtechceu.gtceu.common.machine.multiblock.part.ObjectHolderMachine;
+import com.gregtechceu.gtceu.utils.ResearchManager;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -37,9 +38,12 @@ public class ObjectHolderHandlerMixin {
 
     @Inject(method = "isItemValid", at = @At("HEAD"), cancellable = true)
     private void gtladditions$restrictDataItemsToFirstSlot(int slot, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {
-        if (slot == 1 || stack.isEmpty()) return;
+        if (stack.isEmpty()) return;
         Item item = stack.getItem();
-        if (item == BuiltInRegistries.ITEM.get(DATA_MODULE) || item == BuiltInRegistries.ITEM.get(DATA_ORB)) {
+        boolean allowedData = item == BuiltInRegistries.ITEM.get(DATA_MODULE) || item == BuiltInRegistries.ITEM.get(DATA_ORB);
+        if (slot == 1) {
+            if (!allowedData) cir.setReturnValue(false);
+        } else if (ResearchManager.isStackDataItem(stack, true)) {
             cir.setReturnValue(false);
         }
     }
