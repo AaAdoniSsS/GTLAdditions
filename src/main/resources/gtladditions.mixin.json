@@ -86,7 +86,6 @@
     "kjs.ItemBuilderMixin",
     "kjs.RecipesEventJSMixin",
     "mc.BlockStateMixin",
-    "mc.ChunkMapUnloadCapMixin",
     "mc.CompoundTagMixin",
     "mc.FluidMixin",
     "mc.IngredientMixin",
