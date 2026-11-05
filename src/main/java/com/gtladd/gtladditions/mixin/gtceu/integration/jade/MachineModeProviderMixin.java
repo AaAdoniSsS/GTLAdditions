@@ -14,6 +14,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import com.gtladd.gtladditions.api.machine.IGTLAddMachine;
 import com.gtladd.gtladditions.api.machine.IMultipleRecipeTypeMachine;
+import com.gtladd.gtladditions.api.machine.IThreadMachine;
 import com.gtladd.gtladditions.api.recipe.MultiGTRecipeType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -83,6 +84,10 @@ public class MachineModeProviderMixin {
             iTooltip.add(Component.translatable("gtceu.machine.multiple_recipe.gui.2").append(": ")
                     .append(Component.translatable("gtceu.machine.multiple_recipe.gui." + (isMode ? "0" : "1"))));
         }
+        if (serverData.contains("gtladditions_threads")) {
+            iTooltip.add(Component.translatable("gtladditions.jade.threads",
+                    serverData.getInt("gtladditions_threads")).withStyle(ChatFormatting.AQUA));
+        }
     }
 
     /**
@@ -117,9 +122,16 @@ public class MachineModeProviderMixin {
                     }
                 }
             }
-            if (blockEntity.getMetaMachine() instanceof IGTLAddMachine machine) {
-                if (machine.useModes()) compoundTag.putBoolean("multiMode", machine.isMultipleMode());
+            if (blockEntity.getMetaMachine() instanceof IGTLAddMachine addMachine) {
+                if (addMachine.useModes()) compoundTag.putBoolean("multiMode", addMachine.isMultipleMode());
             }
+            if (blockEntity.getMetaMachine() instanceof IThreadMachine threadMachine) {
+                int threads = threadMachine.getThreads();
+                if (threads > 0) compoundTag.putInt("gtladditions_threads", threads);
+            } else if (blockEntity.getMetaMachine() instanceof IRecipeLogicMachine logicMachine &&
+                    logicMachine.getRecipeLogic() instanceof org.gtlcore.gtlcore.common.machine.trait.MultipleRecipesLogic) {
+                        compoundTag.putInt("gtladditions_threads", 64);
+                    }
         }
     }
 }

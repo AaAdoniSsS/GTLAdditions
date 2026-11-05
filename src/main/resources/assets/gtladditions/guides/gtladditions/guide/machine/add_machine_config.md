@@ -20,7 +20,7 @@ The default number of threads for most GTLAdditions machines is 128 (where appli
 
 > In Extreme Mode, the machine will concentrate on processing a portion of recipes, featuring lossless overclocking and 1toc (For concepts of lossless overclocking and 1toc, please refer to the task book)\
 > Under this mode, the bonus from the Configurable Maintenance will not take effect \
-> In this mode, the number of threads is the maximum number of recipes that can be processed \
+> In this mode, the number of threads corresponds to the maximum number of recipes aggregated per process; these recipes may be the same or different, and each recipe has its own parallel \
 > This mode automatically enables batch processing and cannot be disabled \
 > Unless otherwise specified or provided for by a specific mechanism, the operation of GTLAdditions machines that are not cross-recipe parallel machines also follows the same mechanism as in extreme mode
 

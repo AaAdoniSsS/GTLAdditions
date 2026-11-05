@@ -74,7 +74,7 @@ item_ids:
 > After installing this module, the formula output can be focused on the first item and fluid, converting the output of the second product into additional output of the first product \
 > It has a fuel input cycle of 12 seconds, and **only** two ULV hegu input buses and one LV huge input hatch can be used to receive the fuel \
 > When the module is first activated, it will randomly select two items and one fluid from <ItemLink id="kubejs:black_body_naquadria_supersolid" />,<ItemLink id="kubejs:quantum_anomaly" />,<ItemLink id="kubejs:hyper_stable_self_healing_adhesive" />,<FluidLink id="gtceu:exciteddtec" /> and <FluidLink id="gtceu:exciteddtsc" /> as the fuel for maintaining the module's operation \
-> The correct fuel selected by the module needs to be precisely input to activate the focusing function. If the input quantity is incorrect, an error message will be displayed in the module's GUI \
+> The correct fuel selected by the module needs to be precisely input to activate the focusing function. If the input quantity is incorrect, an error message will be displayed in the module's GUI. The range is (0, 65536) \
 > At the same time, 2/s of Magmatter Block are fixedly consumed. If the input is insufficient, the formula cannot be focused and the output will be impossible \
 > The current and subsequent processing of formulas containing <ItemLink id="kubejs:extremely_durable_plasma_cell" />,<ItemLink id="kubejs:time_dilation_containment_unit" /> and <ItemLink id="kubejs:plasma_containment_cell" /> will not be included in the doubling process \
 > **The Reverse Time Boosting Engine module has a higher priority than this module**

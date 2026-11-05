@@ -22,6 +22,7 @@ item_ids:
 > **Amplification Time 2**: On the basis of amplification Time 1, extra consumption of recipe parallel number / 180mb of <FluidLink id="gtceu:hypogen" />, the recipe output becomes 1.5 times \
 > **Amplification Time 3**: On the basis of amplification Time 2, extra consumption of recipe parallel number / 340mb of <FluidLink id="gtceu:spacetime" />, the recipe output becomes 3 times \
 > The GUI can choose whether to enable the Equally Divided Mode \
+> In the Equally Divided Mode, the thread count is 16 \
 > In the non-Equally Divided Mode, overclocking mode becomes 6x power for 2x speed  \
 > The Equally Divided Mode is **not affected** by the amplification times adjustment \
 > After enabling, each processed recipe requires consumption of recipe parallel number / 108 of <ItemLink id="kubejs:quantum_anomaly" /> and recipe parallel number / 623 of <ItemLink id="kubejs:hypercube" /> \

@@ -164,5 +164,8 @@
   "gui.gtladditions.min_temperature": "Min temperature(K)",
   "gui.gtladditions.max_temperature": "Max temperature(K)",
   "gtladditions.machine.super_input_dual_hatch.item_capacity": "§6Item Capacity: §r%s §7slots, §r%s items §7each§r",
-  "gtladditions.machine.super_input_dual_hatch.fluid_capacity": "§9Fluid Capacity: §r%s §7slots, §r%s mB §7each§r"
+  "gtladditions.machine.super_input_dual_hatch.fluid_capacity": "§9Fluid Capacity: §r%s §7slots, §r%s mB §7each§r",
+  "gtladditions.jade.threads": "Threads: %s",
+  "block.gtladditions.suprachronal_assembly_resonatic_circuit_assembly_module": "Suprachronal Assembly Line Resonatic Circuit Assembly Module",
+  "gtceu.circle_resonatic_assemble": "Resonatic Circuit Assembly"
 }

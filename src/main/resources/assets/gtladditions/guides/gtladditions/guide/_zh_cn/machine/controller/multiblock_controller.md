@@ -17,6 +17,7 @@ categories:
 
 * [密藏之匣](arcane_cache_vault.md)
 * [行星电离汇流塔](planetary_ionisation_convergence_tower.md)
+* [超时空装配线磁共振电路组装模块](suprachronal_assembly_resonatic_circuit_assembly_module.md)
 
 ## <Color color="#00FF00">**UEV**</Color>
 

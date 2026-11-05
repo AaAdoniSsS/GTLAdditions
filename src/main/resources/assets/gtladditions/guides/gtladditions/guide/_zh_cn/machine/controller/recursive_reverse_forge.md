@@ -73,7 +73,7 @@ item_ids:
 > 安装该模块后, 可以使配方产出聚焦在第一个物品和流体上，将第二个产物产出转换为第一个产物的额外产出 \
 > 拥有12s的燃料输入周期, 且**只能**使用两个ulv巨型输入总线和一个lv巨型输入仓来接收燃料 \
 > 模块第一次启动时会在<ItemLink id="kubejs:black_body_naquadria_supersolid" />,<ItemLink id="kubejs:quantum_anomaly" />,<ItemLink id="kubejs:hyper_stable_self_healing_adhesive" />,<FluidLink id="gtceu:exciteddtec" />,<FluidLink id="gtceu:exciteddtsc" />中随机选择两种物品和一种流体作为维持模块运行的燃料 \
-> 需要精确输入被模块选中的燃料以激活聚焦功能，若输入数量错误会在模块GUI中提示 \
+> 需要精确输入被模块选中的燃料以激活聚焦功能，若输入数量错误会在模块GUI中提示，区间为(0, 65536) \
 > 同时固定消耗2/s的磁物质块, 若输入不足则无法聚焦配方输出 \
 > 当前及后续处理带有<ItemLink id="kubejs:extremely_durable_plasma_cell" />,<ItemLink id="kubejs:time_dilation_containment_unit" />, <ItemLink id="kubejs:plasma_containment_cell" />的配方不会参与聚焦过程 \
 > **逆时助推引擎模块优先级高于该模块**

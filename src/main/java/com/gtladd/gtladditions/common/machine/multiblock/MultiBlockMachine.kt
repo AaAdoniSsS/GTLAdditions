@@ -11,6 +11,7 @@ import org.gtlcore.gtlcore.common.data.GTLMachines.GTAEMachines.*
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.*
+import org.gtlcore.gtlcore.common.data.machines.structure.AdvancedMultiBlockMachineStructureA
 
 import com.gregtechceu.gtceu.GTCEu
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper
@@ -55,6 +56,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.structure.MultiBlockStr
 import com.gtladd.gtladditions.common.machine.multiblock.structure.MultiBlockStructureB
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes
 import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.BiosphereIIIType
+import com.gtladd.gtladditions.common.recipe.GTLAddRecipesTypes.CIRCUIT_RESONATIC_ASSEMBLE_RECIPES
 import com.gtladd.gtladditions.utils.ComponentUtil.literal
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.pow
@@ -1747,6 +1749,54 @@ object MultiBlockMachine {
         }
         .renderer(::SpaceElevatorMKIIRenderer)
         .hasTESR(true)
+        .register()
+
+    val SUPRACHRONAL_ASSEMBLY_LINE_MODULE_1: MultiblockMachineDefinition = REGISTRATE.multiblock("suprachronal_assembly_resonatic_circuit_assembly_module", ::SuprachronalAssemblyModuleMachine)
+        .allRotation()
+        .tooltipTextKey(
+            Component.translatable("gtceu.machine.duration_multiplier.tooltip", 0.4),
+            "gtceu.machine.suprachronal_assembly_line_module.tooltip.0".toComponent,
+            "gtceu.multiblock.laser.tooltip".toComponent,
+            Component.translatable("tooltip.gtlcore.structure.source", "TST")
+        )
+        .tooltipTextPerfectOverclock()
+        .tooltipTextRecipeTypes(CIRCUIT_RESONATIC_ASSEMBLE_RECIPES)
+        .tooltipBuilder(GTLAddMachines.GTLAdd_ADD)
+        .recipeType(CIRCUIT_RESONATIC_ASSEMBLE_RECIPES)
+        .recipeModifiers(
+            { machine, recipe, _, _ -> GTLRecipeModifiers.reduction(machine, recipe, 1.0, 0.4) },
+            { machine, recipe, _, _ ->
+                val module = machine as SuprachronalAssemblyModuleMachine
+                FastRecipeModify.modify(
+                    module,
+                    recipe,
+                    module.parallel.toLong(),
+                    ocResult = FastRecipeModify.getPerfectOverclock()
+                ) { FastRecipeModify.getDefaultReduce() }
+            }
+        )
+        .appearanceBlock(MOLECULAR_CASING)
+        .pattern {
+            AdvancedMultiBlockMachineStructureA.SUPRACHRONAL_ASSEMBLY_LINE_MODULE
+                .where("~", controller(blocks(it.get())))
+                .where("B", blocks(DIMENSIONALLY_TRANSCENDENT_CASING.get()))
+                .where("C", blocks(("kubejs:molecular_coil").getBlock))
+                .where("D", blocks(FUSION_GLASS.get()))
+                .where("E", blocks(HIGH_POWER_CASING.get()))
+                .where(
+                    "A",
+                    blocks(MOLECULAR_CASING.get())
+                        .or(abilities(IMPORT_ITEMS).setPreviewCount(1))
+                        .or(abilities(EXPORT_ITEMS).setPreviewCount(1))
+                        .or(abilities(IMPORT_FLUIDS).setPreviewCount(1))
+                        .or(abilities(OPTICAL_DATA_RECEPTION).setExactLimit(1))
+                        .or(abilities(INPUT_ENERGY).setMaxGlobalLimited(2))
+                        .or(abilities(INPUT_LASER).setMaxGlobalLimited(1))
+                )
+                .where(" ", any())
+                .build()
+        }
+        .workableCasingRenderer(GTLCore.id("block/molecular_casing"), GTCEu.id("block/multiblock/fusion_reactor"))
         .register()
 
     @JvmStatic

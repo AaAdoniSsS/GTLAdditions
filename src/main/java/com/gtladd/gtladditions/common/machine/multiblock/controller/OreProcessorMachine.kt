@@ -30,6 +30,7 @@ import net.minecraft.network.chat.Component
 
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
+import com.gtladd.gtladditions.api.machine.IThreadMachine
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.OverClockFactor
@@ -49,7 +50,7 @@ import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 
 @Suppress("CAST_NEVER_SUCCEEDS")
 class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: Boolean) :
-    WorkableElectricMultiblockMachine(holder), ParallelMachine, IRecipeSearchProvider {
+    WorkableElectricMultiblockMachine(holder), ParallelMachine, IRecipeSearchProvider, IThreadMachine {
 
     private var searchCtx: RecipeSearchContext? = null
 
@@ -109,6 +110,15 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
     }
 
     override fun getMaxParallel(): Int = if (this.isAdvanced) Int.MAX_VALUE else GTLRecipeModifiers.getHatchParallel(this)
+
+    override fun getThreads(): Int = opHatch?.let { hatch ->
+        when (hatch.firstTier) {
+            3 -> if (isAdvanced) 144 else 10
+            2 -> if (isAdvanced) 128 else 8
+            1 -> if (isAdvanced) 96 else 6
+            else -> if (isAdvanced) 72 else 4
+        }
+    } ?: 0
 
     class OreProcessorRecipeLogic(private val opMachine: OreProcessorMachine) : RecipeLogic(opMachine), IRecipeStatus, ILockRecipe {
         private var eut: Long = 0

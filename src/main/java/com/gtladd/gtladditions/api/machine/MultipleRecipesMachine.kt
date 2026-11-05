@@ -21,7 +21,7 @@ import com.gtladd.gtladditions.api.recipe.ledger.RecipeSearchContext
 import com.gtladd.gtladditions.config.ConfigHolder
 
 open class MultipleRecipesMachine(holder: IMachineBlockEntity) :
-    WorkableElectricMultipleRecipesMachine(holder), IGTLAddMachine, IBatchMachine, IRecipeSearchProvider {
+    WorkableElectricMultipleRecipesMachine(holder), IGTLAddMachine, IBatchMachine, IRecipeSearchProvider, IThreadMachine {
 
     private var searchCtx: RecipeSearchContext? = null
 
@@ -45,6 +45,8 @@ open class MultipleRecipesMachine(holder: IMachineBlockEntity) :
     }
 
     open fun getThread(): Int = 128
+
+    override fun getThreads(): Int = getThread()
 
     open fun testBefore(obj: Any) = true
 

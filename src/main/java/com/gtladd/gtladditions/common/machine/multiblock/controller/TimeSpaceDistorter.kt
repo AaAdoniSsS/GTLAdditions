@@ -38,6 +38,7 @@ import net.minecraft.world.item.ItemStack
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
 import com.gtladd.gtladditions.api.machine.IMultipleRecipeTypeMachine
 import com.gtladd.gtladditions.api.machine.IRecipeSearchProvider
+import com.gtladd.gtladditions.api.machine.IThreadMachine
 import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.api.recipe.OptimizedRecipeSearch
@@ -66,7 +67,7 @@ import com.gtladd.gtladditions.utils.MathUtil.safeToInt
 import it.unimi.dsi.fastutil.ints.IntArrayList
 
 open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
-    WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine, ParallelMachine, IRecipeSearchProvider {
+    WorkableElectricMultiblockMachine(holder), IMultipleRecipeTypeMachine, ParallelMachine, IRecipeSearchProvider, IThreadMachine {
 
     private var searchCtx: RecipeSearchContext? = null
 
@@ -151,6 +152,8 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
     override val multiRecipeTypes: Array<GTRecipeType> = arrayOf(TimeSpaceDistorterType)
 
     override fun getMaxParallel(): Int = GTLRecipeModifiers.getHatchParallel(this)
+
+    override fun getThreads(): Int = if (isMultiple) 16 else 0
 
     class TimeSpaceDistorterRecipeLogic(val tsdMachine: TimeSpaceDistorter) : RecipeLogic(tsdMachine), IRecipeStatus {
         private var eut = 0L

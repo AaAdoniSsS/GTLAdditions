@@ -37,6 +37,7 @@ class GTLAdditionsGTAddon : IGTAddon {
         VoidfluxReaction.init(provider)
         StellarLgnition.init(provider)
         ChaosWeave.init(provider)
+        CircuitResonaticAssemble.init(provider)
         FractalReconstruction.init(provider)
         AE2.init(provider)
         Assembler.init(provider)

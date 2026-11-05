@@ -28,12 +28,12 @@ public class GTLAdditions {
     public static final String NAME = "GTLAdditions";
 
     public static ResourceLocation id(String name) {
-        return new ResourceLocation(GTLAdditions.MOD_ID, name);
+        return ResourceLocation.fromNamespaceAndPath(GTLAdditions.MOD_ID, name);
     }
 
-    public GTLAdditions() {
+    public GTLAdditions(FMLJavaModLoadingContext context) {
         init();
-        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        IEventBus modEventBus = context.getModEventBus();
         MinecraftForge.EVENT_BUS.register(this);
         MinecraftForge.EVENT_BUS.addListener(ForgeEvent::onLevelUnload);
         modEventBus.addListener(this::addMaterialRegistries);

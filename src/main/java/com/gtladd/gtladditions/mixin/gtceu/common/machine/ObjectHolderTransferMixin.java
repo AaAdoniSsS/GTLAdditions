@@ -18,8 +18,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 public class ObjectHolderTransferMixin {
 
     private static final String EXTERNAL_HANDLER = "com.gregtechceu.gtceu.common.machine.multiblock.part.ObjectHolderMachine$ObjectHolderHandler$1";
-    private static final ResourceLocation DATA_MODULE = new ResourceLocation("gtceu", "data_module");
-    private static final ResourceLocation DATA_ORB = new ResourceLocation("gtceu", "data_orb");
+    private static final ResourceLocation DATA_MODULE = ResourceLocation.fromNamespaceAndPath("gtceu", "data_module");
+    private static final ResourceLocation DATA_ORB = ResourceLocation.fromNamespaceAndPath("gtceu", "data_orb");
 
     @Inject(method = "isItemValid", at = @At("HEAD"), cancellable = true, remap = false)
     private void gtladditions$restrictExternalDataItems(int slot, ItemStack stack, CallbackInfoReturnable<Boolean> cir) {

@@ -24,6 +24,7 @@ import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient
 import com.gregtechceu.gtceu.common.data.GTItems.*
 import com.gregtechceu.gtceu.common.data.GTMachines
 import com.gregtechceu.gtceu.common.data.GTMaterials.*
+import com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLER_RECIPES
 import com.gregtechceu.gtceu.common.data.GTRecipeTypes.ASSEMBLY_LINE_RECIPES
 import com.gregtechceu.gtceu.common.data.machines.GTResearchMachines.ADVANCED_DATA_ACCESS_HATCH
 import com.gregtechceu.gtceu.common.data.machines.GTResearchMachines.DATA_BANK
@@ -32,7 +33,6 @@ import com.gregtechceu.gtceu.data.recipe.VanillaRecipeHelper
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 
-import net.minecraft.commands.arguments.item.ItemArgument.getItem
 import net.minecraft.data.recipes.FinishedRecipe
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.block.Blocks
@@ -65,6 +65,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.RECUR
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.REVERSE_TIME_BOOSTING_ENGINE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SKELETON_SHIFT_RIFT_ENGINE
 import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SPACE_ELEVATOR_MKII
+import com.gtladd.gtladditions.common.machine.multiblock.MultiBlockMachine.SUPRACHRONAL_ASSEMBLY_LINE_MODULE_1
 import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.common.register.GTLAddItems.OUTSTANDING_SOC_WAFER
 import com.gtladd.gtladditions.utils.Registries.getFluid
@@ -584,5 +585,17 @@ object NewMachineRecipe2 {
                     .EUt(VA[UV]).CWUt(256)
             }
             .save(provider)
+
+        ASSEMBLER_RECIPES.recipeBuilder(id("suprachronal_assembly_resonatic_circuit_assembly_module"))
+            .inputItems(SUPRACHRONAL_ASSEMBLY_LINE_MODULE)
+            .inputItems("kubejs:circuit_resonatic_uv".getItemStack(64))
+            .inputItems(CustomTags.UIV_CIRCUITS, 64)
+            .inputItems(gemExquisite, MagnetoResonatic, 64)
+            .inputItems(gemExquisite, MagnetoResonatic, 64)
+            .inputItems("kubejs:cryogenic_interface".getItemStack(16))
+            .inputItems("kubejs:imprinted_resonatic_circuit_board".getItemStack(8))
+            .inputFluids(UuAmplifier.getFluid(23040))
+            .outputItems(SUPRACHRONAL_ASSEMBLY_LINE_MODULE_1)
+            .EUt(VA[UIV].toLong()).duration(300).save(provider)
     }
 }

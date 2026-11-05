@@ -218,6 +218,14 @@ object GTLAddRecipesTypes {
             .setProgressBar(GuiTextures.PROGRESS_BAR_ARROW, FillDirection.LEFT_TO_RIGHT)
             .setSound(GTSoundEntries.ARC)
 
+    @JvmField
+    val CIRCUIT_RESONATIC_ASSEMBLE_RECIPES: GTRecipeType =
+        register("circle_resonatic_assemble", MULTIBLOCK)
+            .setEUIO(IO.IN).setMaxIOSize(6, 1, 1, 0)
+            .setSlotOverlay(false, false, GuiTextures.CIRCUIT_OVERLAY)
+            .setProgressBar(GuiTextures.PROGRESS_BAR_CIRCUIT_ASSEMBLER, FillDirection.LEFT_TO_RIGHT)
+            .setSound(GTSoundEntries.ARC)
+
     val InfernoCleftSmeltingVaultType =
         registry(id("inferno_cleft_smelting_vault_type"), MULTIBLOCK, PYROLYSE_RECIPES, CRACKING_RECIPES)
 

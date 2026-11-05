@@ -17,6 +17,7 @@ categories:
 
 * [Arcane Cache Vault](arcane_cache_vault.md)
 * [Planetary Ionisation Convergence Tower](planetary_ionisation_convergence_tower.md)
+* [Suprachronal Assembly Line Resonatic Circuit Assembly Module](suprachronal_assembly_resonatic_circuit_assembly_module.md)
 
 ## <Color color="#00FF00">**UEV**</Color>
 
