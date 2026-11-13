@@ -12,4 +12,4 @@ item_ids:
 
 <BlockImage id = "arcane_cache_vault" scale = "8"/>
 
-> A Multi-Recipe packager that can use laser hatches (~~No other special features~~)
+> A Multi-Recipe packager that can use laser hatches (~~No more than that sadly~~)
