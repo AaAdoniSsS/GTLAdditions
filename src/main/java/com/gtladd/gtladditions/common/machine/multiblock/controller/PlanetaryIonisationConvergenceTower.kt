@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLSoundEntries
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 import org.gtlcore.gtlcore.integration.voxelregion.GtlRegionExplosionFacade
 
 import com.gregtechceu.gtceu.api.block.ICoilType
@@ -28,6 +29,7 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.server.level.ServerLevel
 import net.minecraft.world.InteractionHand
@@ -50,6 +52,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.Cry
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.HyperdimensionalDrone
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.ComponentUtil.translatable
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.MachineUtil.inputFluidStack
 import com.gtladd.gtladditions.utils.MathUtil.minToLong
 import com.gtladd.gtladditions.utils.Registries.getItem
@@ -245,7 +248,11 @@ class PlanetaryIonisationConvergenceTower(holder: IMachineBlockEntity) : Storage
         GtlRegionExplosionFacade.submitSphere(serverLevel, uuid ?: UUID(0, 0), pos, radius)
     }
 
-    class PICTRecipeLogic(val pictMachine: PlanetaryIonisationConvergenceTower) : RecipeLogic(pictMachine), IRecipeStatus {
+    class PICTRecipeLogic(val pictMachine: PlanetaryIonisationConvergenceTower) :
+        RecipeLogic(pictMachine),
+        IRecipeStatus,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
 
         override fun serverTick() {
             duration = if (pictMachine.isSuper) 20 else 60

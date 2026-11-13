@@ -4,6 +4,7 @@ import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.common.data.GTLItems.CONVERSION_SIMULATE_CARD
 import org.gtlcore.gtlcore.common.data.GTLItems.FAST_CONVERSION_SIMULATE_CARD
 import org.gtlcore.gtlcore.common.data.GTLMaterials
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.data.chemical.ChemicalHelper.get
@@ -31,6 +32,7 @@ import com.lowdragmc.lowdraglib.misc.ItemStackTransfer
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.Item
 import net.minecraft.world.item.ItemStack
@@ -43,6 +45,7 @@ import com.gtladd.gtladditions.common.register.GTLAddItems
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.MathUtil.exp
 import com.gtladd.gtladditions.utils.MathUtil.pow
 import com.gtladd.gtladditions.utils.MathUtil.safeMultiply
@@ -177,7 +180,11 @@ open class ConversationMachine(holder: IMachineBlockEntity) :
 
     override fun onDrops(drops: MutableList<ItemStack>) = this.clearInventory(this.machineStorage.storage)
 
-    class ConversationRecipeLogic(val cMachine: ConversationMachine) : RecipeLogic(cMachine), IRecipeStatus {
+    class ConversationRecipeLogic(val cMachine: ConversationMachine) :
+        RecipeLogic(cMachine),
+        IRecipeStatus,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
 
         override fun findAndHandleRecipe() {
             lastRecipe = null

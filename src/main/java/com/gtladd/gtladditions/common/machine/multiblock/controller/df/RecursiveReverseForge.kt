@@ -10,6 +10,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 import org.gtlcore.gtlcore.utils.datastructure.ModuleRenderInfo
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
@@ -29,6 +30,7 @@ import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
 import net.minecraft.network.chat.HoverEvent
@@ -52,6 +54,7 @@ import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MathUtil.maxToLong
@@ -274,7 +277,12 @@ class RecursiveReverseForge(holder: IMachineBlockEntity) :
 
     override val multiRecipeTypes = arrayOf(GTLAddRecipesTypes.RecursiveReverseForgeType)
 
-    class RRFRecipeLogic(val rrfMachine: RecursiveReverseForge) : RecipeLogic(rrfMachine), IRecipeStatus {
+    class RRFRecipeLogic(val rrfMachine: RecursiveReverseForge) :
+        RecipeLogic(rrfMachine),
+        IRecipeStatus,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
+
         private var eut = 0L
         private var bigEUt = BigInteger.ZERO
 

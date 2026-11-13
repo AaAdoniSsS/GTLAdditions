@@ -11,6 +11,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeResult.fail
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
 import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability.CAP
 import com.gregtechceu.gtceu.api.capability.recipe.IO
@@ -26,6 +27,7 @@ import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.ingredient.FluidIngredient
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
@@ -45,6 +47,7 @@ import com.gtladd.gtladditions.utils.GTRecipeUtils.getFastMultipleRecipe
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getOverclockRecipe
 import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 
@@ -120,7 +123,13 @@ class OreProcessorMachine(holder: IMachineBlockEntity, private val isAdvanced: B
         }
     } ?: 0
 
-    class OreProcessorRecipeLogic(private val opMachine: OreProcessorMachine) : RecipeLogic(opMachine), IRecipeStatus, ILockRecipe {
+    class OreProcessorRecipeLogic(private val opMachine: OreProcessorMachine) :
+        RecipeLogic(opMachine),
+        IRecipeStatus,
+        ILockRecipe,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
+
         private var eut: Long = 0
 
         override fun findAndHandleRecipe() {

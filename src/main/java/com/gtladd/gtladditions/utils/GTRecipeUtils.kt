@@ -8,6 +8,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeInput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipeInput
 import org.gtlcore.gtlcore.api.recipe.chance.LongChanceLogic
 import org.gtlcore.gtlcore.api.recipe.ingredient.LongIngredient
+import org.gtlcore.gtlcore.integration.monitor.MachineMonitorEntries
 
 import com.gregtechceu.gtceu.api.capability.recipe.EURecipeCapability
 import com.gregtechceu.gtceu.api.capability.recipe.FluidRecipeCapability
@@ -15,6 +16,7 @@ import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability
 import com.gregtechceu.gtceu.api.capability.recipe.RecipeCapability
 import com.gregtechceu.gtceu.api.machine.feature.IRecipeLogicMachine
 import com.gregtechceu.gtceu.api.machine.multiblock.WorkableElectricMultiblockMachine
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 import com.gregtechceu.gtceu.api.recipe.content.Content
 import com.gregtechceu.gtceu.api.recipe.content.ContentModifier
@@ -25,6 +27,8 @@ import com.gregtechceu.gtceu.data.recipe.builder.GTRecipeBuilder
 
 import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 
+import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.tags.TagKey
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.item.crafting.Ingredient
@@ -64,12 +68,21 @@ object GTRecipeUtils {
         }
     }
 
+    fun RecipeLogic.monitorInputsOf(): ListTag {
+        val recipe = getLastRecipe() ?: return ListTag()
+        if (recipe.data.contains(MachineMonitorEntries.BATCH_INPUTS)) {
+            return recipe.data.getList(MachineMonitorEntries.BATCH_INPUTS, CompoundTag.TAG_COMPOUND.toInt()).copy()
+        }
+        return MachineMonitorEntries.inputs(recipe)
+    }
+
     fun WorkableElectricMultiblockMachine.getOverclockRecipe(getRecipe: (Long) -> GTRecipe?, testBefore: (Any) -> Boolean = { true }, maxThread: Int, minDuration: Int, ctx: RecipeSearchContext? = null): GTRecipe? {
         if (!this.hasProxies()) return null
         val maxEUt = this.overclockVoltage
         if (maxEUt <= 0) return null
         val il = ContentList()
         val fl = ContentList()
+        val monitorInputs = ListTag()
         val p = (this as ParallelMachine).maxParallel.toLong()
         var totalEu = 0.0
         var hasSubTickParallelized = false
@@ -79,6 +92,7 @@ object GTRecipeUtils {
             if (testBefore.invoke(recipe as Any)) {
                 if (handleRecipeInput(this, recipe)) {
                     ctx?.deductRecipe(recipe)
+                    monitorInputs.addAll(MachineMonitorEntries.inputs(recipe))
                     hasSubTickParallelized = hasSubTickParallelized ||
                         IGTRecipe.of(recipe).isSubTickParallelized
                     totalEu += recipe.duration * recipe.getEU.toDouble()
@@ -103,6 +117,7 @@ object GTRecipeUtils {
         val result = o.buildRawRecipe().markInternallyAggregated()
         IGTRecipe.of(result).isSubTickParallelized = hasSubTickParallelized
         if (batchSize > 1) IGTRecipe.of(result).batchSize = batchSize
+        result.data.put(MachineMonitorEntries.BATCH_INPUTS, MachineMonitorEntries.merge(monitorInputs))
         return result
     }
 
@@ -112,12 +127,14 @@ object GTRecipeUtils {
         if (maxEUt <= 0) return null
         val il = ContentList()
         val fl = ContentList()
+        val monitorInputs = ListTag()
         var rp = (this as ParallelMachine).maxParallel.toLong() * maxThread
         var totalEu = 0.0
         while (rp > 0) {
             val recipe = getRecipe.invoke(rp) ?: break
             if (handleRecipeInput(this, recipe)) {
                 ctx?.deductRecipe(recipe)
+                monitorInputs.addAll(MachineMonitorEntries.inputs(recipe))
                 rp -= recipe.longParallel
                 totalEu += recipe.duration * recipe.getEU.toDouble()
                 il.addAll(recipe.getOutputContents(ItemRecipeCapability.CAP))
@@ -134,7 +151,9 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        return o.buildRawRecipe().markInternallyAggregated()
+        val result = o.buildRawRecipe().markInternallyAggregated()
+        result.data.put(MachineMonitorEntries.BATCH_INPUTS, MachineMonitorEntries.merge(monitorInputs))
+        return result
     }
 
     fun WorkableElectricMultiblockMachine.getMultipleRecipe(getRecipeSet: MutableSet<GTRecipe>, testBefore: (Any) -> Boolean, modifyRecipe: (GTRecipe) -> FastRecipeModify.ReduceResult, maxThread: Int, minDuration: Int, ctx: RecipeSearchContext? = null): GTRecipe? {
@@ -175,6 +194,7 @@ object GTRecipeUtils {
         if (!testBefore.invoke((mp * maxThread - rp) as Any)) return null
         val il = ContentList()
         val fl = ContentList()
+        val monitorInputs = ListTag()
         var totalEu = .0
         for (recipe in recipeList) {
             val par = if (pa[i] > 1) pa[i] else 1
@@ -193,6 +213,7 @@ object GTRecipeUtils {
             }
             i++
             if (ok && c != null) {
+                monitorInputs.addAll(MachineMonitorEntries.inputs(c))
                 val red = modifyRecipe.invoke(c)
                 totalEu += c.getEU.toDouble() * c.duration * this.maintenance() * red.reduceEUt * red.reduceDuration
                 il.addAll(c.getOutputContents(ItemRecipeCapability.CAP))
@@ -206,7 +227,9 @@ object GTRecipeUtils {
         o.tickInput[EURecipeCapability.CAP] = ContentList.getEUtList(if (d > minDuration) maxEUt else (maxEUt * d / minDuration))
         if (!il.isEmpty) o.output[ItemRecipeCapability.CAP] = il
         if (!fl.isEmpty) o.output[FluidRecipeCapability.CAP] = fl
-        return o.buildRawRecipe().markInternallyAggregated()
+        val result = o.buildRawRecipe().markInternallyAggregated()
+        result.data.put(MachineMonitorEntries.BATCH_INPUTS, MachineMonitorEntries.merge(monitorInputs))
+        return result
     }
 
     fun GTRecipe.matchEUt(machine: IEnergyMachine) = this.getEU <= machine.energyContainerList.energyStored

@@ -8,6 +8,7 @@ import org.gtlcore.gtlcore.utils.MachineUtil
 
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.DescSynced
@@ -24,6 +25,7 @@ import com.gtladd.gtladditions.api.recipe.FastRecipeModify
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.format
 import com.gtladd.gtladditions.utils.MathUtil.pow
+import com.gtladd.gtladditions.utils.ModuleConnectionTicker
 
 import kotlin.math.pow
 
@@ -68,6 +70,8 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
     override fun onConnected(host: SpaceElevatorMachine) {
         getSpaceElevatorTier()
         recipeLogic.updateTickSubscription()
+        recipeLogic.markLastRecipeDirty()
+        recipeLogic.status = RecipeLogic.Status.IDLE
     }
 
     override fun getHostScanPositions(): Array<out BlockPos> {
@@ -173,19 +177,25 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
     override fun onStructureFormed() {
         super.onStructureFormed()
         if (!findAndConnectToHost()) removeFromHost(this.host)
+        ModuleConnectionTicker.attach(this, this)
     }
 
     override fun onStructureInvalid() {
         super.onStructureInvalid()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
     }
 
     override fun onPartUnload() {
         super.onPartUnload()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
     }
 
-    override fun onMachineRemoved() = removeFromHost(this.host)
+    override fun onMachineRemoved() {
+        removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
+    }
 
     override fun onWorking(): Boolean {
         val value = super.onWorking()

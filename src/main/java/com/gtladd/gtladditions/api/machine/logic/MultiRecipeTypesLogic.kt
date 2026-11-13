@@ -7,12 +7,15 @@ import org.gtlcore.gtlcore.api.recipe.IGTRecipe
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
+import org.gtlcore.gtlcore.integration.monitor.MachineMonitorEntries
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 
 import com.gtladd.gtladditions.api.machine.ICoilMachine
 import com.gtladd.gtladditions.api.machine.IEnergyMachine
@@ -25,8 +28,16 @@ import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MathUtil.maxToInt
 
 class MultiRecipeTypesLogic(private val multiTypeMachine: MultipleRecipeTypesMachine) :
-    RecipeLogic(multiTypeMachine), ILockRecipe, IRecipeStatus {
+    RecipeLogic(multiTypeMachine), ILockRecipe, IRecipeStatus, IMonitorRecipeInputs {
     private var eut = 0L
+
+    override fun monitorInputs(): ListTag {
+        val recipe = lastRecipe ?: return ListTag()
+        if (recipe.data.contains(MachineMonitorEntries.BATCH_INPUTS)) {
+            return recipe.data.getList(MachineMonitorEntries.BATCH_INPUTS, CompoundTag.TAG_COMPOUND.toInt()).copy()
+        }
+        return MachineMonitorEntries.inputs(recipe)
+    }
 
     override fun getMachine(): MultipleRecipeTypesMachine {
         return super.getMachine() as MultipleRecipeTypesMachine

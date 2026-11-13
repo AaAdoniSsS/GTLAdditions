@@ -10,6 +10,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper
 import org.gtlcore.gtlcore.common.data.GTLMaterials.*
 import org.gtlcore.gtlcore.common.data.GTLRecipeModifiers
 import org.gtlcore.gtlcore.common.data.GTLRecipeTypes.DISTORT_RECIPES
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.gui.GuiTextures
@@ -31,6 +32,7 @@ import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.util.Mth
 import net.minecraft.world.item.ItemStack
@@ -57,6 +59,7 @@ import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.longParallel
 import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.modify
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MachineUtil.inputFluidStack
 import com.gtladd.gtladditions.utils.MachineUtil.inputItemStack
@@ -155,7 +158,12 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
 
     override fun getThreads(): Int = if (isMultiple) 16 else 0
 
-    class TimeSpaceDistorterRecipeLogic(val tsdMachine: TimeSpaceDistorter) : RecipeLogic(tsdMachine), IRecipeStatus {
+    class TimeSpaceDistorterRecipeLogic(val tsdMachine: TimeSpaceDistorter) :
+        RecipeLogic(tsdMachine),
+        IRecipeStatus,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
+
         private var eut = 0L
         val recipeList = IntArrayList()
 

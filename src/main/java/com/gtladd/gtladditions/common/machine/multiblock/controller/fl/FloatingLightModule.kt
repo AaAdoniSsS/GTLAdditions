@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 import com.gregtechceu.gtceu.api.GTValues
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 import com.gregtechceu.gtceu.api.recipe.GTRecipe
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
@@ -18,6 +19,7 @@ import com.gtladd.gtladditions.api.machine.MultipleRecipesTypesMachine
 import com.gtladd.gtladditions.api.recipe.FastRecipeModify.ReduceResult
 import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingLightPosHelper.calculatePossibleHostPositions
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.ModuleConnectionTicker
 
 import kotlin.math.pow
 
@@ -33,18 +35,26 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
     override fun onStructureFormed() {
         super.onStructureFormed()
         if (!findAndConnectToHost()) removeFromHost(this.host)
+        ModuleConnectionTicker.attach(this, this)
     }
 
     override fun onStructureInvalid() {
         super.onStructureInvalid()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
     }
 
     override fun onPartUnload() {
         super.onPartUnload()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
     }
-    override fun getFieldHolder() = MANAGED_FIELD_HOLDER
+
+    override fun onConnected(host: FloatingLightController) {
+        super.onConnected(host)
+        getRecipeLogic().markLastRecipeDirty()
+        getRecipeLogic().status = RecipeLogic.Status.IDLE
+    }
 
     @Persisted
     private var hostPosition: BlockPos? = null

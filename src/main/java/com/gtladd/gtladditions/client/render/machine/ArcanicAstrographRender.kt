@@ -1,6 +1,7 @@
 package com.gtladd.gtladditions.client.render.machine
 
 import org.gtlcore.gtlcore.GTLCore
+import org.gtlcore.gtlcore.api.machine.IGTLRenderDisabled
 import org.gtlcore.gtlcore.client.ClientUtil
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.HarmonyMachine
 import org.gtlcore.gtlcore.utils.RenderUtil
@@ -47,7 +48,8 @@ class ArcanicAstrographRender : WorkableCasingMachineRenderer(GTLCore.id("block/
     @OnlyIn(Dist.CLIENT)
     override fun render(blockEntity: BlockEntity, partialTicks: Float, poseStack: PoseStack, buffer: MultiBufferSource, combinedLight: Int, combinedOverlay: Int) {
         if (blockEntity is IMachineBlockEntity && blockEntity.metaMachine is HarmonyMachine &&
-            (blockEntity.metaMachine as HarmonyMachine).isActive
+            (blockEntity.metaMachine as HarmonyMachine).isActive &&
+            !IGTLRenderDisabled.isRenderDisabled(blockEntity.metaMachine)
         ) {
             val machine = blockEntity.metaMachine as HarmonyMachine
             val tick = RenderUtil.getSmoothTick(machine, partialTicks)

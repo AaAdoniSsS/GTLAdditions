@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller.df
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 import org.gtlcore.gtlcore.api.machine.trait.IRecipeStatus
 import org.gtlcore.gtlcore.common.machine.multiblock.electric.StorageMachine
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.gui.GuiTextures
@@ -25,6 +26,7 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.world.InteractionHand
@@ -38,6 +40,7 @@ import com.gtladd.gtladditions.api.machine.gui.MultiblockDisplayText
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.Cryotheum
 import com.gtladd.gtladditions.common.machine.multiblock.controller.Resource.HyperdimensionalDrone
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.MachineUtil.inputFluidStack
 import com.hepdd.gtmthings.api.misc.WirelessEnergyManager
 import com.hepdd.gtmthings.utils.TeamUtil
@@ -191,7 +194,10 @@ class HyperdimensionalEnergyConcentrator(holder: IMachineBlockEntity) :
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(HyperdimensionalEnergyConcentrator::class.java, StorageMachine.MANAGED_FIELD_HOLDER)
     }
 
-    class HECRecipeLogic(val hecMachine: HyperdimensionalEnergyConcentrator) : RecipeLogic(hecMachine) {
+    class HECRecipeLogic(val hecMachine: HyperdimensionalEnergyConcentrator) :
+        RecipeLogic(hecMachine),
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
 
         override fun serverTick() {
             if (!this.isSuspend) {

@@ -5,6 +5,7 @@ import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 import com.gregtechceu.gtceu.api.GTValues
 import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.machine.feature.IMachineLife
+import com.gregtechceu.gtceu.api.machine.trait.RecipeLogic
 
 import com.lowdragmc.lowdraglib.syncdata.annotation.Persisted
 import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
@@ -18,6 +19,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.controller.bs.Biosphere
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.MathUtil.minToInt
 import com.gtladd.gtladditions.utils.MathUtil.pow
+import com.gtladd.gtladditions.utils.ModuleConnectionTicker
 
 abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
     MultipleRecipesTypesMachine(holder),
@@ -31,16 +33,25 @@ abstract class BiosphereIIIModule(holder: IMachineBlockEntity) :
     override fun onStructureFormed() {
         super.onStructureFormed()
         if (!findAndConnectToHost()) removeFromHost(this.host)
+        ModuleConnectionTicker.attach(this, this)
     }
 
     override fun onStructureInvalid() {
         super.onStructureInvalid()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
     }
 
     override fun onPartUnload() {
         super.onPartUnload()
         removeFromHost(this.host)
+        ModuleConnectionTicker.stop(this)
+    }
+
+    override fun onConnected(host: BiosphereIIIController) {
+        super.onConnected(host)
+        getRecipeLogic().markLastRecipeDirty()
+        getRecipeLogic().status = RecipeLogic.Status.IDLE
     }
 
     @Persisted

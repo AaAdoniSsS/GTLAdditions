@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.common.machine.multiblock.controller.fl
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineHost
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 import org.gtlcore.gtlcore.common.data.GTLMaterials
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 import org.gtlcore.gtlcore.utils.datastructure.ModuleRenderInfo
 
 import com.gregtechceu.gtceu.api.fluids.store.FluidStorageKeys
@@ -23,6 +24,7 @@ import com.lowdragmc.lowdraglib.side.fluid.FluidStack
 
 import net.minecraft.core.BlockPos
 import net.minecraft.core.Direction
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.world.item.ItemStack
 import net.minecraft.world.level.material.Fluid
@@ -34,6 +36,7 @@ import com.gtladd.gtladditions.common.machine.multiblock.controller.fl.FloatingL
 import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.handleEUt
 import com.gtladd.gtladditions.utils.GTRecipeUtils.matchEUt
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet
 
 import java.util.function.Consumer
@@ -371,7 +374,11 @@ class FloatingLightController(holder: IMachineBlockEntity) :
         )
     )
 
-    class FLRecipeLogic(val flMachine: FloatingLightController) : RecipeLogic(flMachine) {
+    class FLRecipeLogic(val flMachine: FloatingLightController) :
+        RecipeLogic(flMachine),
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
+
         override fun serverTick() {
             if (!this.isSuspend) {
                 if (this.progress < 20) this.handleRecipeWorking()

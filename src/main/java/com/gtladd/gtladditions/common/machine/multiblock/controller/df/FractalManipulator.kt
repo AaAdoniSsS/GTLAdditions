@@ -8,6 +8,7 @@ import org.gtlcore.gtlcore.api.recipe.RecipeMultiplierTracker
 import org.gtlcore.gtlcore.api.recipe.RecipeResult
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.handleRecipeOutput
 import org.gtlcore.gtlcore.api.recipe.RecipeRunnerHelper.matchRecipe
+import org.gtlcore.gtlcore.integration.monitor.IMonitorRecipeInputs
 
 import com.gregtechceu.gtceu.api.capability.recipe.IO
 import com.gregtechceu.gtceu.api.capability.recipe.ItemRecipeCapability
@@ -27,6 +28,7 @@ import com.lowdragmc.lowdraglib.syncdata.field.ManagedFieldHolder
 import net.minecraft.ChatFormatting
 import net.minecraft.core.BlockPos
 import net.minecraft.nbt.CompoundTag
+import net.minecraft.nbt.ListTag
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.Component.translatable
 import net.minecraft.network.chat.HoverEvent
@@ -43,6 +45,7 @@ import com.gtladd.gtladditions.utils.ComponentUtil.toComponent
 import com.gtladd.gtladditions.utils.GTRecipeUtils.create
 import com.gtladd.gtladditions.utils.GTRecipeUtils.euTier
 import com.gtladd.gtladditions.utils.GTRecipeUtils.getEU
+import com.gtladd.gtladditions.utils.GTRecipeUtils.monitorInputsOf
 import com.gtladd.gtladditions.utils.GTRecipeUtils.setEU
 import com.gtladd.gtladditions.utils.GTRecipeUtils.withSearchContext
 import com.gtladd.gtladditions.utils.MachineUtil.inputItemStack
@@ -177,7 +180,12 @@ class FractalManipulator(holder: IMachineBlockEntity) :
         val MANAGED_FIELD_HOLDER = ManagedFieldHolder(FractalManipulator::class.java, WorkableElectricMultiblockMachine.MANAGED_FIELD_HOLDER)
     }
 
-    class FMRecipeLogic(val fmMachine: FractalManipulator) : RecipeLogic(fmMachine), IRecipeStatus {
+    class FMRecipeLogic(val fmMachine: FractalManipulator) :
+        RecipeLogic(fmMachine),
+        IRecipeStatus,
+        IMonitorRecipeInputs {
+        override fun monitorInputs(): ListTag = monitorInputsOf()
+
         private var eut: Long = 0
         private var bigEUt = BigInteger.ZERO
 
