@@ -17,4 +17,4 @@ item_ids:
 * **Stellar Lgnition**: Directly converts fluids into plasma, skip the complicated intermediate processing steps
 * **Chaos Alchemy**: Integrates the alloy smelter and vacuum freezer into a single-step reaction
 * **Ultimate Matter Forge**: Higher parallel processing, the actual parallel is set to 16 times the upper limit for parallel hatch
-* ~~(You need to modify a lot of patterns)~~
+* ~~(Good luck modifying all your patterns)~~
