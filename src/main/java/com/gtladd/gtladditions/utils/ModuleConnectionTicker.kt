@@ -24,14 +24,14 @@ object ModuleConnectionTicker {
                 return@subscribeServerTick
             }
             if (isHostStillPresent(module)) return@subscribeServerTick
-            if (!module.findAndConnectToHost()) module.removeFromHost(module.getHost())
+            module.findAndConnectToHost()
         }
     }
 
     private fun isHostStillPresent(module: IModularMachineModule<*, *>): Boolean {
         if (module.getHost() == null) return false
-        val hostPos = module.getHostPosition() ?: return false
-        val level = module.getLevel() ?: return false
+        val hostPos = module.hostPosition ?: return false
+        val level = module.level ?: return false
         return level.getBlockEntity(hostPos) is IMachineBlockEntity
     }
 
