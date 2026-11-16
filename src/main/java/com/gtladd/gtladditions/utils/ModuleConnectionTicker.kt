@@ -3,6 +3,7 @@ package com.gtladd.gtladditions.utils
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineHost
 import org.gtlcore.gtlcore.api.machine.multiblock.IModularMachineModule
 
+import com.gregtechceu.gtceu.api.machine.IMachineBlockEntity
 import com.gregtechceu.gtceu.api.machine.MetaMachine
 import com.gregtechceu.gtceu.api.machine.TickableSubscription
 
@@ -22,10 +23,16 @@ object ModuleConnectionTicker {
                 stop(machine)
                 return@subscribeServerTick
             }
-            val host = module.getHost()
-            if (host != null && host.isFormed) return@subscribeServerTick
+            if (isHostStillPresent(module)) return@subscribeServerTick
             if (!module.findAndConnectToHost()) module.removeFromHost(module.getHost())
         }
+    }
+
+    private fun isHostStillPresent(module: IModularMachineModule<*, *>): Boolean {
+        if (module.getHost() == null) return false
+        val hostPos = module.getHostPosition() ?: return false
+        val level = module.getLevel() ?: return false
+        return level.getBlockEntity(hostPos) is IMachineBlockEntity
     }
 
     fun stop(machine: MetaMachine) {
