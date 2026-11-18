@@ -19,27 +19,19 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenCustomHashMap;
 import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
 
 import java.util.Map;
-import java.util.WeakHashMap;
 
 public final class GTRecipeBuilderManager {
 
-    static Map<ItemStack, Ingredient> ITEM_STACK_INGREDIENT_MAP;
-    static Map<TagKey<Item>, Ingredient> ITEM_TAG_INGREDIENT_MAP;
-    static Map<FluidStack, FluidIngredient> FLUID_STACK_INGREDIENT_MAP;
-    static Map<TagKey<Fluid>, FluidIngredient> FLUID_TAG_INGREDIENT_MAP;
+    static Map<ItemStack, Ingredient> ITEM_STACK_INGREDIENT_MAP = new Object2ObjectOpenCustomHashMap<>(8192, 0.5f, ItemStackHashStrategy.comparingAllButCount());
+    static Map<TagKey<Item>, Ingredient> ITEM_TAG_INGREDIENT_MAP = new Reference2ObjectOpenHashMap<>(2048, 0.5f);
+    static Map<FluidStack, FluidIngredient> FLUID_STACK_INGREDIENT_MAP = new Object2ObjectOpenCustomHashMap<>(8192, 0.5f, FluidStackHashStrategy.comparingAllButAmount());
+    static Map<TagKey<Fluid>, FluidIngredient> FLUID_TAG_INGREDIENT_MAP = new Reference2ObjectOpenHashMap<>(2048, 0.5f);
 
     public static void init() {
         ITEM_STACK_INGREDIENT_MAP = new Object2ObjectOpenCustomHashMap<>(8192, 0.5f, ItemStackHashStrategy.comparingAllButCount());
         ITEM_TAG_INGREDIENT_MAP = new Reference2ObjectOpenHashMap<>(2048, 0.5f);
         FLUID_STACK_INGREDIENT_MAP = new Object2ObjectOpenCustomHashMap<>(8192, 0.5f, FluidStackHashStrategy.comparingAllButAmount());
         FLUID_TAG_INGREDIENT_MAP = new Reference2ObjectOpenHashMap<>(2048, 0.5f);
-    }
-
-    public static void clear() {
-        ITEM_STACK_INGREDIENT_MAP = new WeakHashMap<>();
-        ITEM_TAG_INGREDIENT_MAP = new WeakHashMap<>();
-        FLUID_STACK_INGREDIENT_MAP = new WeakHashMap<>();
-        FLUID_TAG_INGREDIENT_MAP = new WeakHashMap<>();
     }
 
     public static Ingredient getIngredient(ItemStack itemStack) {

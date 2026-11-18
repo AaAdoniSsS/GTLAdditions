@@ -84,7 +84,6 @@
     "gtmtings.WirelessOpticalComputationHatchMachineMixin",
     "guide.DefaultExtensionsMixin",
     "kjs.ItemBuilderMixin",
-    "kjs.RecipesEventJSMixin",
     "mc.BlockStateMixin",
     "mc.CompoundTagMixin",
     "mc.FluidMixin",

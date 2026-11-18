@@ -17,17 +17,17 @@
 
 ## 前置需求
 
-- GTLCore  `版本 >= 1.2.3.3-fix4`
-- Kotlin For Forge `版本 >= 4.11.0`
+- GTLCore  `版本 >= 1.2.3.3-fix4` [Github](https://github.com/GNSW/GTLCore)
+- Kotlin For Forge `版本 >= 4.11.0` [Curseforge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge) [Modrinth](https://modrinth.com/mod/kotlin-for-forge)
 - Java `版本 >= 21`
 
 ## 安装流程
 
 首先，在[此处](https://pan.quark.cn/s/d13f899cdab5#/list/share)或者[这里](https://drive.google.com/drive/folders/1Ga_w-TmDKNru0me1kAM_gXyedz_Ne4-x)下载《GregTech Leisure》整合包，然后使用你的Minecraft启动器安装它
 
-然后删除其中的GTLCore，接着在[这里](https://github.com/AaAdoniSsS/GTLCore)下载并安装最新版GTLCore
+然后删除其中的`GTLCore`，接着在[这里](https://github.com/GNSW/GTLCore)下载并安装最新版`GTLCore`，同时在[此处](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge)或者[这里](https://modrinth.com/mod/kotlin-for-forge)下载并安装`Kotlin For Forge`
 
-最后将GTLAdditions添加到/mods文件夹中
+最后将GTLAdditions添加到`/mods`文件夹中
 
 享受你的GTL之旅吧! ~~你可能在不玩GTL之后也能看到这些机器~~
 

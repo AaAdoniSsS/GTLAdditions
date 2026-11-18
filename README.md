@@ -17,15 +17,15 @@ This mod is developed based on the `GregTech Leisure`. On the basis of this Modp
 
 ## Requirement
 
-- GTLCore  `Version >= 1.2.3.3-fix4`
-- Kotlin For Forge `Version >= 4.11.0`
+- GTLCore  `Version >= 1.2.3.3-fix4` [Github](https://github.com/GNSW/GTLCore)
+- Kotlin For Forge `Version >= 4.11.0` [Curseforge](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge) [Modrinth](https://modrinth.com/mod/kotlin-for-forge)
 - Java `Version >= 21`
 
 ## Install
 
 First,Download `GregTech Leisure` [here](https://pan.quark.cn/s/d13f899cdab5#/list/share) or [here](https://drive.google.com/drive/folders/1Ga_w-TmDKNru0me1kAM_gXyedz_Ne4-x),and install it with your Minecraft Launcher
 
-Second delete `GTLCore` and install the newest one,you can find it in [here](https://github.com/AaAdoniSsS/GTLCore)
+Second delete `GTLCore` and install the newest one,you can find it in [here](https://github.com/GNSW/GTLCore), install `Kotlin For Forge` at the same time on [here](https://www.curseforge.com/minecraft/mc-mods/kotlin-for-forge) or [here](https://modrinth.com/mod/kotlin-for-forge)
 
 Finally, add this mod to `/mods` folder
 
