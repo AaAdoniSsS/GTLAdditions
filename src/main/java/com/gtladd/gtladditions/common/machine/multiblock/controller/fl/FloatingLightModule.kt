@@ -53,7 +53,9 @@ abstract class FloatingLightModule(holder: IMachineBlockEntity) :
     override fun onConnected(host: FloatingLightController) {
         super.onConnected(host)
         getRecipeLogic().markLastRecipeDirty()
-        getRecipeLogic().status = RecipeLogic.Status.IDLE
+        if (getRecipeLogic().isWorkingEnabled) {
+            getRecipeLogic().status = RecipeLogic.Status.IDLE
+        }
     }
 
     @Persisted

@@ -71,7 +71,9 @@ class AdvancedSpaceElevatorModuleMachine(holder: IMachineBlockEntity) :
         getSpaceElevatorTier()
         recipeLogic.updateTickSubscription()
         recipeLogic.markLastRecipeDirty()
-        recipeLogic.status = RecipeLogic.Status.IDLE
+        if (recipeLogic.isWorkingEnabled) {
+            recipeLogic.status = RecipeLogic.Status.IDLE
+        }
     }
 
     override fun getHostScanPositions(): Array<out BlockPos> {
