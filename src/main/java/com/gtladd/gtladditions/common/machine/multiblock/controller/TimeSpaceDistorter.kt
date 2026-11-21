@@ -361,7 +361,11 @@ open class TimeSpaceDistorter(holder: IMachineBlockEntity) :
                 }
                 if (multiplier > 1.0) {
                     val mdf = ContentModifier.multiplier(multiplier)
-                    recipe.outputs.entries.forEach { (c, l) -> l.forEach { it.modify(c, mdf) } }
+                    recipe.outputs?.forEach { (c, list) ->
+                        list?.forEach { content ->
+                            content?.modify(c, mdf)
+                        }
+                    }
                 }
                 return recipe
             }
